@@ -1,0 +1,66 @@
+/*
+ * Чекбоксы и радио. LuCI рисует нативные input с appearance:none и двумя
+ * псевдоэлементами: ::before — коробка, ::after — маска-SVG галочки/точки.
+ * Механику апстрима (включая переменные --bd-color/--fg-color как хук для
+ * состояния invalid) сохраняем, меняем размер и краску под рецепт shadcn
+ * Checkbox: size-4, rounded-[4px], checked -> bg-primary.
+ */
+
+input[type="checkbox"],
+input[type="radio"] {
+	--bd-color: var(--input);
+	--fg-color: var(--primary-foreground);
+
+	/* сбрасываем геометрию общего правила полей: оттуда прилетают padding,
+	   border-radius и тень, из-за которых чекбокс расползается в прямоугольник */
+	@apply relative m-0 inline-block size-4 cursor-pointer appearance-none rounded-none
+	       border-0 bg-transparent p-0 shadow-none;
+	color: var(--fg-color);
+}
+
+input[type="checkbox"]::before,
+input[type="checkbox"]::after,
+input[type="radio"]::before,
+input[type="radio"]::after {
+	@apply absolute;
+	content: "";
+}
+
+input[type="checkbox"]::before,
+input[type="radio"]::before {
+	@apply left-0 top-0 size-4 rounded-[4px] border bg-transparent shadow-xs dark:bg-input/30;
+	border-color: var(--bd-color);
+}
+
+input[type="radio"],
+input[type="radio"]::before {
+	@apply rounded-full;
+}
+
+input[type="checkbox"]::after,
+input[type="radio"]::after {
+	@apply left-[3px] top-[3px] size-2.5;
+}
+
+input[type="checkbox"]:checked::before,
+input[type="radio"]:checked::before {
+	@apply border-primary bg-primary;
+}
+
+input[type="checkbox"]:checked::after,
+input[type="radio"]:checked::after {
+	--checkmark-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='m2.5 7.4 7.5 7.5-2.5 2.4L0 10Zm15-5L20 4.9 7.5 17.3 5 15Z'/></svg>");
+	-webkit-mask: var(--checkmark-icon) center/cover no-repeat;
+	mask: var(--checkmark-icon) center/cover no-repeat;
+	background: var(--fg-color);
+}
+
+input[type="radio"]:checked:after {
+	--checkmark-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><circle cx='10' cy='10' r='7'/></svg>");
+}
+
+input[type="checkbox"].cbi-input-invalid,
+input[type="radio"].cbi-input-invalid {
+	--bd-color: var(--destructive);
+	--fg-color: var(--destructive-foreground);
+}

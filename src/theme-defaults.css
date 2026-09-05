@@ -1,0 +1,41 @@
+/*
+ * Дефолты токенов. Импортируется ДО палитры, поэтому любая официальная тема
+ * shadcn, положенная в theme/globals.css, перебивает эти значения — а то, чего
+ * она не описывает, остаётся рабочим.
+ *
+ * Так файл темы можно скачать с shadcn/ui и завести без единой правки.
+ */
+
+:root {
+	/* Системный стек: роутер работает без интернета, webfont'ы тянуть некуда.
+	   Тема, которая задаёт свои шрифты, переопределит это ниже по каскаду. */
+	--font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
+	--font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono",
+		"Courier New", monospace;
+
+	/* Радиус: официальные темы задают его сами, здесь только страховка. */
+	--radius: 0.625rem;
+
+	/* Семантики success/warning в наборе shadcn нет вообще, а LuCI без неё не
+	   живёт: .cbi-button-save, .alert-message.warning, .label.success, uci-дифф.
+	   Отдельные имена *-fallback, чтобы тема с собственными --success/--warning
+	   имела приоритет (см. var(--success, …) в theme-map.css). */
+	--success-fallback: oklch(0.55 0.13 155);
+	--success-foreground-fallback: oklch(0.985 0 0);
+	--warning-fallback: oklch(0.72 0.16 75);
+	--warning-foreground-fallback: oklch(0.205 0 0);
+
+	/* В актуальном наборе shadcn у destructive нет своего foreground —
+	   компоненты используют text-white. Старые темы его задают, поэтому тоже
+	   через фолбэк. */
+	--destructive-foreground-fallback: oklch(0.985 0 0);
+}
+
+.dark, :root[data-darkmode="true"] {
+	--success-fallback: oklch(0.70 0.13 155);
+	--success-foreground-fallback: oklch(0.205 0 0);
+	--warning-fallback: oklch(0.80 0.14 75);
+	--warning-foreground-fallback: oklch(0.205 0 0);
+	--destructive-foreground-fallback: oklch(0.985 0 0);
+}

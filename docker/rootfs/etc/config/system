@@ -1,0 +1,9 @@
+config system
+	option hostname 'openwrt-testbed'
+	option timezone 'UTC'
+	option ttylogin '0'
+	option log_size '64'
+
+# В контейнере время берётся с хоста, ntpd только шумит в лог.
+config timeserver 'ntp'
+	option enabled '0'

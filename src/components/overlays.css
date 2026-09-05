@@ -1,0 +1,193 @@
+/*
+ * Модалки, алерты, тултипы. Рецепты shadcn Dialog / Alert / Tooltip.
+ *
+ * Механику видимости не трогаем: оверлей показывается классом
+ * body.modal-overlay-active, который ставит ui.js, а Escape ищет кнопку по
+ * .right > button и .button-row > .btn — эти обёртки обязаны сохраниться.
+ */
+
+#modal_overlay {
+	@apply fixed inset-x-0 bottom-0 top-0 z-[900] overflow-auto bg-black/50;
+	transition: opacity .125s ease-in;
+	opacity: 0;
+	visibility: hidden;
+}
+
+.modal {
+	@apply w-[90%] min-w-[270px] max-w-[600px] rounded-2xl border border-border
+	       bg-card p-6 text-card-foreground shadow-2xl;
+	margin: 5em auto;
+	min-height: 32px;
+}
+
+.modal > * {
+	@apply mb-2 max-w-full;
+	line-height: normal;
+}
+
+.modal > pre,
+.modal > textarea {
+	@apply w-full overflow-auto;
+	white-space: pre-wrap;
+}
+
+.modal > .button-row {
+	@apply flex flex-wrap justify-between gap-2;
+}
+
+.modal > .button-row > button:not(:last-of-type) {
+	@apply mr-2;
+}
+
+.modal > .button-row > button:first-of-type {
+	@apply mr-auto;
+}
+
+body.modal-overlay-active {
+	@apply h-screen overflow-hidden;
+}
+
+body.modal-overlay-active #modal_overlay {
+	@apply left-0 right-0 opacity-100;
+	visibility: visible;
+}
+
+/* --- алерты: рецепт Alert -------------------------------------------------- */
+
+.alert-message {
+	@apply relative mb-2 rounded-xl border border-border bg-card px-4 py-3 text-sm
+	       text-card-foreground shadow-none;
+	white-space: unset;
+}
+
+.alert-message.notice, .cbi-tooltip.notice {
+	@apply border-border bg-card text-card-foreground;
+}
+
+.alert-message.warning {
+	@apply border-warning/40 bg-warning/10 text-card-foreground;
+}
+
+.alert-message.warning h4 {
+	@apply text-warning;
+}
+
+.modal.alert-message {
+	@apply text-card-foreground;
+}
+
+.alert-message .close {
+	@apply mt-px;
+}
+
+.alert-message h4,
+.alert-message h5,
+.alert-message pre,
+.alert-message ul,
+.alert-message li,
+.alert-message p {
+	@apply m-0 my-1 border-none bg-transparent p-0;
+	color: inherit;
+	line-height: inherit;
+}
+
+.alert-message button {
+	@apply my-1;
+}
+
+/* --- тултипы: рецепт TooltipContent --------------------------------------- */
+
+.cbi-title-ref {
+	@apply text-primary underline-offset-4 hover:underline;
+}
+
+.cbi-title-ref::after {
+	content: "➙";
+}
+
+.cbi-tooltip-container {
+	@apply cursor-help;
+}
+
+/* переход по opacity — часть контракта: ui.js прячет тултип, снимая инлайн-стиль */
+.cbi-tooltip {
+	@apply absolute z-[1000] w-fit rounded-lg bg-foreground px-3 py-1.5 text-xs
+	       text-background shadow-md;
+	left: -10000px;
+	white-space: pre;
+	opacity: 0;
+	transition: opacity .25s ease-in;
+}
+
+.cbi-tooltip-container:hover .cbi-tooltip:not(:empty) {
+	@apply opacity-100;
+	left: auto;
+	transition: opacity .25s ease-in;
+}
+
+/* --- экран авторизации -----------------------------------------------------
+ * Ядро показывает форму логина в модалке (`ui.showModal(..., 'login')`), внутри
+ * обычная двухколоночная раскладка .cbi-value. Ориентир — блок login из
+ * shadcn: карточка по центру экрана, подписи над полями, поля и кнопка во всю
+ * ширину. Разметку не трогаем, только раскладку.
+ */
+
+/* Оверлей превращаем в центрирующий контейнер только для логина: у остальных
+   модалок своя механика прокрутки. */
+#modal_overlay:has(> .modal.login) {
+	/* Фон страницы логина — bg-muted, карточка — bg-card: именно так устроен
+	   блок login у shadcn, то есть полотно светлее карточки, а не наоборот.
+	   Затемняющую пелену не используем: за модалкой на этой странице ничего
+	   нет, и серая накладка только пачкает фон. */
+	@apply grid place-items-center bg-muted p-4;
+}
+
+.modal.login {
+	@apply my-0 w-full max-w-sm gap-0 rounded-2xl p-6;
+}
+
+.modal.login > h4 {
+	@apply mb-1 text-center text-xl font-semibold tracking-tight;
+}
+
+/* «Log in» и так единственное действие, разделитель перед ним лишний */
+.modal.login > hr {
+	@apply hidden;
+}
+
+/* Внутри модалки логина .cbi-section — просто обёртка формы, а не блок
+   настроек: карточка в карточке здесь лишняя. */
+.modal.login .cbi-section,
+.modal.login .cbi-section-node,
+.modal.login form.cbi-map {
+	@apply m-0 border-0 bg-transparent p-0 shadow-none;
+}
+
+.modal.login .cbi-value {
+	@apply mb-4 block;
+}
+
+.modal.login .cbi-value:last-child {
+	@apply mb-0;
+}
+
+.modal.login .cbi-value label.cbi-value-title {
+	@apply mb-1.5 block w-full flex-none p-0 text-left text-sm font-medium;
+}
+
+.modal.login .cbi-value-field {
+	@apply ml-0 w-full;
+}
+
+.modal.login .cbi-value-field input {
+	@apply h-10 w-full;
+}
+
+.modal.login > button.important {
+	@apply mt-6 h-10 w-full text-sm;
+	font-size: 100%;
+}
+
+.modal.login .alert-message {
+	@apply mb-4 mt-0;
+}

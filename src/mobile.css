@@ -1,0 +1,14 @@
+/*
+ * Entry point for the mobile CSS -> htdocs/luci-static/shadcn/mobile.css
+ *
+ * header.ut links this file separately via <link media="only screen and
+ * (max-device-width: 854px)">, so the file must exist: without it the request
+ * 404s and tables become unreadable on a phone.
+ *
+ * @reference provides the tokens and utilities that @apply needs without
+ * emitting anything, so the palette is not duplicated in the second file.
+ */
+
+@reference "./cascade.css";
+
+@import "./mobile/screens.css";

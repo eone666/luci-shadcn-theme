@@ -1,0 +1,182 @@
+/*
+ * Сетевые бейджи: ifacebox (карточка интерфейса), ifacebadge (устройство),
+ * zonebadge (зона firewall), таблица статуса сети.
+ *
+ * Важное ограничение: фон .zonebadge[style] и .ifacebox-head[style] приходит
+ * инлайновым стилем из resources/firewall.js (--zone-color-rgb), инлайн бьёт
+ * любой класс — поэтому фон этих элементов мы не красим вообще.
+ */
+
+.ifacebox {
+	@apply mx-2.5 inline-flex min-w-[100px] flex-col overflow-hidden whitespace-nowrap
+	       rounded-xl border border-border bg-card text-center text-card-foreground shadow-sm;
+	line-height: 1.2em;
+}
+
+.ifacebox .ifacebox-head {
+	@apply border-b border-border bg-muted px-2 py-1 text-xs font-medium tracking-wide
+	       text-card-foreground;
+}
+
+.ifacebox .ifacebox-body {
+	@apply flex flex-col items-center gap-1 p-2.5 font-mono text-xs text-muted-foreground;
+}
+
+.ifacebox .ifacebox-head[style] {
+	text-shadow: none;
+}
+
+/* Апстрим красил активную голову в акцент; в палитре neutral это белый блок,
+   поэтому берём нейтральную «выделенную» поверхность. */
+.ifacebox .ifacebox-head.active {
+	@apply bg-accent text-accent-foreground;
+}
+
+/* Цвет зоны приходит инлайном из firewall.js, поэтому перебить его можно только
+   через !important. Вместо градиента апстрима — плоская подложка: цвет зоны
+   подмешан в поверхность карточки, так он остаётся узнаваемым, но не спорит с
+   остальной темой. */
+[data-darkmode="true"] .zonebadge[style],
+[data-darkmode="true"] .ifacebox-head[style] {
+	background: color-mix(in oklab, rgb(var(--zone-color-rgb)) 26%, var(--card)) !important;
+}
+
+:root:not([data-darkmode="true"]) .zonebadge[style],
+:root:not([data-darkmode="true"]) .ifacebox-head[style] {
+	background: color-mix(in oklab, rgb(var(--zone-color-rgb)) 55%, var(--card)) !important;
+}
+
+/* Иконки устройств — это <img> с готовым SVG внутри (ethernet.svg и родня),
+   покрасить их нельзя. В силуэт превращать нельзя тоже: это заливные
+   иллюстрации, а не линейные глифы, и brightness(0) даёт сплошное пятно.
+   Поэтому просто обесцвечиваем — форма читается, а синева из 2000-х уходит
+   и не спорит с монохромной палитрой. */
+.ifacebox img,
+.ifacebadge img {
+	filter: grayscale(1) opacity(.8);
+}
+
+:root[data-darkmode="true"] .ifacebox img,
+:root[data-darkmode="true"] .ifacebadge img,
+.dark .ifacebox img,
+.dark .ifacebadge img {
+	filter: grayscale(1) brightness(.85) opacity(.9);
+}
+
+
+.ifacebadge {
+	@apply inline-block rounded-lg border border-border bg-card px-1.5 py-1
+	       text-card-foreground;
+	flex-direction: row;
+	cursor: default;
+	line-height: 1.2em;
+	text-shadow: none;
+}
+
+.ifacebadge img {
+	@apply size-8 align-middle;
+}
+
+.ifacebadge-active {
+	@apply border-primary font-medium;
+}
+
+.network-status-table {
+	@apply flex flex-wrap;
+}
+
+.network-status-table .ifacebox {
+	@apply m-2 grow;
+}
+
+.network-status-table .ifacebox-body {
+	@apply flex h-full flex-col text-left;
+}
+
+.network-status-table .ifacebox-body > * {
+	@apply m-1;
+}
+
+.network-status-table .ifacebox-body > span {
+	@apply h-full;
+	flex: 10 10 auto;
+}
+
+.network-status-table .ifacebox-body > div {
+	@apply flex flex-wrap;
+	margin: -.125em;
+}
+
+.ifacebadge.large,
+.network-status-table .ifacebox-body .ifacebadge {
+	@apply flex min-w-[220px] flex-1 p-1;
+	margin: .125em;
+}
+
+.ifacebadge.large {
+	@apply inline-flex;
+}
+
+.network-status-table .ifacebox-body .ifacebadge > span {
+	@apply overflow-hidden text-ellipsis;
+}
+
+.ifacebadge > *,
+.ifacebadge.large > * {
+	margin: 0 .125em;
+}
+
+/* --- зоны firewall -------------------------------------------------------- */
+
+.zonebadge {
+	@apply inline-block whitespace-nowrap rounded-md px-1 py-0.5 text-foreground;
+	text-shadow: none;
+}
+
+.zonebadge > em,
+.zonebadge > strong {
+	@apply mx-0.5 inline-block;
+}
+
+.zonebadge input {
+	width: 6em;
+}
+
+.zonebadge > .ifacebadge {
+	@apply ml-0.5;
+}
+
+.zonebadge-empty {
+	@apply border border-dashed border-border text-xs italic text-muted-foreground;
+}
+
+/* фон здесь наследуется от цвета зоны — inherit трогать нельзя */
+.zonebadge .cbi-tooltip {
+	@apply pointer-events-none rounded-md p-px shadow-md;
+	background: inherit;
+	margin: -1.6em 0 0 -5px;
+}
+
+.zonebadge .cbi-tooltip > * {
+	@apply relative z-[2] m-px;
+}
+
+.zone-forwards {
+	@apply flex flex-nowrap;
+}
+
+.zone-forwards > * {
+	@apply p-px;
+	flex: 1 1 40%;
+	text-wrap: auto;
+}
+
+.zone-forwards > span {
+	@apply text-center;
+	flex-basis: 10%;
+}
+
+.zone-forwards .zone-src,
+.zone-forwards .zone-dest {
+	@apply flex flex-col;
+}

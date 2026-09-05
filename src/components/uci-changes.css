@@ -1,0 +1,75 @@
+/*
+ * Диалог «Save & Apply»: список изменений uci и легенда.
+ * Ядро выдаёт дифф семантическими тегами ins/del/var, поэтому красим их
+ * напрямую: добавленное — success, удалённое — destructive.
+ */
+
+.uci-change-list {
+	@apply font-mono text-xs;
+	line-height: 170%;
+	white-space: pre;
+}
+
+.uci-dialog div > del,
+.uci-dialog div > ins,
+.uci-dialog div > var {
+	@apply relative mb-0.5 overflow-hidden text-ellipsis rounded-sm border border-border
+	       bg-muted p-0.5;
+	line-height: 15px;
+}
+
+.uci-dialog div > ins {
+	@apply border-success/60 bg-success/20;
+}
+
+.uci-dialog div > del {
+	@apply border-destructive/60 bg-destructive/20;
+}
+
+.uci-dialog var > ins {
+	@apply bg-success/20;
+}
+
+.uci-dialog var > del {
+	@apply bg-destructive/20;
+}
+
+.uci-change-list > var > * {
+	@apply overflow-hidden text-ellipsis;
+}
+
+.uci-dialog del,
+.uci-dialog ins,
+.uci-dialog var {
+	@apply block font-mono not-italic text-foreground no-underline;
+}
+
+.uci-change-legend {
+	@apply flex flex-wrap;
+}
+
+.uci-change-legend-label {
+	@apply m-0.5 flex items-center;
+	flex-basis: 150px;
+}
+
+.uci-change-legend-label > ins,
+.uci-change-legend-label > del,
+.uci-change-legend-label > var {
+	@apply mr-1 flex size-4 rounded-sm;
+}
+
+.uci-change-legend-label > * > * {
+	@apply p-px;
+	flex-basis: 100%;
+}
+
+#applyreboot-section {
+	line-height: 300%;
+}
+
+/* Спиннер красится токеном, поэтому отдельная тёмная правка апстрима не нужна,
+   но селектор оставляем — на него мог рассчитывать сторонний CSS. */
+[data-darkmode="true"] .spinning::before {
+	background: var(--on-color, var(--foreground));
+}

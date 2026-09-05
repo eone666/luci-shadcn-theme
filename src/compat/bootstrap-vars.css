@@ -1,0 +1,64 @@
+/*
+ * Слой совместимости: переменные luci-theme-bootstrap -> токены shadcn.
+ *
+ * Апстрим строил палитру покомпонентно (H/S/L + знак дельты) и считал оттенки
+ * через calc()/hsl(). Здесь те же имена получают значения из токенов shadcn.
+ *
+ * Файл ПОСТОЯННЫЙ, а не временный: на эти переменные опирается не только наш
+ * унаследованный CSS, но и сторонние вьюхи ядра. Проверенный потребитель —
+ * /www/luci-static/resources/view/dashboard/css/custom.css из luci-mod-dashboard:
+ *   .Dashboard { color: var(--text-color-high, #212529) !important }
+ *   .Dashboard hr { border-top: 1px solid var(--border-color-medium, rgba(0,0,0,.1)) }
+ * Без этих переменных дашборд молча уедет в свои светлые фолбэки на тёмной теме.
+ * Тот же приём позволяет переносить "длинный хвост" правил дословно.
+ *
+ * Чего здесь принципиально НЕТ — H/S/L-триплетов (--border-color-low-hsl и т.п.):
+ * oklch-токен нельзя разложить в компоненты HSL. Все их использования переписаны
+ * на color-mix() в src/legacy/.
+ */
+
+:root {
+	/* фон: high — полотно, medium — карточки/панели, low — приглушённые зоны */
+	--background-color-high: var(--background);
+	--background-color-medium: var(--card);
+	--background-color-low: var(--muted);
+
+	/* текст: highest — заголовки, high — основной, medium — описания, low — плейсхолдеры */
+	--text-color-highest: var(--foreground);
+	--text-color-high: var(--foreground);
+	--text-color-medium: var(--muted-foreground);
+	--text-color-low: color-mix(in oklab, var(--muted-foreground) 70%, var(--background));
+
+	/* границы: у shadcn один --border, разделение на три уровня даём прозрачностью */
+	--border-color-high: var(--border);
+	--border-color-medium: var(--border);
+	--border-color-low: color-mix(in oklab, var(--border) 60%, transparent);
+
+	/* акцент: medium/low в апстриме — состояния hover/active */
+	--primary-color-high: var(--primary);
+	--primary-color-medium: color-mix(in oklab, var(--primary) 90%, var(--background));
+	--primary-color-low: color-mix(in oklab, var(--primary) 80%, var(--background));
+	--on-primary-color: var(--primary-foreground);
+
+	--error-color-high: var(--destructive);
+	--error-color-medium: color-mix(in oklab, var(--destructive) 90%, var(--background));
+	--error-color-low: color-mix(in oklab, var(--destructive) 80%, var(--background));
+	--on-error-color: var(--destructive-foreground);
+
+	--success-color-high: var(--success);
+	--success-color-medium: color-mix(in oklab, var(--success) 90%, var(--background));
+	--success-color-low: color-mix(in oklab, var(--success) 80%, var(--background));
+	--on-success-color: var(--success-foreground);
+
+	--warn-color-high: var(--warning);
+	--warn-color-medium: color-mix(in oklab, var(--warning) 90%, var(--background));
+	--warn-color-low: color-mix(in oklab, var(--warning) 80%, var(--background));
+	--on-warn-color: var(--warning-foreground);
+
+	--disabled-opacity: 0.5;
+	color-scheme: light;
+}
+
+.dark {
+	color-scheme: dark;
+}

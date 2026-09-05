@@ -1,0 +1,57 @@
+/*
+ * UIDynamicList: список значений с перетаскиванием и кнопкой удаления,
+ * нарисованной псевдоэлементом ::after. Логику drag-and-drop
+ * (pointer-events, user-select, cursor) переносим как есть — на неё
+ * опирается ui.js.
+ */
+
+.cbi-dynlist {
+	@apply inline-flex h-auto min-h-9 flex-col;
+}
+
+.cbi-dynlist > .item {
+	@apply relative mb-1 overflow-hidden rounded-lg border border-input bg-transparent
+	       py-1.5 pl-2 pr-8 text-sm text-foreground shadow-xs dark:bg-input/30;
+	pointer-events: auto;   /* нужно для drag-and-drop */
+	cursor: move;
+	user-select: text;      /* выделение текста при перетаскивании */
+	word-break: break-all;
+}
+
+.cbi-dynlist > .item::after {
+	@apply absolute inset-y-0 right-0 inline-flex items-center rounded-r-lg border-l
+	       border-input px-2 font-medium text-destructive;
+	content: "×";
+	pointer-events: auto;
+}
+
+/* индикатор места вставки при drag-and-drop */
+.cbi-dynlist > .item.drag-over {
+	@apply border-t-primary;
+	border-top-width: 2px;
+}
+
+/* перетаскиваемый элемент делаем полупрозрачным */
+.cbi-dynlist > .item.dragging {
+	@apply opacity-50;
+}
+
+/* чтобы курсор не менялся над span внутри элемента */
+.cbi-dynlist > .item > span {
+	@apply pointer-events-none;
+}
+
+.cbi-dynlist > .add-item {
+	@apply flex gap-1;
+}
+
+.cbi-dynlist > .add-item > .cbi-input-text.drag-over,
+.cbi-dynlist > .add-item > .cbi-button-add.drag-over {
+	@apply border-t-primary;
+	border-top-width: 2px;
+}
+
+.cbi-dynlist > .add-item > input,
+.cbi-dynlist > .add-item > button {
+	@apply flex-auto overflow-hidden text-ellipsis whitespace-nowrap;
+}

@@ -1,0 +1,254 @@
+/*
+ * Шапка, главное меню, дропдауны меню, breadcrumb и футер.
+ *
+ * У апстрима шапка — тёмная градиентная панель с двумя десятками хардкод-цветов
+ * (#333/#222/#bfbfbf/#999/#808080...). В shadcn для «хрома приложения» есть
+ * отдельное семейство токенов --sidebar-*, оно и используется: в светлой теме
+ * панель почти белая, в тёмной — на тон светлее полотна.
+ *
+ * Раскрытие подменю у апстрима сделано без JS (левый вынос за экран плюс
+ * .dropdown:hover), поэтому механика left:-9999px сохранена как есть.
+ */
+
+header {
+	/* Шапка не отделена от тела — как на сайте shadcn: ни рамки, ни своей
+	   заливки. Полупрозрачный фон с размытием нужен только для того, чтобы
+	   контент не просвечивал сквозь неё при скролле (шапка sticky).
+	   items-stretch + min-h: пункты меню тянутся на всю высоту, поэтому у них
+	   крупная зона наведения, а подменю прилипает к нижней кромке
+	   (см. top:100% ниже) — иначе курсор теряет hover в зазоре. */
+	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
+	       bg-background/80 text-foreground backdrop-blur-md;
+	margin: -5px -5px 15px -5px;
+	/* избыточные свойства ниже обходят баг csstidy */
+	padding-left: calc((100% - 1180px) / 2);
+	padding-right: calc((100% - 1180px) / 2);
+}
+
+header a {
+	@apply text-foreground/70;
+	text-shadow: none;
+}
+
+/* У логотипа ховер без плашки: у апстрима она была во всю высоту шапки и с
+   прямыми углами, что рядом с пилюлями пунктов смотрится чужеродно. */
+header .brand:hover {
+	@apply bg-transparent text-foreground no-underline;
+}
+
+header ul .active > a {
+	@apply bg-accent text-accent-foreground no-underline;
+}
+
+header .brand {
+	@apply flex items-center px-4 text-lg font-semibold text-foreground;
+	float: none;
+	line-height: 1.2;
+}
+
+header .pull-right {
+	@apply ml-auto mr-2 flex items-center gap-1;
+}
+
+header p {
+	@apply m-0;
+	line-height: 40px;
+}
+
+/* --- главное меню ---------------------------------------------------------- */
+
+.nav {
+	/* mx-0/mb-0 гасят отступы общего правила ul из типографики: иначе
+	   margin-bottom режет высоту полосы, и пункты не тянутся на всю шапку */
+	@apply relative left-0 mx-0 mb-0 mr-2.5 flex items-stretch;
+	float: none;
+}
+
+.nav > li {
+	@apply flex items-stretch;
+	float: none;
+}
+
+.nav a {
+	/* li тянется на всю высоту шапки (это зона наведения и точка привязки
+	   подменю), а сама ссылка — «пилюля» с вертикальным отступом */
+	@apply my-1.5 flex items-center rounded-md px-3 text-sm font-medium no-underline;
+	float: none;
+}
+
+.nav a:hover {
+	@apply bg-accent text-accent-foreground no-underline;
+}
+
+.nav .active > a {
+	@apply bg-accent text-accent-foreground;
+}
+
+.nav a.menu:hover {
+	@apply bg-accent;
+}
+
+/* --- дропдаун меню: рецепт DropdownMenuContent ----------------------------- */
+
+.nav .dropdown-menu {
+	@apply bg-popover;
+}
+
+.nav .dropdown-menu a.menu {
+	@apply text-popover-foreground;
+}
+
+.nav .dropdown-menu li a {
+	@apply text-popover-foreground/80;
+	text-shadow: none;
+}
+
+.nav .dropdown-menu li a:hover {
+	@apply bg-accent text-accent-foreground;
+	background-image: none;
+}
+
+.nav .dropdown-menu .active a {
+	@apply text-accent-foreground;
+}
+
+.nav .dropdown-menu li a {
+	@apply px-2 py-1.5;
+}
+
+li.menu, .dropdown {
+	@apply relative;
+}
+
+a.menu:after {
+	@apply ml-1 inline-block h-0 w-0 self-center opacity-60;
+	content: "&darr;";
+	text-indent: -99999px;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid currentcolor;
+}
+
+.dropdown-menu {
+	/* mx-0/mb-0 гасят отступы общего правила для ul из типографики: без них
+	   подменю уезжало на 24px вправо.
+	   top:100% вместо фиксированных 40px апстрима — подменю прилипает к
+	   кромке пункта, между ними нет зазора, и hover не теряется. */
+	@apply absolute z-[900] mx-0 mb-0 min-w-[8rem] rounded-xl border border-border
+	       bg-popover p-1.5 text-popover-foreground shadow-lg;
+	float: none;
+	top: 100%;
+	left: -9999px;
+	background-clip: padding-box;
+}
+
+.dropdown-menu li {
+	@apply block bg-transparent;
+	float: none;
+}
+
+.dropdown-menu a {
+	@apply relative flex cursor-default select-none items-center gap-2 rounded-lg px-2.5
+	       py-1.5 text-sm font-normal;
+	clear: both;
+	color: inherit;
+	text-shadow: none;
+}
+
+.dropdown-menu a:hover {
+	@apply bg-accent text-accent-foreground no-underline shadow-none;
+	background-image: none;
+}
+
+/* вынос за экран и есть механика показа — трогать нельзя */
+.dropdown:hover ul.dropdown-menu {
+	left: 0;
+}
+
+.dropdown-menu .dropdown-menu {
+	@apply absolute mt-0 shadow-lg;
+	left: 100%;
+	top: 0;
+}
+
+.dropdown-menu li {
+	@apply relative;
+}
+
+/* --- breadcrumb и футер --------------------------------------------------- */
+
+.breadcrumb {
+	/* mx-0 — по той же причине, что и у табов: это ul */
+	@apply mx-0 mb-4 flex flex-none rounded-xl border border-border bg-card px-3 py-2
+	       text-sm;
+}
+
+.breadcrumb li {
+	@apply list-none;
+}
+
+.breadcrumb li:not(:last-child)::after {
+	@apply px-1.5 text-muted-foreground;
+	content: "/";
+}
+
+.breadcrumb .active a {
+	@apply text-muted-foreground;
+}
+
+footer {
+	@apply mt-auto flex flex-wrap items-baseline justify-between border-t border-border
+	       pt-4 text-xs text-muted-foreground;
+	/* избыточные свойства ниже обходят баг csstidy */
+	padding-left: calc((100% - 940px) / 2);
+	padding-right: calc((100% - 940px) / 2);
+}
+
+footer a {
+	@apply text-foreground/70 underline-offset-4 hover:underline;
+}
+
+footer span {
+	@apply mb-4;
+}
+
+footer ul.breadcrumb {
+	@apply ml-auto;
+}
+
+/* --- узкое окно ------------------------------------------------------------
+ * mobile.css подключён шаблоном по `max-device-width`, то есть реагирует на
+ * физический экран устройства, а не на размер окна: при ресайзе на десктопе он
+ * не срабатывает вовсе. Поэтому раскладку шапки для узких окон задаём здесь,
+ * по ширине вьюпорта. На телефоне обе медиазапроса совпадают по смыслу, так
+ * что конфликта нет.
+ */
+@media (max-width: 860px) {
+	header {
+		@apply min-h-0 flex-wrap items-center justify-center gap-x-1 px-1 py-1;
+	}
+
+	header .brand {
+		@apply w-full justify-center whitespace-nowrap px-2 py-1 text-base;
+		flex: 1 1 100%;
+	}
+
+	.nav {
+		@apply m-0 w-full flex-wrap justify-center;
+		flex: 1 1 100%;
+	}
+
+	.nav a {
+		@apply my-0.5 whitespace-nowrap px-2.5 py-1.5 text-sm;
+	}
+
+	header .pull-right {
+		@apply mx-auto flex flex-row items-center justify-center gap-1 p-0;
+		flex: 0 0 auto;
+	}
+
+	/* подменю привязано к пункту, а не к фиксированной высоте шапки */
+	.dropdown-menu {
+		top: 100%;
+	}
+}

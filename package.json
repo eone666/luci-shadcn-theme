@@ -1,0 +1,25 @@
+{
+  "name": "luci-theme-shadcn",
+  "version": "0.1.0",
+  "private": true,
+  "description": "shadcn/ui theme for LuCI (OpenWrt), CSS built with Tailwind",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "playwright-core": "^1.62.1"
+  },
+  "scripts": {
+    "tokens": "node scripts/tokens.mjs",
+    "prebuild": "npm run tokens",
+    "predev": "npm run tokens",
+    "build": "npm run build:cascade && npm run build:mobile",
+    "build:cascade": "tailwindcss -i src/cascade.css -o .build/cascade.css --minify && node scripts/postprocess.mjs .build/cascade.css luci-theme-shadcn/htdocs/luci-static/shadcn/cascade.css",
+    "build:mobile": "tailwindcss -i src/mobile.css -o .build/mobile.css --minify && node scripts/postprocess.mjs .build/mobile.css luci-theme-shadcn/htdocs/luci-static/shadcn/mobile.css",
+    "dev": "node scripts/dev.mjs",
+    "audit": "node scripts/audit-selectors.mjs",
+    "shots": "node scripts/shots.mjs",
+    "shots:states": "node scripts/states.mjs",
+    "inspect": "node scripts/inspect.mjs",
+    "package": "sh scripts/package.sh"
+  }
+}

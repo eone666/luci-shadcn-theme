@@ -1,0 +1,52 @@
+/*
+ * Entry point for the theme's main CSS -> htdocs/luci-static/shadcn/cascade.css
+ *
+ * Tailwind is pulled in piece by piece rather than via `@import "tailwindcss"`:
+ *   - preflight is deliberately left out: in v4 it sets img/svg/video{display:block},
+ *     which breaks .ifacebadge/.zonebadge (their icons sit inline with the text),
+ *     and it strips list styling that .uci-change-list relies on. Our own reset
+ *     lives in base/reset.css.
+ *   - `source(none)` on utilities: the theme ships no markup of its own — the
+ *     classes come from LuCI core and all we write is @apply. Without it Tailwind
+ *     would scan README/compose.yaml and dump junk utilities into the output.
+ *
+ * Our own rules are written outside @layer — just like upstream, which has no
+ * layers at all: layered rules always lose to unlayered ones, and mixing two
+ * cascade models in a single theme costs more than it is worth.
+ */
+
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+
+/* Order matters here: our defaults come BEFORE the palette so that any official
+   shadcn theme dropped into theme/globals.css overrides them, and the token ->
+   utility mapping comes AFTER, so it picks up whatever the theme defined. */
+@import "./theme-defaults.css";
+@import "./generated/tokens.css";   /* palette normalized by scripts/tokens.mjs */
+@import "./theme-map.css";
+@import "./compat/bootstrap-vars.css";
+
+/* Theme layers. The order mirrors upstream's cascade order: @apply does not
+   change specificity, so the "aggregate" rules (generic field look, focus, .btn)
+   must sit exactly where they sat in luci-theme-bootstrap. */
+@import "./base/reset.css";
+@import "./base/scaffolding.css";
+@import "./base/typography.css";
+@import "./components/forms.css";
+@import "./components/dynlist.css";
+@import "./components/select-native.css";
+@import "./components/checkbox-radio.css";
+@import "./components/semantic.css";
+@import "./components/buttons.css";
+@import "./components/tables.css";
+@import "./components/tabs.css";
+@import "./components/chrome.css";
+@import "./components/overlays.css";
+@import "./components/feedback.css";
+@import "./components/network.css";
+@import "./components/uci-changes.css";
+@import "./components/filebrowser.css";
+@import "./components/dropdown-widget.css";
+@import "./components/misc.css";

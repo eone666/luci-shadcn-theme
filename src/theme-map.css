@@ -1,0 +1,58 @@
+/*
+ * Проброс токенов темы в утилиты Tailwind (@apply bg-card, text-muted-foreground,
+ * border-border и т.д.).
+ *
+ * Официальные темы shadcn несут такой блок сами, но не все и не полностью,
+ * поэтому здесь он объявлен целиком и через var(--x, <дефолт>): совпадающие
+ * объявления безвредны, а недостающие подхватываются из src/theme-defaults.css.
+ * Именно это позволяет положить в theme/globals.css любую тему с shadcn/ui
+ * и ничего не править.
+ */
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	--color-sidebar: var(--sidebar, var(--card));
+	--color-sidebar-foreground: var(--sidebar-foreground, var(--card-foreground));
+	--color-sidebar-primary: var(--sidebar-primary, var(--primary));
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground, var(--primary-foreground));
+	--color-sidebar-accent: var(--sidebar-accent, var(--accent));
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground, var(--accent-foreground));
+	--color-sidebar-border: var(--sidebar-border, var(--border));
+	--color-sidebar-ring: var(--sidebar-ring, var(--ring));
+
+	--color-chart-1: var(--chart-1, var(--primary));
+	--color-chart-2: var(--chart-2, var(--muted-foreground));
+	--color-chart-3: var(--chart-3, var(--accent-foreground));
+	--color-chart-4: var(--chart-4, var(--muted-foreground));
+	--color-chart-5: var(--chart-5, var(--foreground));
+
+	/* чего у shadcn нет — берём из дефолтов, но тема может задать своё */
+	--color-success: var(--success, var(--success-fallback));
+	--color-success-foreground: var(--success-foreground, var(--success-foreground-fallback));
+	--color-warning: var(--warning, var(--warning-fallback));
+	--color-warning-foreground: var(--warning-foreground, var(--warning-foreground-fallback));
+	--color-destructive-foreground: var(--destructive-foreground, var(--destructive-foreground-fallback));
+
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+}

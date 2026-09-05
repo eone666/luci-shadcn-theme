@@ -1,0 +1,123 @@
+/*
+ * Бейджи, индикаторы, прогрессбар, спиннер и анимации.
+ *
+ * Индикаторы в шапке (#indicators) не имеют классов вообще — только атрибуты
+ * [data-indicator]/[data-style]/[data-clickable], поэтому красятся ими.
+ *
+ * @keyframes переносим руками: с source(none) Tailwind ничего не генерирует,
+ * а классы .flash/.fade-in/.fade-out ставит ui.js.
+ */
+
+.label,
+header [data-indicator] {
+	@apply inline-flex w-fit shrink-0 items-center justify-center gap-1 whitespace-nowrap
+	       rounded-full border border-transparent bg-secondary px-2 py-0.5 text-xs
+	       font-medium text-secondary-foreground;
+	margin: .125em 0 .125em .4em;
+	text-shadow: none;
+}
+
+header [data-indicator][data-clickable] {
+	@apply cursor-pointer hover:bg-secondary/80;
+}
+
+a.label:link,
+a.label:visited {
+	color: inherit;
+}
+
+a.label:hover {
+	@apply no-underline;
+}
+
+.label.important {
+	@apply bg-primary text-primary-foreground;
+}
+
+.label.warning {
+	@apply bg-warning text-warning-foreground;
+}
+
+.label.success {
+	@apply bg-success text-success-foreground;
+}
+
+.label.notice,
+header [data-indicator][data-style="active"] {
+	@apply bg-primary text-primary-foreground;
+}
+
+/* --- прогрессбар: рецепт Progress ---------------------------------------- */
+
+.cbi-progressbar {
+	@apply relative h-2 min-w-[170px] overflow-hidden rounded-full border-0 bg-primary/20;
+	margin: 1.4em 0 4px 0;
+}
+
+.cbi-progressbar > div {
+	@apply h-full rounded-full bg-primary;
+	transition: width .25s ease-in;
+	width: 0%;
+}
+
+.cbi-progressbar::before {
+	@apply absolute left-0 overflow-hidden text-ellipsis text-xs text-muted-foreground;
+	top: -1.4em;
+	content: attr(title);
+	white-space: pre;
+}
+
+/* --- спиннер -------------------------------------------------------------- */
+
+#view > div.spinning:first-child {
+	@apply table;
+	margin: 15vh auto;
+}
+
+.spinning {
+	@apply relative;
+	padding-left: 32px !important;
+}
+
+.spinning::before {
+	--spinner-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' stroke='%23000' stroke-width='3' fill='none'><circle cx='10' cy='10' r='8' stroke-opacity='.5'/><path d='M10 2c4 0 8 4 8 8'><animateTransform attributeName='transform' type='rotate' dur='1s' from='0 10 10' to='360 10 10' repeatCount='indefinite'/></path></svg>");
+
+	@apply absolute size-5;
+	top: calc(50% - 10px);
+	left: 6px;
+	content: " ";
+	/* цвет берётся из токена, поэтому отдельная правка под тёмную тему не нужна */
+	background: var(--on-color, var(--foreground));
+	mask: var(--spinner-icon) center/cover no-repeat;
+	-webkit-mask: var(--spinner-icon) center/cover no-repeat;
+}
+
+/* --- анимации ------------------------------------------------------------- */
+
+@keyframes flash {
+	0% { opacity: 1; }
+	50% { opacity: .5; }
+	100% { opacity: 1; }
+}
+
+.flash {
+	animation: flash .35s;
+}
+
+@keyframes fade-in {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes fade-out {
+	0% { opacity: 1; }
+	100% { opacity: 0; }
+}
+
+.fade-in {
+	animation: fade-in .4s ease;
+}
+
+.fade-out {
+	animation: fade-out .4s ease;
+}

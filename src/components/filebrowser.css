@@ -1,0 +1,101 @@
+/*
+ * Файловый браузер (System -> Backup, загрузка прошивки).
+ * Раскрытие сделано переходом height/opacity — механику сохраняем,
+ * поверхность берём из рецепта DropdownMenuContent.
+ */
+
+.cbi-filebrowser {
+	@apply flex min-w-[210px] max-w-full flex-col overflow-hidden rounded-xl border
+	       border-border bg-popover text-popover-foreground opacity-0 shadow-lg;
+	height: 0;
+}
+
+.cbi-filebrowser.open {
+	@apply h-auto overflow-visible opacity-100;
+	transition: opacity .25s ease-in;
+}
+
+.cbi-filebrowser > * {
+	@apply max-w-full overflow-hidden text-ellipsis whitespace-nowrap border-b
+	       border-border;
+	padding: 0 0 .25em 0;
+	margin: .25em .25em 0 .25em;
+}
+
+.cbi-filebrowser .cbi-button-positive {
+	@apply mr-1;
+}
+
+.cbi-filebrowser > div {
+	@apply border-b-0;
+}
+
+.cbi-filebrowser > ul > li {
+	@apply flex flex-row rounded-sm px-1;
+}
+
+.cbi-filebrowser > ul > li:hover {
+	@apply bg-accent text-accent-foreground;
+}
+
+.cbi-filebrowser > ul > li > div:first-child {
+	@apply overflow-hidden text-ellipsis;
+	flex: 10;
+}
+
+.cbi-filebrowser > ul > li > div:last-child {
+	@apply text-right;
+	flex: 3;
+}
+
+.cbi-filebrowser > ul > li > div:last-child > button {
+	@apply my-px ml-1 h-7 px-2 text-xs;
+}
+
+.cbi-filebrowser .upload {
+	@apply flex flex-row flex-wrap border-b border-border;
+	margin: 0 -.125em .25em -.125em;
+	padding: 0 0 .125em 0;
+}
+
+.cbi-filebrowser .upload > * {
+	@apply flex-1;
+	margin: .125em;
+}
+
+.cbi-filebrowser .upload > .btn {
+	flex-basis: 60px;
+}
+
+.cbi-filebrowser .upload > div {
+	@apply min-w-[150px];
+	flex: 10;
+}
+
+.cbi-filebrowser .upload > div > input {
+	@apply w-full;
+}
+
+/* --- список клиентов Wi-Fi ------------------------------------------------ */
+
+.assoclist .ifacebadge {
+	@apply flex flex-col items-center text-center;
+	white-space: normal;
+}
+
+.assoclist .ifacebadge > img {
+	margin: .2em;
+}
+
+.assoclist .td:nth-of-type(3),
+.assoclist .td:nth-of-type(5) {
+	@apply w-1/4;
+}
+
+.assoclist .td:nth-of-type(6) button {
+	word-break: normal;
+}
+
+[data-page="admin-system-admin-sshkeys"] .cbi-dynlist {
+	max-width: none;
+}

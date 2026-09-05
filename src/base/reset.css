@@ -1,0 +1,89 @@
+/*
+ * Reset. Перенесено из luci-theme-bootstrap: preflight Tailwind не подключаем,
+ * потому что в v4 он ставит img/svg/video{display:block} (ломает .ifacebadge и
+ * .zonebadge, где иконки идут инлайн с текстом) и обнуляет списки, на которых
+ * держатся .uci-change-list и .cbi-section-error. Вьюхи LuCI написаны под
+ * именно этот reset.
+ */
+
+* {
+	scroll-margin-top: 40px;
+}
+
+*, *::before, *::after {
+	@apply m-0 box-border border-0 p-0;
+}
+
+abbr[title], acronym[title] {
+	@apply cursor-help border-b border-dotted font-normal;
+	font-weight: inherit;
+}
+
+table {
+	@apply border-separate border-spacing-0;
+	border-collapse: collapse;
+}
+
+ol, ul {
+	@apply list-none;
+}
+
+html {
+	@apply h-full text-base;
+}
+
+a:focus {
+	outline: thin dotted;
+}
+
+a:hover, a:active {
+	@apply outline-0;
+}
+
+sub, sup {
+	@apply relative align-baseline text-[75%] leading-none;
+}
+
+sup { top: -0.5em }
+sub { bottom: -0.25em }
+
+img {
+	-ms-interpolation-mode: bicubic;
+}
+
+button,
+input,
+select,
+option,
+textarea {
+	@apply m-0 box-border align-baseline text-base;
+	line-height: 2em;
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+	@apply cursor-pointer break-all;
+	-webkit-appearance: button;
+}
+
+button[disabled],
+input[type="button"][disabled],
+input[type="reset"][disabled],
+input[type="submit"][disabled] {
+	@apply opacity-50;
+}
+
+input[type="search"] {
+	@apply box-content;
+	-webkit-appearance: textfield;
+}
+
+input[type="search"]::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+textarea {
+	@apply overflow-auto align-top font-mono;
+}

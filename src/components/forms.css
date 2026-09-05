@@ -1,0 +1,210 @@
+/*
+ * Формы и поля ввода. Рецепты shadcn Input/Textarea/Label, состояние фокуса —
+ * ring вместо инсет-тени апстрима.
+ *
+ * Геометрия LuCI сохранена там, где на неё опирается вёрстка: двухколоночный
+ * .cbi-value с заголовком в 180px и поля по 210px.
+ */
+
+fieldset {
+	@apply mb-2 pt-2;
+}
+
+fieldset legend {
+	@apply block pt-5 text-lg font-semibold leading-none text-foreground;
+}
+
+label, input, button, select {
+	@apply font-sans text-sm font-normal;
+	line-height: normal;
+}
+
+/* --- раскладка строки настройки ------------------------------------------- */
+
+.cbi-value {
+	@apply mb-4 flex flex-wrap items-baseline;
+}
+
+.cbi-value-field {
+	@apply ml-5 flex-1;
+}
+
+.cbi-value label.cbi-value-title {
+	@apply flex-[0_0_180px] pt-1.5 text-right text-sm leading-tight font-medium text-foreground;
+}
+
+.cbi-value > .cbi-section,
+.cbi-value > .cbi-tblsection {
+	@apply w-full;
+}
+
+label > input[type="checkbox"],
+label > input[type="radio"] {
+	@apply m-0 align-text-top;
+}
+
+label[for] {
+	@apply cursor-pointer;
+}
+
+/* Группа связанных полей: инпут + кнопка встык (напр. поле со «Найти»). */
+.control-group {
+	@apply inline-flex gap-0.5;
+}
+
+.control-group > input + :not(input):not(select),
+.control-group > select + :not(input):not(select) {
+	@apply rounded-l-none px-1.5;
+	margin-left: calc(-.2em + -2px);
+}
+
+/* --- поля: рецепт Input --------------------------------------------------- */
+
+input,
+textarea,
+select,
+.cbi-select,
+.cbi-dropdown:not(.btn):not(.cbi-button) {
+	@apply inline-block w-[210px] rounded-lg border border-input bg-transparent px-3 py-1
+	       text-sm text-foreground shadow-xs outline-none dark:bg-input/30;
+}
+
+@media screen and (min-width: 768px) {
+	#localtime {
+		width: 300px;
+	}
+}
+
+input,
+select,
+.cbi-select,
+.cbi-dropdown:not(.btn):not(.cbi-button) {
+	@apply h-9;
+}
+
+.cbi-dropdown:not(.btn):not(.cbi-button),
+.cbi-dynlist {
+	@apply w-auto min-w-[210px] max-w-[400px];
+}
+
+.td > input[type=text],
+.td > input[type=password],
+.td > select,
+.td > .cbi-dropdown:not(.btn):not(.cbi-button),
+.cbi-dynlist > .add-item > .cbi-dropdown {
+	@apply w-full;
+}
+
+::placeholder {
+	@apply text-muted-foreground;
+}
+
+/* --- состояния ------------------------------------------------------------ */
+
+/* Апстрим вешал здесь инсет-тень; в shadcn роль подсветки играет ring,
+   поэтому остаётся только переход. Список селекторов сохранён как был. */
+.item::after,
+.btn,
+.cbi-button,
+.cbi-select,
+.cbi-dropdown,
+.cbi-dynlist > .item,
+input[type="checkbox"]::before,
+input[type="radio"]::before,
+input, button, textarea, select {
+	@apply transition-[color,box-shadow,background-color,border-color];
+}
+
+/* !important на border-color — из апстрима: иначе рамку перебивает
+   собственный border у .btn/.cbi-button, объявленный ниже по каскаду. */
+.item:hover::after,
+.btn:hover, .btn:focus,
+.cbi-button:hover, .cbi-button:focus,
+.cbi-select.focus,
+.cbi-dropdown:focus, .cbi-dropdown[open],
+.cbi-dynlist > .item:focus,
+input[type="checkbox"]:focus::before,
+input[type="radio"]:focus::before,
+input:focus, button:hover, textarea:focus, select:focus {
+	@apply border-ring! outline-none ring-[3px] ring-ring/50 no-underline;
+}
+
+/* невалидное значение — рецепт aria-invalid из shadcn */
+.cbi-input-invalid,
+.cbi-input-invalid.cbi-dropdown:not(.btn):not(.cbi-button),
+.cbi-input-invalid.cbi-dropdown:not([open]) > ul > li,
+.cbi-value-error input {
+	@apply border-destructive text-destructive;
+}
+
+.cbi-input-invalid:focus,
+.cbi-select.cbi-input-invalid,
+input[type="checkbox"].cbi-input-invalid:focus::before,
+input[type="radio"].cbi-input-invalid:focus::before {
+	@apply border-destructive! ring-destructive/20 dark:ring-destructive/40;
+}
+
+input[disabled],
+button[disabled],
+select[disabled],
+textarea[disabled],
+.cbi-select[disabled]::before,
+.cbi-dropdown[disabled]:not(.btn):not(.cbi-button),
+input[type="checkbox"][disabled]::before,
+input[type="checkbox"][disabled]::after,
+input[type="radio"][disabled]::before,
+input[type="radio"][disabled]::after {
+	@apply pointer-events-none cursor-default opacity-50;
+}
+
+input[readonly],
+select[readonly],
+textarea[readonly] {
+	@apply cursor-auto border-border/50;
+	pointer-events: auto;
+}
+
+/* --- служебные блоки формы ------------------------------------------------ */
+
+.cbi-optionals,
+.cbi-section-create {
+	@apply pb-2.5 pl-2.5;
+}
+
+.cbi-section-create {
+	@apply -m-[3px] inline-flex items-center;
+}
+
+.cbi-section-create > * {
+	@apply m-[3px] flex-auto;
+}
+
+.cbi-section-create > * > input {
+	@apply w-full;
+}
+
+/* Панель действий — отдельная карточка под секциями, в тон остальным. */
+.actions,
+.cbi-page-actions {
+	@apply mb-4 flex flex-wrap items-center justify-end gap-2 rounded-xl border
+	       border-border bg-card px-4 py-3 text-right;
+}
+
+.actions .secondary-action,
+.cbi-page-actions .secondary-action {
+	@apply float-right;
+}
+
+.actions .secondary-action a,
+.cbi-page-actions .secondary-action a {
+	@apply leading-9;
+}
+
+.actions .secondary-action a:hover,
+.cbi-page-actions .secondary-action a:hover {
+	@apply underline;
+}
+
+.cbi-page-actions > form {
+	@apply m-0 inline;
+}

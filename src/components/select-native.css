@@ -1,0 +1,59 @@
+/*
+ * Нативный select в обёртке .cbi-select и файловый input.
+ * Градиенты апстрима заменены на плоскую поверхность рецепта shadcn Select,
+ * стрелка «▾» оставлена текстом (иконок в теме нет) и покрашена в muted.
+ */
+
+.cbi-value-field > .cbi-checkbox,
+.cbi-value-field > div > .cbi-radio {
+	@apply inline-flex h-9 items-center;
+}
+
+.cbi-radio {
+	@apply cursor-pointer gap-0.5;
+}
+
+.cbi-select {
+	@apply relative bg-transparent p-0 dark:bg-input/30;
+}
+
+.cbi-select select,
+.cbi-select select:focus {
+	@apply h-full w-full cursor-pointer border-none bg-transparent px-1.5 outline-none;
+	appearance: none;
+	-webkit-appearance: none;
+	margin-right: .6em;
+}
+
+.cbi-select::before {
+	@apply pointer-events-none absolute inset-y-0 right-0 flex flex-col justify-center
+	       rounded-md px-1.5 text-muted-foreground;
+	content: "▾";
+}
+
+.cbi-select select option {
+	@apply bg-popover text-popover-foreground;
+}
+
+.cbi-select select option:hover {
+	@apply bg-accent text-accent-foreground;
+}
+
+.cbi-select select option:checked {
+	@apply bg-accent text-accent-foreground;
+}
+
+input[type=file] {
+	@apply border-none p-0 shadow-none;
+	line-height: initial;
+	width: auto !important;
+}
+
+input[type=button], input[type=reset], input[type=submit] {
+	@apply h-auto w-auto;
+}
+
+select[multiple] {
+	@apply bg-background;
+	height: inherit;
+}

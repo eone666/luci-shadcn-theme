@@ -1,0 +1,24 @@
+/*
+ * Семантические поверхности, общие для кнопок, алертов и тултипов.
+ * Вместо цветных градиентов апстрима — манера shadcn: нейтральная подложка
+ * с цветным акцентом текста и рамки.
+ */
+
+.btn.danger,
+.alert-message.danger,
+.btn.error,
+.alert-message.error,
+.cbi-tooltip.error {
+	--on-color: var(--destructive);
+	@apply border-destructive/40 bg-destructive/10 text-destructive;
+}
+
+.btn.success, .alert-message.success, .cbi-tooltip.success {
+	--on-color: var(--success);
+	@apply border-success/40 bg-success/10 text-success;
+}
+
+.btn.info, .alert-message.info, .cbi-tooltip.info {
+	--on-color: var(--accent-foreground);
+	@apply border-border bg-accent text-accent-foreground;
+}

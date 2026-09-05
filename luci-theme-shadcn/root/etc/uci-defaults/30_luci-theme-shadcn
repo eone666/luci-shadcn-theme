@@ -1,0 +1,27 @@
+#!/bin/sh
+
+changed=0
+
+set_opt() {
+	local key=$1
+	local val=$2
+
+	if ! uci -q get "luci.$key" 2>/dev/null; then
+		uci set "luci.$key=$val"
+		changed=1
+	fi
+}
+
+# Три варианта одной темы: shadcn следует prefers-color-scheme, остальные два
+# жёстко фиксируют режим (см. darkpref в ucode/template/themes/shadcn/header.ut).
+# mediaurlbase намеренно не меняем: установка темы не должна молча переключать
+# интерфейс, выбор остаётся за System -> Language and Style -> Design.
+set_opt themes.Shadcn /luci-static/shadcn
+set_opt themes.ShadcnDark /luci-static/shadcn-dark
+set_opt themes.ShadcnLight /luci-static/shadcn-light
+
+if [ $changed = 1 ]; then
+	uci commit luci
+fi
+
+exit 0

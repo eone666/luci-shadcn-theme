@@ -1,0 +1,124 @@
+/*
+ * Служебные классы LuCI и точечные правки отдельных страниц.
+ * Утилиты выравнивания идут с !important — так в апстриме, на них опираются
+ * инлайновые таблицы вьюх.
+ */
+
+.hidden { @apply hidden; }
+
+form.inline { @apply mb-0 inline; }
+
+#modemenu li:last-child span.divider { @apply hidden; }
+
+#syslog {
+	@apply mb-4 w-full rounded-md border border-border bg-muted p-2 font-mono text-xs
+	       text-foreground;
+}
+
+.left { text-align: left !important; }
+.right { text-align: right !important; }
+.center { text-align: center !important; }
+.top { vertical-align: top !important; }
+.middle { vertical-align: middle !important; }
+.bottom { vertical-align: bottom !important; }
+
+table table td,
+.cbi-value-field table td {
+	@apply border-none;
+}
+
+/* --- значения с подсказкой (var) ------------------------------------------ */
+
+div.cbi-value var,
+.td.cbi-value-field var {
+	@apply italic text-foreground/90;
+}
+
+div.cbi-value var[data-tooltip],
+.td.cbi-value-field var[data-tooltip],
+div.cbi-value var.cbi-tooltip-container,
+.td.cbi-value-field var.cbi-tooltip-container {
+	@apply cursor-help border-b border-dotted border-muted-foreground;
+}
+
+div.cbi-value var.cbi-tooltip-container,
+.td.cbi-value-field var.cbi-tooltip-container .cbi-tooltip {
+	@apply not-italic text-background;
+	white-space: normal;
+}
+
+/* --- дашборд -------------------------------------------------------------
+ * luci-mod-dashboard рисует карточки своим классом .dashboard-bg и красит их
+ * в var(--background-color-medium) без рамки. В нашей палитре это --muted:
+ * в тёмной теме он на тон светлее полотна и карточка видна, а в светлой это
+ * 0.97 против белого фона — подложка исчезала. Приводим её к тем же карточкам,
+ * что и секции: bg-card + рамка.
+ */
+.Dashboard .dashboard-bg {
+	@apply rounded-xl border border-border bg-card text-card-foreground;
+}
+
+/* Таблица списка устройств: дашборд задаёт всем своим таблицам width:auto, и
+   она жмётся к левому краю карточки, растянутой на всю страницу. Тянем только
+   её — маленьким таблицам «ключ-значение» в блоках Internet/System auto нужен.
+   Селектор с тегом (0,2,1) специально: custom.css ядра грузится после темы,
+   и с равной специфичностью выиграл бы он. */
+.Dashboard table.devices-info {
+	@apply w-full;
+}
+
+/* Иконки дашборда — это <img> с зашитым внутрь stroke="#000", поэтому цветом
+   их не покрасить, только фильтром. Штатные темы LuCI этого не делают вовсе,
+   и на тёмном полотне иконки становятся почти невидимыми. Класс svgmonotone
+   ядро ставит как раз на однотонные — их и инвертируем.
+   Цветные статусные иконки (internet.svg, зелёный глобус) класса не имеют и
+   остаются как есть: цвет там несёт смысл. */
+.svgmonotone {
+	filter: none;
+}
+
+.dark .svgmonotone,
+:root[data-darkmode="true"] .svgmonotone {
+	filter: invert(1) brightness(.92);
+}
+
+/* --- правки отдельных страниц --------------------------------------------- */
+
+/* графики collectd рисуются картинками под светлую тему */
+[data-darkmode="true"] [data-page="admin-statistics-graphs"] [data-plugin] img {
+	filter: invert(100%) hue-rotate(150deg);
+}
+
+/* инлайновые svg-графики статуса: фон и оси задаются вьюхой инлайном */
+#view div[style] > svg {
+	background-color: var(--background) !important;
+}
+
+#view div[style] > svg line[style] {
+	stroke: var(--foreground) !important;
+}
+
+/* --- отдельные страницы и модалки ---------------------------------------- */
+
+#cbi-network-interface .ifacebox-body {
+	white-space: normal;
+}
+
+#cbi-network-interface .ifacebox img {
+	@apply size-6;
+}
+
+#dsl_status_table .ifacebox-body span > strong {
+	@apply inline-block;
+	min-width: 35%;
+}
+
+#modal_overlay > .modal.uci-dialog,
+#modal_overlay > .modal.cbi-modal {
+	@apply max-w-[900px];
+}
+
+/* размеры кнопки логина заданы в overlays.css вместе с остальной карточкой */
+#modal_overlay > .modal.login > button.important {
+	@apply w-full;
+}

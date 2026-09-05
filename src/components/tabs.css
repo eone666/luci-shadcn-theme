@@ -1,0 +1,137 @@
+/*
+ * Табы. Рецепт shadcn Tabs варианта default — сегмент-контрол на подложке
+ * bg-muted. Underline-вариант не берём: табы LuCI переносятся на несколько
+ * строк, и подчёркивание при переносе выглядит сломанным.
+ *
+ * В .tabs активный элемент помечен классом .active, а в .cbi-tabmenu наоборот:
+ * неактивные несут .cbi-tab-disabled. Оба контракта сохранены.
+ */
+
+.tabs, .cbi-tabmenu {
+	/* mx-0 гасит отступ общего правила ul из типографики — иначе полоса табов
+	   съезжает вправо на 24px относительно заголовка страницы.
+	   w-fit — как у TabsList в shadcn: полоса по содержимому, а не во всю ширину */
+	@apply mx-0 mb-4 flex w-fit max-w-full flex-wrap items-center gap-1 rounded-full
+	       bg-muted p-1 text-muted-foreground;
+	list-style: none;
+}
+
+.tabs > li, .cbi-tabmenu > li {
+	/* max-width апстрима (48%) здесь не нужен: у него полоса тянулась во всю
+	   ширину страницы, а у нас она по контенту (w-fit), и 48% начинали
+	   считаться от неё же — подписи обрезались в «IPv4 Routi…». Длинные
+	   наборы табов теперь переносятся на вторую строку. */
+	/* Паддинга на li нет намеренно: фон-пилюля рисуется здесь, а кликабельна
+	   ссылка внутри — поэтому все отступы отданы ей, иначе зона наведения
+	   оказывается больше зоны клика. */
+	@apply inline-flex max-w-full flex-initial items-center justify-center
+	       rounded-full p-0 text-sm font-medium text-foreground/60 transition-all;
+}
+
+.tabs > li > a, .cbi-tabmenu > li > a {
+	/* рамка тоже здесь, а не на li: иначе ссылка меньше пилюли на её толщину */
+	@apply flex h-full w-full items-center justify-center gap-1.5 overflow-hidden
+	       text-ellipsis whitespace-nowrap rounded-full border border-transparent
+	       px-3.5 py-1 no-underline outline-none;
+	color: inherit;
+}
+
+.tabs > li > a:focus-visible, .cbi-tabmenu > li > a:focus-visible {
+	@apply rounded-sm ring-[3px] ring-ring/50;
+	text-decoration: none;
+}
+
+/* активный сегмент */
+.tabs > li.active, .cbi-tabmenu > li:not(.cbi-tab-disabled) {
+	@apply bg-background text-foreground shadow-sm dark:bg-input/30;
+}
+
+.tabs > li.active > a, .cbi-tabmenu > li:not(.cbi-tab-disabled) > a {
+	@apply dark:border-input;
+}
+
+.tabs > li:not(.active), .cbi-tabmenu > .cbi-tab-disabled {
+	@apply bg-transparent text-muted-foreground;
+}
+
+.tabs > li:not(.active):hover, .cbi-tabmenu > .cbi-tab-disabled:hover {
+	@apply bg-accent/50 text-foreground;
+}
+
+/* счётчик ошибок валидации на табе — рецепт Badge destructive */
+.cbi-tab-disabled[data-errors]::after {
+	@apply ml-1 inline-flex min-w-4 flex-col justify-center rounded-full bg-destructive
+	       px-1.5 text-center text-xs font-medium;
+	content: attr(data-errors);
+	color: white;
+	height: 16px;
+}
+
+.cbi-tabmenu.map {
+	@apply m-0;
+}
+
+.cbi-tabmenu.map > li {
+	@apply text-base font-semibold;
+}
+
+.cbi-tab-descr {
+	@apply mb-4 mt-0 text-sm text-muted-foreground;
+}
+
+/* дропдаун внутри полосы табов */
+.tabs .menu-dropdown, .tabs .dropdown-menu {
+	@apply rounded-md border;
+	top: 35px;
+}
+
+.tabs a.menu:after, .tabs .dropdown-toggle:after {
+	@apply ml-1;
+	border-top-color: var(--muted-foreground);
+}
+
+.tabs li.open.menu .menu, .tabs .open.dropdown .dropdown-toggle {
+	@apply border-border;
+}
+
+.tabs li.open a.menu:after, .tabs .dropdown.open .dropdown-toggle:after {
+	border-top-color: var(--foreground);
+}
+
+/* --- панели табов: видимостью управляет атрибут, а не класс --------------- */
+
+.tab-content > .tab-pane,
+.tab-content > div {
+	@apply hidden;
+}
+
+.tab-content > .active {
+	@apply block;
+}
+
+[data-tab-title] {
+	@apply h-0 overflow-hidden opacity-0;
+}
+
+[data-tab-active="true"] {
+	@apply h-auto overflow-visible opacity-100 transition-opacity;
+}
+
+/* Узкое окно: полоса-пилюля с переносом строк превращается в бесформенное
+   пятно, поэтому становится прямоугольной карточкой, а табы — сеткой.
+   Медиазапрос по ширине вьюпорта, а не по max-device-width: последний не
+   реагирует на ресайз окна (см. комментарий в chrome.css). */
+@media (max-width: 720px) {
+	.tabs, .cbi-tabmenu {
+		@apply w-full rounded-xl p-1.5;
+	}
+
+	.tabs > li, .cbi-tabmenu > li {
+		@apply flex-1;
+		flex-basis: 42%;
+	}
+
+	.tabs > li > a, .cbi-tabmenu > li > a {
+		@apply rounded-lg;
+	}
+}

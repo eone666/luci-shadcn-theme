@@ -1,0 +1,154 @@
+/*
+ * Кнопки. Рецепт shadcn Button: база = вариант outline размера sm, потому что
+ * кнопки LuCI живут в строках таблиц и рядах действий; залитые варианты
+ * (default/destructive/secondary) остаются за реально главными действиями.
+ *
+ * Механику апстрима с переменной --on-color сохраняем: семантические варианты
+ * меняют только её и цвет рамки, а базовая геометрия описана один раз.
+ */
+
+.item::after,
+.btn,
+.cbi-button {
+	--on-color: var(--foreground);
+
+	@apply inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-2
+	       whitespace-nowrap rounded-full border border-input bg-transparent px-4 text-sm
+	       font-medium shadow-xs hover:bg-accent hover:text-accent-foreground
+	       dark:bg-input/30 dark:hover:bg-input/50;
+	color: var(--on-color);
+}
+
+/* --- контурные семантические варианты ------------------------------------- */
+
+.cbi-button-positive,
+.cbi-button-fieldadd,
+.cbi-button-add,
+.cbi-button-save {
+	--on-color: var(--success);
+	@apply border-success/40 hover:bg-success/10;
+}
+
+.cbi-button-neutral,
+.cbi-button-download,
+.cbi-button-find,
+.cbi-button-link,
+.cbi-button-up,
+.cbi-button-down {
+	@apply text-foreground;
+}
+
+.btn.primary,
+.cbi-button-action,
+.cbi-button-apply,
+.cbi-button-reload,
+.cbi-button-edit {
+	--on-color: var(--foreground);
+	@apply border-border;
+}
+
+.cbi-button-negative,
+.cbi-section-remove .cbi-button,
+.cbi-button-reset,
+.cbi-button-remove {
+	--on-color: var(--destructive);
+	@apply border-destructive/40 hover:bg-destructive/10;
+}
+
+/* --- залитые варианты: главное действие ----------------------------------- */
+
+/* Save & Apply и «Log in» — рецепт Button default. */
+.btn.primary,
+.cbi-button-action.important,
+.cbi-page-actions .cbi-button-apply {
+	--on-color: var(--primary-foreground);
+	@apply border-transparent bg-primary shadow-xs hover:bg-primary/90 hover:text-primary-foreground;
+}
+
+.cbi-button-positive.important {
+	--on-color: var(--primary-foreground);
+	@apply border-transparent bg-primary hover:bg-primary/90 hover:text-primary-foreground;
+}
+
+/* «Save» рядом с «Save & Apply» — вторичное действие, рецепт Button secondary. */
+.cbi-page-actions .cbi-button-save {
+	--on-color: var(--secondary-foreground);
+	@apply border-transparent bg-secondary hover:bg-secondary/80 hover:text-secondary-foreground;
+}
+
+.cbi-button-negative.important {
+	--on-color: white;
+	@apply border-transparent bg-destructive hover:bg-destructive/90 hover:text-white
+	       focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:hover:bg-destructive/70
+	       dark:focus-visible:ring-destructive/40;
+}
+
+/* Апстрим возвращал такой Save в контурный вид — оставляем то же поведение. */
+.cbi-page-actions .cbi-button-apply + .cbi-button-save,
+.cbi-page-actions .cbi-button-negative + .cbi-button-save {
+	--on-color: var(--foreground);
+	@apply border-input bg-transparent hover:bg-accent hover:text-accent-foreground
+	       dark:bg-input/30;
+}
+
+/* Edit в строке таблицы: у апстрима он был залит акцентом, но в палитре neutral
+   это белый блок в каждой строке — слишком громко. Оставляем контурным. */
+.cbi-section-actions .cbi-button-edit {
+	--on-color: var(--foreground);
+	@apply border-input bg-transparent hover:bg-accent hover:text-accent-foreground
+	       dark:bg-input/30;
+}
+
+/* --- состояния и размеры -------------------------------------------------- */
+
+.btn.active, .btn:active {
+	@apply shadow-none;
+	background-color: color-mix(in oklab, var(--accent) 100%, transparent);
+}
+
+.btn.disabled,
+.btn[disabled] {
+	@apply cursor-default opacity-50 shadow-none;
+	pointer-events: none;
+}
+
+.btn.large {
+	@apply h-10 rounded-full px-6 text-sm;
+	line-height: normal;
+}
+
+.btn.small {
+	@apply h-7 gap-1.5 rounded-full px-3 text-xs;
+}
+
+/* --- крестик закрытия (модалки, алерты) ----------------------------------- */
+
+.close {
+	@apply float-right cursor-pointer rounded-xs text-xl font-medium leading-none
+	       text-muted-foreground opacity-70 transition-opacity hover:text-foreground
+	       hover:opacity-100;
+	text-shadow: none;
+}
+
+.close:hover {
+	@apply no-underline opacity-100;
+}
+
+.btn .close, .alert-message .close {
+	@apply font-sans leading-tight;
+}
+
+/* --- ряд действий страницы ------------------------------------------------ */
+
+.cbi-page-actions::after {
+	@apply table clear-both;
+	content: "";
+}
+
+.cbi-page-actions > * {
+	@apply align-middle;
+}
+
+.cbi-page-actions > :not([method="post"]):not(.cbi-button-apply):not(.cbi-button-negative):not(.cbi-button-save):not(.cbi-button-reset) {
+	@apply float-left mr-1.5;
+}

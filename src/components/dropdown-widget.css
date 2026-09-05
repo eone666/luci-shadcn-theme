@@ -1,0 +1,180 @@
+/*
+ * .cbi-dropdown — собственный select LuCI (он же ComboButton у «Save & Apply»).
+ *
+ * Это не стиль, а конечный автомат: всё состояние живёт в атрибутах
+ * ([open], [multiple], [empty], [more], [display], [selected], [unselectable],
+ * [optional]) и классах .preview/.open/.more/.hide-open/.hide-close, а
+ * показом управляет ui.js через десяток `display: … !important`.
+ *
+ * Поэтому вся логика (display/flex/order/!important/переходы) перенесена
+ * дословно, а изменены только поверхность, радиус, тень и цвета — по рецептам
+ * shadcn Select и DropdownMenu.
+ */
+
+.cbi-dropdown {
+	@apply relative cursor-pointer;
+	display: inline-flex !important;
+	height: auto;
+	padding: 0 !important;
+}
+
+/* Закрытое поле — рецепт SelectTrigger (у апстрима здесь был градиент). */
+.cbi-dropdown:not(.btn):not(.cbi-button) {
+	@apply rounded-lg border border-input bg-transparent text-foreground dark:bg-input/30;
+	background-image: none;
+}
+
+.cbi-dropdown img {
+	/* ограничиваем картинки любого размера по высоте строки */
+	max-height: 1.6em;
+	width: auto;
+}
+
+.cbi-dropdown > ul {
+	@apply flex w-full list-none overflow-hidden p-0;
+	margin: 0 !important;
+}
+
+.cbi-dropdown.btn > ul:not(.dropdown),
+.cbi-dropdown.cbi-button > ul:not(.dropdown) {
+	margin: 0 0 0 13px !important;
+}
+
+.cbi-dropdown.btn.spinning > ul:not(.dropdown),
+.cbi-dropdown.cbi-button.spinning > ul:not(.dropdown) {
+	margin: 0 !important;
+}
+
+.cbi-dropdown > ul.preview {
+	@apply hidden;
+}
+
+.cbi-dropdown > .open,
+.cbi-dropdown > .more {
+	@apply flex flex-col justify-center px-1.5 text-center text-muted-foreground;
+	flex-grow: 0;
+	flex-shrink: 0;
+	line-height: 2em;
+}
+
+/* каретка ComboButton отделяется линией того же цвета, что текст кнопки */
+.cbi-dropdown.btn > .open,
+.cbi-dropdown.cbi-button > .open {
+	@apply ml-2 border-l px-2;
+	border-left-color: color-mix(in oklab, currentcolor 25%, transparent);
+	color: inherit;
+}
+
+.cbi-dropdown > .more,
+.cbi-dropdown:not(.btn):not(.cbi-button) > ul > li[placeholder] {
+	@apply hidden text-muted-foreground;
+}
+
+.cbi-dropdown > ul > li {
+	@apply hidden items-center self-center overflow-hidden text-ellipsis whitespace-nowrap;
+	flex-shrink: 1;
+	flex-grow: 1;
+	color: inherit;
+}
+
+.cbi-dropdown > ul.dropdown > li,
+.cbi-dropdown:not(.btn):not(.cbi-button) > ul > li {
+	@apply px-2 text-foreground;
+	min-height: 20px;
+	padding-top: .25em;
+	padding-bottom: .25em;
+}
+
+.cbi-dropdown > ul > li .hide-open { display: block; display: initial; }
+.cbi-dropdown > ul > li .hide-close { display: none; }
+
+.cbi-dropdown > ul > li[display]:not([display="0"]) {
+	@apply border-l border-border;
+}
+
+.cbi-dropdown[empty] > ul {
+	max-width: 1px;
+}
+
+.cbi-dropdown > ul > li > form {
+	@apply pointer-events-none m-0 hidden p-0;
+}
+
+.cbi-dropdown > ul > li img {
+	@apply mr-1 align-middle;
+}
+
+.cbi-dropdown > ul > li > form > input[type="checkbox"] {
+	margin: 0 .25em 0 0;
+}
+
+.cbi-dropdown > ul > li input[type="text"] {
+	@apply h-5;
+}
+
+.cbi-dropdown[open] {
+	@apply relative;
+}
+
+/* Раскрытый список — рецепт SelectContent. */
+.cbi-dropdown[open] > ul.dropdown {
+	@apply absolute z-[1100] block w-auto min-w-full overflow-y-auto rounded-xl border
+	       border-border bg-popover p-1.5 text-popover-foreground shadow-lg;
+	max-width: none;
+	transition: max-height .125s ease-in;
+}
+
+.cbi-dropdown > ul > li[display],
+.cbi-dropdown[open] > ul.preview,
+.cbi-dropdown[open] > ul.dropdown > li,
+.cbi-dropdown[multiple] > ul > li > label,
+.cbi-dropdown[multiple][open] > ul.dropdown > li,
+.cbi-dropdown[multiple][more] > .more,
+.cbi-dropdown[multiple][empty] > .more {
+	flex-grow: 1;
+	display: flex !important;
+}
+
+.cbi-dropdown[empty] > ul > li,
+.cbi-dropdown[optional][open] > ul.dropdown > li[placeholder] {
+	display: block !important;
+}
+
+.cbi-dropdown[multiple][open] > ul.dropdown > li > form {
+	display: flex !important;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li .hide-open { display: none; }
+.cbi-dropdown[open] > ul.dropdown > li .hide-close { display: block; display: initial; }
+
+/* Пункты списка — рецепт SelectItem; разделителей между ними у shadcn нет. */
+.cbi-dropdown[open] > ul.dropdown > li {
+	@apply cursor-default select-none rounded-lg border-b-0 px-2.5 py-1.5 text-sm;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li[selected] {
+	@apply bg-accent/60 font-medium text-accent-foreground;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li.focus,
+.cbi-dropdown[open] > ul.dropdown > li:hover {
+	@apply bg-accent text-accent-foreground;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li[selected].focus,
+.cbi-dropdown[open] > ul.dropdown > li[selected]:hover {
+	@apply bg-accent font-medium text-accent-foreground;
+	background-image: none;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li:last-child {
+	@apply mb-0 border-b-0;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li[unselectable] {
+	@apply pointer-events-none opacity-50;
+}
+
+.cbi-dropdown[open] > ul.dropdown > li > input.create-item-input:first-child:last-child {
+	@apply w-full;
+}
