@@ -72,9 +72,8 @@
 /*
  * The dark variant, declared on our side as well.
  * scripts/tokens.mjs rewrites the palette's own @custom-variant into this same
- * prefix form, but a theme is free to ship without one at all (theme/pink.css
- * does) -- and then every dark:* inside @apply would silently vanish. This file
- * is imported after the palette, so the declaration below is the one that wins
- * either way.
+ * prefix form, but a theme is free to ship without one at all -- and then every
+ * dark:* inside @apply would silently vanish. This file is imported after the
+ * palette, so the declaration below is the one that wins either way.
  */
 @custom-variant dark (:is(.dark, [data-darkmode="true"]) &);

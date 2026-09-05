@@ -16,13 +16,6 @@ The built CSS carries no trace of Tailwind: no banner, no `@layer`, no `--tw-*`
 
 Replace `theme/globals.css` and run `npm run build`. That is all.
 
-Two palettes are kept in the repository, so switching is a copy:
-
-```sh
-cp theme/neutral.css theme/globals.css && npm run build   # shadcn neutral (default)
-cp theme/pink.css    theme/globals.css && npm run build   # pink, square corners
-```
-
 **Any official shadcn set** works — the `globals.css` from `shadcn init`, one of
 the ready-made base colors (neutral, zinc, slate, stone, gray), or a theme built
 at https://ui.shadcn.com/create. The file is dropped in as is and never edited by
@@ -108,9 +101,7 @@ is to compare the selector list against upstream in `refs/upstream-25.12/`.
 ## Layout
 
 ```
-theme/globals.css          the active palette (never edited by hand)
-theme/neutral.css          shadcn neutral -- the shipped default
-theme/pink.css             pink palette with --radius: 0, as an alternative
+theme/globals.css          the active palette, shadcn neutral (never edited)
 src/
   cascade.css              entry point -> htdocs/luci-static/shadcn/cascade.css
   mobile.css               entry point -> htdocs/luci-static/shadcn/mobile.css
