@@ -47,12 +47,14 @@ trick as for `.devices-info`. If a new core module starts overriding geometry,
 ## Development
 
 ```sh
-cp .env.example .env
-docker compose up -d --wait      # test bench: OpenWrt 25.12.4 + full LuCI
 npm install
+npm run bench                    # OpenWrt 25.12.4 + full LuCI in a container
 npm run dev                      # watch build for cascade.css and mobile.css
-open http://localhost:8080       # root / openwrt
 ```
+
+`npm run bench` prints the URL when the container reports healthy; the login is
+`root` / `openwrt` unless `.env` says otherwise (`cp .env.example .env` to change
+the port, the password, the architecture or the variant to start with).
 
 Edits under `src/**` show up on F5 — the CSS is mounted into the container
 directly. Caching: on the bench the files carry no `?v=`, so keep DevTools open
@@ -69,14 +71,24 @@ LUCI_THEME=shadcn-light docker compose up -d --force-recreate --wait
 
 | | |
 |---|---|
-| `npm run build` | build `cascade.css` + `mobile.css` (minify + strip Tailwind traces) |
-| `npm run dev` | the same in watch mode, including a token rebuild when the palette changes |
-| `npm run tokens` | rebuild `src/generated/tokens.css` from `theme/globals.css` |
+| `npm run build` | palette → tokens → Tailwind → `luci-theme-shadcn/htdocs/` |
+| `npm run dev` | the same in watch mode, the palette included |
+| `npm run tokens` | just the palette step, with a report on what it found in it |
 | `npm run audit` | diff the selectors against upstream: `MISSING` must be empty |
+| `npm run check` | `build` + `audit` — what to run before a commit |
+| `npm run package` | build the `.apk` (OpenWrt SDK in docker) |
+| `npm run package:check` | install that `.apk` into a clean OpenWrt and verify it |
+| `npm run bench` | start the test bench and print its URL |
+| `npm run bench:down` / `bench:logs` | stop it / follow its log |
 | `npm run shots` | screenshots of the bench pages into `shots/` |
 | `npm run shots:states` | screenshots of interactive states: dropdown, Save & Apply dialog, validation error, modal |
 | `npm run inspect` | computed styles of an element on a live page: `npm run inspect -- system 'input[type=checkbox]'` |
-| `npm run package` | build the `.apk` (OpenWrt SDK in docker) |
+| `npm run clean` | remove `.build/`, `.sdk-out/`, `src/generated/`, `shots/` |
+
+The build is `scripts/build.mjs`, the entry points live in
+`scripts/lib/entries.mjs`, and `scripts/dev.mjs` watches the same list — so
+adding a stylesheet is one line in one file. There are no `pre*` hooks: what a
+script does is what it says.
 
 `npm run shots` takes arguments after `--`: page names to limit the run,
 `--light` for the light variant, `--viewport` to crop to the window instead of
@@ -271,8 +283,8 @@ as upstream does it.
 ## Building the package
 
 ```sh
-npm run package        # .apk in .sdk-out/
-sh scripts/package-check.sh   # install it into a clean OpenWrt and verify
+npm run package         # .apk in .sdk-out/
+npm run package:check   # install it into a clean OpenWrt and verify
 ```
 
 `scripts/package.sh` builds the package in the official OpenWrt SDK. The SDK only

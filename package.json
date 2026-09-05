@@ -1,25 +1,30 @@
 {
   "name": "luci-theme-shadcn",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "shadcn/ui theme for LuCI (OpenWrt), CSS built with Tailwind",
+  "description": "A shadcn/ui-styled theme for LuCI, the OpenWrt web interface",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.11"
+  },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
     "playwright-core": "^1.62.1"
   },
   "scripts": {
-    "tokens": "node scripts/tokens.mjs",
-    "prebuild": "npm run tokens",
-    "predev": "npm run tokens",
-    "build": "npm run build:cascade && npm run build:mobile",
-    "build:cascade": "tailwindcss -i src/cascade.css -o .build/cascade.css --minify && node scripts/postprocess.mjs .build/cascade.css luci-theme-shadcn/htdocs/luci-static/shadcn/cascade.css",
-    "build:mobile": "tailwindcss -i src/mobile.css -o .build/mobile.css --minify && node scripts/postprocess.mjs .build/mobile.css luci-theme-shadcn/htdocs/luci-static/shadcn/mobile.css",
+    "build": "node scripts/build.mjs",
     "dev": "node scripts/dev.mjs",
+    "tokens": "node scripts/tokens.mjs",
     "audit": "node scripts/audit-selectors.mjs",
+    "check": "npm run build && npm run audit",
+    "package": "sh scripts/package.sh",
+    "package:check": "sh scripts/package-check.sh",
+    "bench": "docker compose up -d --wait && echo \"LuCI on http://$(docker compose port openwrt 80 | sed 's/^0\\.0\\.0\\.0/localhost/')\"",
+    "bench:down": "docker compose down",
+    "bench:logs": "docker compose logs -f",
     "shots": "node scripts/shots.mjs",
     "shots:states": "node scripts/states.mjs",
     "inspect": "node scripts/inspect.mjs",
-    "package": "sh scripts/package.sh"
+    "clean": "rm -rf .build .sdk-out src/generated shots"
   }
 }

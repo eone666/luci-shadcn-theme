@@ -26,7 +26,7 @@ services:
       - "${SSH_PORT:-2222}:22"
     volumes:
       # Live theme editing: the static files and ucode templates are mounted
-      # straight into the paths the .ipk would install them to. No container
+      # straight into the paths the package installs them to. No container
       # restart is needed — F5 is enough (for .ut templates see the README, the
       # cache has to be cleared).
       - ./luci-theme-shadcn/htdocs/luci-static/shadcn:/www/luci-static/shadcn:ro

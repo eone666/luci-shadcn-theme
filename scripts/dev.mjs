@@ -8,17 +8,14 @@
  * theme/globals.css is not part of Tailwind's import graph (tokens.mjs is what
  * reads it), so it is watched separately.
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { watch } from 'node:fs';
 import { resolve } from 'node:path';
+import { root, OUT, ENTRIES } from './lib/entries.mjs';
 
-const root = resolve(import.meta.dirname, '..');
-const OUT = 'luci-theme-shadcn/htdocs/luci-static/shadcn';
-
-const ENTRIES = [
-	{ name: 'cascade.css', src: 'src/cascade.css' },
-	{ name: 'mobile.css', src: 'src/mobile.css' },
-];
+// the palette has to be normalised once before the watchers start, or the very
+// first Tailwind pass builds against a stale (or missing) tokens.css
+spawnSync('node', ['scripts/tokens.mjs'], { cwd: root, stdio: 'inherit' });
 
 const children = [];
 const run = (cmd, args, opts = {}) => {

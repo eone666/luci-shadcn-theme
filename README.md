@@ -21,7 +21,9 @@ nothing about the markup or the workflow changes, only how it looks.
 
 ## Install
 
-Grab `luci-theme-shadcn-*.apk` from the Releases page, copy it to the router and:
+Grab `luci-theme-shadcn-*.apk` from the
+[Releases page](https://github.com/eone666/luci-shadcn-theme/releases), copy it
+to the router and:
 
 ```sh
 apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.0-r1.apk
@@ -80,25 +82,37 @@ theme ships with shadcn **neutral**.
 ## Building from source
 
 ```sh
+git clone https://github.com/eone666/luci-shadcn-theme.git
+cd luci-shadcn-theme
 npm install
 npm run build                  # CSS -> luci-theme-shadcn/htdocs/
 npm run package                # .apk in .sdk-out/ (OpenWrt SDK in docker)
-sh scripts/package-check.sh    # install it into a clean OpenWrt and verify
+npm run package:check          # install it into a clean OpenWrt and verify
 ```
 
-There is also a full test bench — OpenWrt in a container with all of LuCI, the
-theme mounted live:
+There is also a full test bench — OpenWrt in a container with all of LuCI and
+the theme mounted live, so edits show up on F5:
 
 ```sh
-cp .env.example .env
-docker compose up -d --wait
+npm run bench                  # starts it and prints the URL (root / openwrt)
 npm run dev                    # watch build
-open http://localhost:8080     # root / openwrt
+npm run bench:down             # when you are done
 ```
+
+Settings — port, password, architecture, which variant to start with — come from
+`.env`; `cp .env.example .env` if you want to change any of them.
 
 [docs/internals.md](docs/internals.md) explains the build pipeline, the scripts
 and the test bench; [docs/plan.md](docs/plan.md) is the design log — what was
 decided and why.
+
+## Contributing
+
+`npm run check` before a pull request: it builds and then diffs the selector list
+against upstream's `luci-theme-bootstrap`, and `MISSING` has to stay empty. The
+theme does not own the markup — LuCI core generates the classes — so a rule
+dropped while restyling is invisible until somebody opens that one page, and the
+audit is what catches it. Comments and docs are in English.
 
 ## Credits and licence
 
