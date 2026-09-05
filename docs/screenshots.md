@@ -5,14 +5,18 @@ away from anybody who wants to look at the theme without installing it. The
 palette is shadcn **neutral**; swapping `theme/globals.css` recolours every one
 of these.
 
+The firewall page is the one on the README's front page, dark and light joined
+along a diagonal — tabs, cards, both checkbox states, native selects, the
+coloured zone badges LuCI paints inline, a table and all three button kinds in a
+single screen.
+
 ## Dark
 
-### Firewall — zones
+### System — startup
 
-Tabs, cards, both checkbox states, native selects, the coloured zone badges LuCI
-paints inline, a table, and all three button kinds at once.
+A long striped table with a row of pill buttons on every line.
 
-![Firewall zone settings](img/zones.png)
+![Initscripts](img/startup.png)
 
 ### Network — interfaces
 

@@ -9,7 +9,7 @@ nothing about the markup or the workflow changes, only how it looks.
 
 <p align="center">
   <a href="docs/screenshots.md"><b>More screenshots →</b></a><br>
-  <sub>the firewall, interfaces, the dashboard, a modal, the login screen, a phone</sub>
+  <sub>initscripts, interfaces, the dashboard, a modal, the login screen, a phone</sub>
 </p>
 
 ## Install

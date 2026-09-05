@@ -2,7 +2,7 @@
 /*
  * The README hero: one page shot twice, dark and light, joined along a diagonal.
  *
- *   node scripts/hero.mjs [page] [--out docs/img/hero.png]
+ *   node scripts/hero.mjs [page] [--out docs/img/hero.png] [--top .3] [--bottom .6]
  *
  * Both halves have to be the same page at the same size, so the shots are taken
  * here rather than reused: switch the bench to a variant, capture, switch back.
@@ -16,7 +16,7 @@ const argv = process.argv.slice(2);
 const outArg = argv.indexOf('--out');
 const out = resolve(import.meta.dirname, '..',
 	outArg < 0 ? 'docs/img/hero.png' : argv[outArg + 1]);
-const name = argv.find((a) => !a.startsWith('--') && PAGES[a]) ?? 'zones';
+const name = argv.find((a) => !a.startsWith('--') && PAGES[a]) ?? 'zones';   // the firewall page: most widgets per screen
 const width = 1440, height = 880;
 
 const shots = {};
@@ -29,9 +29,17 @@ for (const variant of ['dark', 'light']) {
 	await browser.close();
 }
 
-/* The seam: a straight line from x=SPLIT_TOP across the top edge down to
-   x=SPLIT_BOTTOM at the bottom. Light takes everything to the right of it. */
-const SPLIT_TOP = 0.62, SPLIT_BOTTOM = 0.38;
+/* The seam: a straight line from x=SPLIT_TOP on the top edge down to
+   x=SPLIT_BOTTOM on the bottom one, as fractions of the width; light takes
+   everything to the right of it. The default leans right going down, so the
+   seam crosses the header and the tab strip -- both then show up in both
+   schemes, which a seam that starts out on the right cannot do: LuCI keeps the
+   brand, the menu and the tabs on the left. */
+const num = (name, fallback) => {
+	const i = argv.indexOf(`--${name}`);
+	return i < 0 ? fallback : Number(argv[i + 1]);
+};
+const SPLIT_TOP = num('top', 0.30), SPLIT_BOTTOM = num('bottom', 0.60);
 
 const { browser, page } = await open({ width: 400, height: 300, scale: 1 });
 const dataUrl = await page.evaluate(async ({ dark, light, top, bottom }) => {
