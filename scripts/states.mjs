@@ -8,66 +8,25 @@
  *   node scripts/states.mjs dropdown   # just one
  *   node scripts/states.mjs --light
  */
-import { chromium } from 'playwright-core';
-import { mkdirSync, readdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { homedir } from 'node:os';
+import { open, login, go as goTo, switchTheme } from './lib/bench.mjs';
 
-const root = resolve(import.meta.dirname, '..');
-const OUT = resolve(root, 'shots');
-const BASE = process.env.LUCI_URL ?? 'http://localhost:8080';
+const OUT = resolve(import.meta.dirname, '..', 'shots');
 
-function chromePath() {
-	const cache = join(homedir(), 'Library/Caches/ms-playwright');
-	const dir = readdirSync(cache).filter((d) => d.startsWith('chromium-')).sort().pop();
-	return join(cache, dir, 'chrome-mac-arm64',
-		'Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing');
-}
-
-const args = process.argv.slice(2);
-const light = args.includes('--light');
-const want = args.filter((a) => !a.startsWith('--'));
+const argv = process.argv.slice(2);
+const light = argv.includes('--light');
+const want = argv.filter((a) => !a.startsWith('--'));
 const suffix = light ? '-light' : '';
 
 mkdirSync(OUT, { recursive: true });
-const browser = await chromium.launch({ executablePath: chromePath() });
-const ctx = await browser.newContext({
-	viewport: { width: 1440, height: 900 },
-	deviceScaleFactor: 2,
-	colorScheme: light ? 'light' : 'dark',
-});
-const page = await ctx.newPage();
+switchTheme(light ? 'shadcn-light' : 'shadcn-dark');
+
+const { browser, page } = await open({ light, height: 900 });
 const shot = (name) => page.screenshot({ path: join(OUT, `state-${name}${suffix}.png`) });
+const go = (url) => goTo(page, url);
 
-await page.goto(`${BASE}/cgi-bin/luci/`, { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('input[name="luci_username"]');
-await page.fill('input[name="luci_username"]', 'root');
-await page.fill('input[name="luci_password"]', process.env.LUCI_PASS ?? 'openwrt');
-await page.click('button');
-await page.waitForURL(/cgi-bin\/luci/);
-
-/* Wait until the page has actually finished drawing: LuCI views render on the
-   client, and a shot taken too early catches an intermediate state — up to a
-   frame where the theme has not applied yet and the core shows its fallback. */
-async function settle(page, extra = 1200) {
-	await page.waitForLoadState('networkidle').catch(() => {});
-	await page.waitForFunction(() => !document.querySelector('#view > .spinning'),
-		{ timeout: 20000 }).catch(() => {});
-	await page.waitForFunction(() => {
-		// the theme has applied: the background comes from a token, not the
-		// default transparent one
-		const bg = getComputedStyle(document.body).backgroundColor;
-		return bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
-	}, { timeout: 10000 }).catch(() => {});
-	await page.waitForFunction(() => !document.fonts || document.fonts.status === 'loaded',
-		{ timeout: 5000 }).catch(() => {});
-	await page.waitForTimeout(extra);
-}
-
-const go = async (url) => {
-	await page.goto(BASE + url, { waitUntil: 'domcontentloaded' });
-	await settle(page);
-};
+await login(page);
 
 const run = (name) => !want.length || want.includes(name);
 

@@ -55,6 +55,12 @@ ensure_veth lan0
 ensure_veth wan0
 
 # --- LuCI -------------------------------------------------------------------
+# Board model. On real hardware this file is written at boot from the device
+# tree; in a container nothing writes it, and the dashboard then shows
+# "Model: undefined", which looks like a theme bug rather than a missing file.
+mkdir -p /tmp/sysinfo
+[ -s /tmp/sysinfo/model ] || echo "${BOARD_MODEL:-OpenWrt Test Bench}" > /tmp/sysinfo/model
+
 if [ -n "$ROOT_PASSWORD" ]; then
 	printf '%s\n%s\n' "$ROOT_PASSWORD" "$ROOT_PASSWORD" | passwd root >/dev/null 2>&1
 fi

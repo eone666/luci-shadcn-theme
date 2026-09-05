@@ -7,29 +7,13 @@
  *   node scripts/inspect.mjs system 'input[type=checkbox]' '.tabs > li'
  *   node scripts/inspect.mjs system '.cbi-value input' --shot   # + element shot
  *
- * Page names are the same as in scripts/shots.mjs.
+ * Page names are the ones in scripts/lib/bench.mjs.
  */
-import { chromium } from 'playwright-core';
-import { mkdirSync, readdirSync } from 'node:fs';
-import { resolve, join } from 'node:path';
-import { homedir } from 'node:os';
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { PAGES, open, login, go } from './lib/bench.mjs';
 
 const root = resolve(import.meta.dirname, '..');
-const BASE = process.env.LUCI_URL ?? 'http://localhost:8080';
-
-const PAGES = {
-	login: '/cgi-bin/luci/',
-	dashboard: '/cgi-bin/luci/admin/dashboard',
-	overview: '/cgi-bin/luci/admin/status/overview',
-	interfaces: '/cgi-bin/luci/admin/network/network',
-	wireless: '/cgi-bin/luci/admin/network/wireless',
-	zones: '/cgi-bin/luci/admin/network/firewall/zones',
-	dhcp: '/cgi-bin/luci/admin/network/dhcp',
-	system: '/cgi-bin/luci/admin/system/system',
-	packages: '/cgi-bin/luci/admin/system/package-manager',
-	startup: '/cgi-bin/luci/admin/system/startup',
-	routes: '/cgi-bin/luci/admin/status/routes',
-};
 
 /* The properties that usually turn out to be the culprits. */
 const PROPS = [
@@ -49,30 +33,18 @@ const args = process.argv.slice(2);
 const shot = args.includes('--shot');
 const [pageName, ...selectors] = args.filter((a) => !a.startsWith('--'));
 if (!pageName || !selectors.length) {
-	console.error('a page and at least one selector are required');
+	console.error('a page and at least one selector are required\n' +
+		`pages: ${Object.keys(PAGES).join(', ')}`);
+	process.exit(1);
+}
+if (!PAGES[pageName]) {
+	console.error(`no such page: ${pageName}\npages: ${Object.keys(PAGES).join(', ')}`);
 	process.exit(1);
 }
 
-const browser = await chromium.launch({ executablePath: chromePath() });
-const ctx = await browser.newContext({
-	viewport: { width: 1440, height: 1000 },
-	colorScheme: 'dark',
-});
-const page = await ctx.newPage();
-
-await page.goto(`${BASE}/cgi-bin/luci/`, { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('input[name="luci_username"]', { timeout: 15000 });
-await page.fill('input[name="luci_username"]', process.env.LUCI_USER ?? 'root');
-await page.fill('input[name="luci_password"]', process.env.LUCI_PASS ?? 'openwrt');
-await page.click('button');
-await page.waitForURL(/cgi-bin\/luci/, { timeout: 15000 });
-
-if (pageName !== 'login') {
-	await page.goto(BASE + PAGES[pageName], { waitUntil: 'domcontentloaded' });
-	await page.waitForFunction(() => !document.querySelector('#view > .spinning'),
-		{ timeout: 15000 }).catch(() => {});
-	await page.waitForTimeout(600);
-}
+const { browser, page } = await open({ scale: 1 });
+await login(page);
+if (pageName !== 'login') await go(page, PAGES[pageName].url);
 
 for (const sel of selectors) {
 	const data = await page.evaluate(({ sel, props }) => {
