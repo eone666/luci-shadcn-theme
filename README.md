@@ -42,11 +42,14 @@ uci set luci.main.mediaurlbase=/luci-static/shadcn-dark && uci commit luci
 
 Three variants are registered, exactly like the stock bootstrap theme:
 
-| Variant | |
+| In the Design list | |
 |---|---|
 | `Shadcn` | follows the browser's `prefers-color-scheme` |
-| `Shadcn-Light` | always light |
-| `Shadcn-Dark` | always dark |
+| `ShadcnLight` | always light |
+| `ShadcnDark` | always dark |
+
+(No dashes: uci option names cannot carry them, which is why the stock theme
+lists `BootstrapDark` too.)
 
 To remove it, put your old theme back first, then `apk del luci-theme-shadcn` —
 the package cleans its own entries out of uci.

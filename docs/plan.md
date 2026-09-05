@@ -18,7 +18,7 @@ unwraps `@layer`, flattens `@supports(color-mix)` and renames `--tw-*`.
 
 | | |
 |---|---|
-| Theme variants | Three entries, as in bootstrap: **Shadcn** (auto, by `prefers-color-scheme`), **Shadcn-Light**, **Shadcn-Dark**. `shadcn-light`/`shadcn-dark` are symlinks to the `shadcn` directory. There is no switcher in the UI. |
+| Theme variants | Three entries, as in bootstrap: **Shadcn** (auto, by `prefers-color-scheme`), **ShadcnLight**, **ShadcnDark** (uci option names take no dashes). `shadcn-light`/`shadcn-dark` are symlinks to the `shadcn` directory. There is no switcher in the UI. |
 | Dark mechanics | `header.ut` emits `<html data-darkmode="true" class="dark">`: the `class` is the shadcn contract (`.dark {…}`, `@custom-variant dark`), the attribute is the contract of the inherited rules. In the auto variant an inline script toggles both. |
 | Build | On the host: `@tailwindcss/cli@4.3.3`, `npm run dev` (watch) / `npm run build` (minify). |
 | Font | A system stack, no webfonts (the router has no internet). |
