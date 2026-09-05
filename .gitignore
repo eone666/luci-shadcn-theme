@@ -10,3 +10,6 @@ shots/
 
 # local bench settings; the sample lives in .env.example
 .env
+
+# macOS finder droppings
+.DS_Store
