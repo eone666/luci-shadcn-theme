@@ -67,15 +67,37 @@ Decisions following the owner's feedback:
   strip on a narrow screen is a rectangular card, and the dashboard tables are taken out
   of card mode.
 
+Done since:
+
+- **The `.apk` builds and installs.** `npm run package` runs the OpenWrt SDK in a
+  container, `scripts/package-check.sh` then installs the result into a clean
+  `openwrt/rootfs` and checks the files, the symlinks, the three uci entries, the
+  version stamped into the template, that the CSS was not mangled, that the page
+  renders dark and that `postrm` cleans up after itself. The recipe deliberately does
+  not `feeds install luci-base` — that pulls the whole dependency chain and dies on
+  `liblucihttp-lua`, while a data-only theme needs nothing but `luci.mk`.
+  `LUCI_MINIFY_CSS:=0` and `LUCI_MINIFY_JS:=0`: both minifiers redirect into `$src.o`
+  before checking that the host tool exists.
+- **`cascade.css` is 73 KB** (upstream's is 53 KB; it was 83 KB). `scripts/postprocess.mjs`
+  drops variables nothing reads, rules the next rule fully overrides — which is what
+  Tailwind's `color-mix()` fallbacks become once the `@supports` wrapper is flattened —
+  merges neighbouring rules that share a selector and clears out the declarations that
+  merging makes dead. Verified by diffing the computed style of every element across
+  8 pages × 2 variants × 2 widths before and against after: the only differences are the
+  widths of elements whose text changes between runs (the clock, the uptime), and the
+  same differences show up when the identical CSS is measured twice.
+
 Left for later:
 
-- The size of `cascade.css` — 80 KB against upstream's 44 KB (`@apply` + the `@supports`
-  fallbacks for `color-mix()`). Acceptable, but it could be squeezed.
-- Building the `.apk` in the OpenWrt SDK has not been tested (it needs the SDK itself);
-  `LUCI_MINIFY_CSS:=0` is set up front.
-- Input fields: on the reference they are filled and almost borderless, whereas ours are
-  transparent with a border; our density is tighter than shadcn's. Awaiting the owner's
-  decision.
+- Squeezing further would mean merging rules that share a declaration block but are not
+  neighbours (~4 KB): safe only with a proper cascade analysis, since anything between
+  them may target the same elements.
+- ~~Input fields~~ — checked against the recipe rather than against the screenshot, and
+  there is nothing to fix: shadcn's Input is `h-9 rounded-md border bg-transparent px-3
+  py-1 shadow-xs dark:bg-input/30`, and ours is that exactly, only with `rounded-lg` for
+  the rounder look we chose. What looked "filled and borderless" on the reference is the
+  dark card surface behind a `bg-input/30` field. Filling the fields in the light theme
+  as well would be a deviation from shadcn, so it is not done unless asked for.
 - A glyph set of our own instead of the LuCI icons (substituting the `src` through a
   `mask`) — that would mean new assets in the package, so it was not done.
 

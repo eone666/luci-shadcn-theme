@@ -133,7 +133,13 @@ The postprocessing turns the output into an ordinary LuCI theme:
 - **flattens** `@supports (color: color-mix(…))`: the value we want, the one with
   transparency, lives inside such a block while the opaque fallback is outside,
   which is why the block is flattened rather than dropped;
-- renames the internal `--tw-*` to `--th-*`.
+- renames the internal `--tw-*` to `--th-*`;
+- shrinks what is left: variables nothing reads (Tailwind emits a definition and
+  its use in the same rule, so an unread name is dead everywhere), rules the very
+  next rule overrides in full — which is exactly what those `color-mix()`
+  fallbacks become once the wrapper is flattened — neighbouring rules that share
+  a selector, and the declarations that merging leaves dead. Roughly 9 KB, and
+  none of it changes a single computed style.
 
 At the end the script checks that neither the word `tailwind`, nor `--tw-`, nor
 `@layer` is left in the output — otherwise it fails. `npm run audit` works off the
@@ -220,10 +226,11 @@ content on cards, a header that is not set apart.
 ## Limitations
 
 - `oklch()` and `color-mix()` require Chrome 111+, Safari 16.4+, Firefox 113+.
-- The built `cascade.css` is ~80 KB against upstream's 44 KB: `@apply` expands
-  utilities into declarations, and Tailwind adds `@supports` fallbacks for
-  `color-mix()`. That is acceptable for router flash, but there is room to
-  optimise.
+- The built `cascade.css` is ~73 KB against upstream's ~53 KB: `@apply` expands
+  utilities into declarations, and the palette itself is another 3 KB. The size
+  pass in `postprocess.mjs` takes off ~9 KB of that; what is left would need
+  rules that share a declaration block but are not neighbours to be merged, which
+  is only safe with a proper cascade analysis.
 - The background of `.zonebadge[style]` and `.ifacebox-head[style]` arrives as an
   inline style from `resources/firewall.js`, and inline beats any class — the
   theme does not paint these elements.

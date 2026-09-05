@@ -16,6 +16,11 @@
  *      lives inside such a block while the opaque fallback is outside — which
  *      is why the block is flattened rather than dropped.
  *   5. Renames the `--tw-*` variables to `--th-*`.
+ *   6. Shrinks the result: drops variables nobody reads and rules the next rule
+ *      fully overrides, merges neighbours that share a selector, and clears out
+ *      the declarations that merging leaves dead. See shrink() for why each of
+ *      those is safe -- around 9 KB on cascade.css, with not one computed style
+ *      changed.
  *
  *   node scripts/postprocess.mjs <input> <output>
  */
@@ -86,6 +91,167 @@ function unwrapAtRule(css, needle) {
 	return [css, n];
 }
 
+/* --- size pass ------------------------------------------------------------
+ * The theme ships to a router, where every kilobyte sits in flash and goes
+ * over the wire uncompressed (uhttpd does not gzip). Tailwind's output is
+ * written for a bundler that is expected to do this pass; we do it ourselves.
+ */
+
+/** Split CSS into top-level rules, respecting quoted strings (data: URIs in
+ *  this file carry both braces and semicolons). */
+function parseRules(css) {
+	const out = [];
+	let start = 0, depth = 0, brace = -1, quote = null;
+	for (let i = 0; i < css.length; i++) {
+		const c = css[i];
+		if (quote) {
+			if (c === '\\') i++;
+			else if (c === quote) quote = null;
+			continue;
+		}
+		if (c === '"' || c === "'") quote = c;
+		else if (c === '{') { if (depth++ === 0) brace = i; }
+		else if (c === '}' && --depth === 0) {
+			out.push({
+				prelude: css.slice(start, brace).trim(),
+				body: css.slice(brace + 1, i),
+			});
+			start = i + 1;
+			brace = -1;
+		}
+	}
+	const tail = css.slice(start).trim();
+	if (tail) out.push({ prelude: tail, body: null });
+	return out;
+}
+
+const render = (rules) => rules
+	.map((r) => (r.body === null ? r.prelude : `${r.prelude}{${r.body}}`))
+	.join('');
+
+/** Split a declaration list on top-level semicolons. */
+function splitDecls(body) {
+	const out = [];
+	let start = 0, depth = 0, quote = null;
+	for (let i = 0; i < body.length; i++) {
+		const c = body[i];
+		if (quote) {
+			if (c === '\\') i++;
+			else if (c === quote) quote = null;
+			continue;
+		}
+		if (c === '"' || c === "'") quote = c;
+		else if (c === '(') depth++;
+		else if (c === ')') depth--;
+		else if (c === ';' && depth === 0) { out.push(body.slice(start, i)); start = i + 1; }
+	}
+	if (body.slice(start).trim()) out.push(body.slice(start));
+	return out;
+}
+
+const propOf = (decl) => {
+	const i = decl.indexOf(':');
+	return i < 0 ? null : decl.slice(0, i).trim();
+};
+
+const NESTED = /^@(media|supports|container|scope)\b/;
+
+function shrink(css, stats) {
+	/* Which --th-* variables does anything actually read? Tailwind emits the
+	   definition and the use inside the same rule, so a name never read in this
+	   file is not read anywhere -- and where a read does cross files it carries
+	   an inline fallback (mobile.css reads var(--th-leading, <computed>)), so
+	   the worst case is the fallback rather than a broken declaration. */
+	const used = new Set();
+	for (const m of css.matchAll(/var\(\s*(--th-[a-z0-9-]+)/g)) used.add(m[1]);
+
+	const pass = (rules) => {
+		const out = [];
+		for (const rule of rules) {
+			if (rule.body === null) { out.push(rule); continue; }
+
+			/* 1. an @property for a variable nobody reads describes nothing */
+			const prop = rule.prelude.match(/^@property\s+(--th-[a-z0-9-]+)/);
+			if (prop && !used.has(prop[1])) { stats.deadVars++; continue; }
+
+			if (NESTED.test(rule.prelude)) {
+				rule.body = render(pass(parseRules(rule.body)));
+				if (!rule.body.trim()) continue;
+				out.push(rule);
+				continue;
+			}
+
+			/* 2. and neither does its declaration */
+			const decls = splitDecls(rule.body).filter((d) => {
+				const p = propOf(d);
+				if (p && p.startsWith('--th-') && !used.has(p)) { stats.deadVars++; return false; }
+				return true;
+			});
+			if (!decls.length) { stats.emptied++; continue; }
+			rule.body = decls.join(';');
+			rule.props = new Set(decls.map(propOf).filter(Boolean));
+			rule.important = /!important/.test(rule.body);
+			out.push(rule);
+		}
+
+		/* 3. a rule the very next one overrides in full, same selector and so
+		   same specificity, is unreachable. This is what Tailwind's color-mix()
+		   fallbacks are once the @supports wrapper is flattened away -- and they
+		   only ever mattered to browsers without color-mix(), which cannot run
+		   this file anyway: dropping @layer properties above already requires
+		   @property, which landed later than color-mix() everywhere. */
+		const kept = [];
+		for (let i = 0; i < out.length; i++) {
+			const a = out[i], b = out[i + 1];
+			if (a.body !== null && b && b.body !== null && a.prelude === b.prelude &&
+			    !a.important && a.props && b.props &&
+			    [...a.props].every((p) => b.props.has(p))) {
+				stats.shadowed++;
+				continue;
+			}
+			kept.push(a);
+		}
+
+		/* 4. neighbours with the same selector become one rule: identical
+		   declarations in identical order, minus a selector and two braces */
+		const merged = [];
+		for (const rule of kept) {
+			const prev = merged[merged.length - 1];
+			if (prev && rule.body !== null && prev.body !== null &&
+			    prev.prelude === rule.prelude && !NESTED.test(rule.prelude) &&
+			    !rule.prelude.startsWith('@')) {
+				prev.body += ';' + rule.body;
+				if (rule.props) for (const p of rule.props) prev.props.add(p);
+				prev.merged = true;
+				stats.merged++;
+				continue;
+			}
+			merged.push(rule);
+		}
+
+		/* 5. inside one block only the last declaration of a property counts,
+		   so the earlier ones are dead -- mostly the color-mix() fallbacks that
+		   step 4 has just moved in next to their replacements. An !important
+		   earlier on would outrank what follows, so those stay. */
+		for (const rule of merged) {
+			if (!rule.merged || rule.body === null) continue;
+			const decls = splitDecls(rule.body);
+			const lastAt = new Map();
+			decls.forEach((d, i) => { const p = propOf(d); if (p) lastAt.set(p, i); });
+			const keep = decls.filter((d, i) => {
+				const p = propOf(d);
+				if (!p || lastAt.get(p) === i || /!important/.test(d)) return true;
+				stats.dupes++;
+				return false;
+			});
+			rule.body = keep.join(';');
+		}
+		return merged;
+	};
+
+	return render(pass(parseRules(css)));
+}
+
 const [input, output] = process.argv.slice(2);
 if (!input || !output) {
 	console.error('an input path and an output path are required');
@@ -149,6 +315,16 @@ const twCount = (css.match(/--tw-/g) || []).length;
 if (twCount) {
 	css = css.replaceAll('--tw-', '--th-');
 	report.push(`--tw-* -> --th-* (${twCount})`);
+}
+
+// 6. shrink
+{
+	const stats = { deadVars: 0, shadowed: 0, emptied: 0, merged: 0, dupes: 0 };
+	const wasSize = css.length;
+	css = shrink(css, stats);
+	report.push(`shrunk by ${wasSize - css.length} bytes ` +
+		`(dead vars ${stats.deadVars}, overridden rules ${stats.shadowed}, ` +
+		`merged ${stats.merged}, dead declarations ${stats.dupes})`);
 }
 
 const leftovers = [];
