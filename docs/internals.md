@@ -83,6 +83,7 @@ LUCI_THEME=shadcn-light docker compose up -d --force-recreate --wait
 | `npm run shots` | screenshots of the bench pages into `shots/` |
 | `npm run shots:states` | screenshots of interactive states: dropdown, Save & Apply dialog, validation error, modal |
 | `npm run inspect` | computed styles of an element on a live page: `npm run inspect -- system 'input[type=checkbox]'` |
+| `node scripts/hero.mjs` | the README hero: one page shot in both variants and joined along a diagonal |
 | `npm run clean` | remove `.build/`, `.sdk-out/`, `src/generated/`, `shots/` |
 
 The build is `scripts/build.mjs`, the entry points live in
@@ -126,7 +127,7 @@ scripts/
   package.sh               .apk via the OpenWrt SDK; package-check.sh verifies it
 luci-theme-shadcn/         the package itself: htdocs, ucode templates, uci-defaults, Makefile
 refs/upstream-25.12/       upstream reference for npm run audit
-docs/                      this file, the design log, the README screenshots
+docs/                      this file, the design log, screenshots.md and img/
 ```
 
 The built CSS is committed: the OpenWrt SDK has no node, so the package is built

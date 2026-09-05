@@ -5,18 +5,11 @@ A theme for **LuCI**, the OpenWrt web interface, in the style of
 and an `oklch` palette. Light and dark, and every LuCI page keeps working —
 nothing about the markup or the workflow changes, only how it looks.
 
-![The dashboard, dark variant](docs/img/dashboard.png)
-
-## More screenshots
+![LuCI with the theme, dark and light](docs/img/hero.png)
 
 <p align="center">
-  <img src="docs/img/system-light.png" alt="System settings, light variant" width="700">
-  &nbsp;
-  <img src="docs/img/system-mobile.png" alt="System settings on a phone" width="180">
-</p>
-
-<p align="center">
-  <img src="docs/img/login.png" alt="The login screen" width="620">
+  <a href="docs/screenshots.md"><b>More screenshots →</b></a><br>
+  <sub>the firewall, interfaces, the dashboard, a modal, the login screen, a phone</sub>
 </p>
 
 ## Install

@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+/*
+ * The README hero: one page shot twice, dark and light, joined along a diagonal.
+ *
+ *   node scripts/hero.mjs [page] [--out docs/img/hero.png]
+ *
+ * Both halves have to be the same page at the same size, so the shots are taken
+ * here rather than reused: switch the bench to a variant, capture, switch back.
+ * The compositing runs on a canvas inside the same browser -- no image library.
+ */
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { PAGES, open, login, go, switchTheme } from './lib/bench.mjs';
+
+const argv = process.argv.slice(2);
+const outArg = argv.indexOf('--out');
+const out = resolve(import.meta.dirname, '..',
+	outArg < 0 ? 'docs/img/hero.png' : argv[outArg + 1]);
+const name = argv.find((a) => !a.startsWith('--') && PAGES[a]) ?? 'zones';
+const width = 1440, height = 880;
+
+const shots = {};
+for (const variant of ['dark', 'light']) {
+	switchTheme(`shadcn-${variant}`);
+	const { browser, page } = await open({ light: variant === 'light', width, height });
+	await login(page);
+	await go(page, PAGES[name].url);
+	shots[variant] = await page.screenshot();     // viewport only, both identical in size
+	await browser.close();
+}
+
+/* The seam: a straight line from x=SPLIT_TOP across the top edge down to
+   x=SPLIT_BOTTOM at the bottom. Light takes everything to the right of it. */
+const SPLIT_TOP = 0.62, SPLIT_BOTTOM = 0.38;
+
+const { browser, page } = await open({ width: 400, height: 300, scale: 1 });
+const dataUrl = await page.evaluate(async ({ dark, light, top, bottom }) => {
+	const load = (src) => new Promise((ok, err) => {
+		const img = new Image();
+		img.onload = () => ok(img);
+		img.onerror = err;
+		img.src = src;
+	});
+	const [d, l] = await Promise.all([load(dark), load(light)]);
+	const c = document.createElement('canvas');
+	c.width = d.naturalWidth;
+	c.height = d.naturalHeight;
+	const ctx = c.getContext('2d');
+	ctx.drawImage(d, 0, 0);
+
+	const xTop = c.width * top, xBottom = c.width * bottom;
+	ctx.save();
+	ctx.beginPath();
+	ctx.moveTo(xTop, 0);
+	ctx.lineTo(c.width, 0);
+	ctx.lineTo(c.width, c.height);
+	ctx.lineTo(xBottom, c.height);
+	ctx.closePath();
+	ctx.clip();
+	ctx.drawImage(l, 0, 0);
+	ctx.restore();
+
+	// a hairline on the seam, so the join reads as deliberate
+	ctx.strokeStyle = 'rgba(127,127,127,.55)';
+	ctx.lineWidth = Math.max(2, c.width / 900);
+	ctx.beginPath();
+	ctx.moveTo(xTop, 0);
+	ctx.lineTo(xBottom, c.height);
+	ctx.stroke();
+
+	return c.toDataURL('image/png');
+}, {
+	dark: `data:image/png;base64,${shots.dark.toString('base64')}`,
+	light: `data:image/png;base64,${shots.light.toString('base64')}`,
+	top: SPLIT_TOP, bottom: SPLIT_BOTTOM,
+});
+await browser.close();
+
+mkdirSync(dirname(out), { recursive: true });
+writeFileSync(out, Buffer.from(dataUrl.split(',')[1], 'base64'));
+console.log(`${name}: dark + light -> ${out.replace(process.cwd() + '/', '')}`);
