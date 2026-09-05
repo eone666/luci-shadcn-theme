@@ -1,7 +1,7 @@
 /*
- * Служебные классы LuCI и точечные правки отдельных страниц.
- * Утилиты выравнивания идут с !important — так в апстриме, на них опираются
- * инлайновые таблицы вьюх.
+ * LuCI helper classes and spot fixes for individual pages.
+ * The alignment utilities carry !important, as they do upstream: the inline
+ * tables in the views rely on them.
  */
 
 .hidden { @apply hidden; }
@@ -27,7 +27,7 @@ table table td,
 	@apply border-none;
 }
 
-/* --- значения с подсказкой (var) ------------------------------------------ */
+/* --- values with a hint (var) --------------------------------------------- */
 
 div.cbi-value var,
 .td.cbi-value-field var {
@@ -47,32 +47,39 @@ div.cbi-value var.cbi-tooltip-container,
 	white-space: normal;
 }
 
-/* --- дашборд -------------------------------------------------------------
- * luci-mod-dashboard рисует карточки своим классом .dashboard-bg и красит их
- * в var(--background-color-medium) без рамки. В нашей палитре это --muted:
- * в тёмной теме он на тон светлее полотна и карточка видна, а в светлой это
- * 0.97 против белого фона — подложка исчезала. Приводим её к тем же карточкам,
- * что и секции: bg-card + рамка.
+/* --- dashboard -----------------------------------------------------------
+ * luci-mod-dashboard draws its cards with its own .dashboard-bg class and
+ * paints them var(--background-color-medium) with no border. In our palette
+ * that is --muted: in the dark theme it is a shade lighter than the canvas and
+ * the card is visible, but in the light one it is 0.97 against a white
+ * background and the surface disappeared. It is brought in line with the same
+ * cards the sections use: bg-card plus a border.
+ *
+ * The class is repeated in the selector on purpose (0,3,0): custom.css also
+ * pins border-radius:16px, and it is loaded after the theme, so on equal
+ * specificity the card would keep the core's rounding and ignore --radius
+ * entirely. A tag would not do here -- .dashboard-bg sits on divs as well as
+ * on thead/tfoot.
  */
-.Dashboard .dashboard-bg {
+.Dashboard .dashboard-bg.dashboard-bg {
 	@apply rounded-xl border border-border bg-card text-card-foreground;
 }
 
-/* Таблица списка устройств: дашборд задаёт всем своим таблицам width:auto, и
-   она жмётся к левому краю карточки, растянутой на всю страницу. Тянем только
-   её — маленьким таблицам «ключ-значение» в блоках Internet/System auto нужен.
-   Селектор с тегом (0,2,1) специально: custom.css ядра грузится после темы,
-   и с равной специфичностью выиграл бы он. */
+/* The device list table: the dashboard sets width:auto on all of its tables,
+   so it huddles at the left edge of a card that spans the whole page. Only
+   this one is stretched — the small key/value tables in the Internet/System
+   blocks need auto. The tag in the selector (0,2,1) is deliberate: the core's
+   custom.css is loaded after the theme and would win on equal specificity. */
 .Dashboard table.devices-info {
 	@apply w-full;
 }
 
-/* Иконки дашборда — это <img> с зашитым внутрь stroke="#000", поэтому цветом
-   их не покрасить, только фильтром. Штатные темы LuCI этого не делают вовсе,
-   и на тёмном полотне иконки становятся почти невидимыми. Класс svgmonotone
-   ядро ставит как раз на однотонные — их и инвертируем.
-   Цветные статусные иконки (internet.svg, зелёный глобус) класса не имеют и
-   остаются как есть: цвет там несёт смысл. */
+/* Dashboard icons are <img> elements with stroke="#000" baked in, so they
+   cannot be recoloured — only filtered. The stock LuCI themes do not do this
+   at all, which makes the icons nearly invisible on a dark canvas. The core
+   sets the svgmonotone class on exactly the single-tone ones, so those are
+   the ones we invert. Coloured status icons (internet.svg, the green globe)
+   carry no such class and stay as they are: there the colour carries meaning. */
 .svgmonotone {
 	filter: none;
 }
@@ -82,14 +89,14 @@ div.cbi-value var.cbi-tooltip-container,
 	filter: invert(1) brightness(.92);
 }
 
-/* --- правки отдельных страниц --------------------------------------------- */
+/* --- per-page fixes ------------------------------------------------------- */
 
-/* графики collectd рисуются картинками под светлую тему */
+/* collectd graphs are rendered as images made for the light theme */
 [data-darkmode="true"] [data-page="admin-statistics-graphs"] [data-plugin] img {
 	filter: invert(100%) hue-rotate(150deg);
 }
 
-/* инлайновые svg-графики статуса: фон и оси задаются вьюхой инлайном */
+/* inline status svg graphs: the view sets background and axes inline */
 #view div[style] > svg {
 	background-color: var(--background) !important;
 }
@@ -98,7 +105,7 @@ div.cbi-value var.cbi-tooltip-container,
 	stroke: var(--foreground) !important;
 }
 
-/* --- отдельные страницы и модалки ---------------------------------------- */
+/* --- individual pages and modals ----------------------------------------- */
 
 #cbi-network-interface .ifacebox-body {
 	white-space: normal;
@@ -118,7 +125,7 @@ div.cbi-value var.cbi-tooltip-container,
 	@apply max-w-[900px];
 }
 
-/* размеры кнопки логина заданы в overlays.css вместе с остальной карточкой */
+/* the login button sizing lives in overlays.css with the rest of the card */
 #modal_overlay > .modal.login > button.important {
 	@apply w-full;
 }

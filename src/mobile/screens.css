@@ -1,18 +1,18 @@
 /*
- * Адаптив. header.ut подключает этот файл отдельным <link> с
- * media="only screen and (max-device-width: 854px)", поэтому здесь только
- * переопределения для узких экранов, а верхний уровень файла = полоса ≤854px.
+ * Responsive rules. header.ut links this file through a separate <link> with
+ * media="only screen and (max-device-width: 854px)", so it holds nothing but
+ * overrides for narrow screens — the top level of the file is the ≤854px band.
  *
- * Раскладка перенесена из luci-theme-bootstrap (Apache-2.0, коммит e9ebca7)
- * как есть: карточный режим таблиц через .td[data-title]::before и сетка
- * .col-1…col-10 — это контракт с ядром, ломать его нельзя. Заменены только
- * цветовые ссылки на токены shadcn и убран градиент полосы табов, которая
- * на десктопе стала сегмент-контролом.
+ * The layout is carried over from luci-theme-bootstrap (Apache-2.0, commit
+ * e9ebca7) as is: the card mode for tables via .td[data-title]::before and the
+ * .col-1…col-10 grid are a contract with the core and must not be broken. Only
+ * the colour references were swapped for shadcn tokens, and the gradient was
+ * dropped from the tab strip, which became a segmented control on desktop.
  */
 
-/* Апстрим прятал имя устройства на телефоне ради места. Мы его оставляем:
-   оно занимает первую строку по центру над меню. !important — потому что
-   правило перекрывает не наше, а унаследованное поведение. */
+/* Upstream hid the device name on phones to save space. We keep it: it takes
+   the first line, centred above the menu. The !important is there because the
+   rule overrides inherited behaviour rather than our own. */
 header h3 a, header .brand {
 	display: flex !important;
 	width: 100%;
@@ -23,10 +23,10 @@ header h3 a, header .brand {
 	line-height: 1.4;
 }
 
-/* Полоса табов на узком экране переносится на несколько строк, и форма-пилюля
-   превращается в бесформенное пятно. Здесь она становится прямоугольной
-   карточкой, а сами табы — сеткой в два столбца. mobile.css подключается после
-   cascade.css, поэтому !important не нужен. */
+/* On a narrow screen the tab strip wraps onto several lines and the pill shape
+   turns into a shapeless blob. Here it becomes a rectangular card and the tabs
+   a two-column grid. mobile.css is loaded after cascade.css, so no !important
+   is needed. */
 .tabs, .cbi-tabmenu {
 	@apply w-full rounded-xl p-1.5;
 }
@@ -178,9 +178,9 @@ header h3 a, header .brand {
 		flex-basis: 100%;
 	}
 
-	/* Таблицы дашборда ядро верстает само и подписей data-title у них нет,
-	   поэтому карточный режим их только ломает: 3 колонки расползаются по
-	   строкам. Возвращаем им табличную раскладку. */
+	/* The core lays out the dashboard tables itself and they carry no data-title
+	   labels, so the card mode only breaks them: three columns sprawl across
+	   rows. They are given the table layout back. */
 	.Dashboard table.devices-info,
 	.Dashboard table.devices-info .tr,
 	.Dashboard table.devices-info .th,
@@ -318,14 +318,12 @@ header h3 a, header .brand {
 		flex-direction: row;
 	}
 
-	/* Шапка на телефоне: бренд скрыт (правило выше), поэтому строку занимает
-	   меню, а индикаторы прижаты вправо в той же строке. Апстрим ставил их
-	   колонкой на 20% ширины — из-за этого получалась вторая строка и большое
-	   пустое поле под меню. */
-	/* На телефоне бренд скрыт (правило выше), поэтому шапку занимает меню.
-	   Всё выравнивается по центру, и перенесённые пункты тоже остаются
-	   центрированными; индикаторы уезжают отдельной строкой под меню —
-	   если прижимать их вправо, они съедают ширину и центровка ломается. */
+	/* Header on a phone: three centred rows -- the device name (rule at the top
+	   of this file), the menu, and the indicators. Everything is centred, and
+	   wrapped items stay centred as well; pushing the indicators to the right
+	   instead would eat into the width and break the centring. Upstream laid
+	   them out as a column 20% wide, which left a large empty area below the
+	   menu. */
 	header {
 		@apply min-h-0 flex-wrap items-center justify-center gap-x-1 px-1 py-1;
 	}

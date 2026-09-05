@@ -1,10 +1,11 @@
 /*
- * Кнопки. Рецепт shadcn Button: база = вариант outline размера sm, потому что
- * кнопки LuCI живут в строках таблиц и рядах действий; залитые варианты
- * (default/destructive/secondary) остаются за реально главными действиями.
+ * Buttons. The shadcn Button recipe: the base is the outline variant in size
+ * sm, because LuCI buttons live inside table rows and action bars; the filled
+ * variants (default/destructive/secondary) are reserved for actions that are
+ * genuinely primary.
  *
- * Механику апстрима с переменной --on-color сохраняем: семантические варианты
- * меняют только её и цвет рамки, а базовая геометрия описана один раз.
+ * Upstream's --on-color mechanic is kept: a semantic variant only changes that
+ * variable and the border colour, while the base geometry is written once.
  */
 
 .item::after,
@@ -13,13 +14,13 @@
 	--on-color: var(--foreground);
 
 	@apply inline-flex h-8 shrink-0 cursor-pointer items-center justify-center gap-2
-	       whitespace-nowrap rounded-full border border-input bg-transparent px-4 text-sm
+	       whitespace-nowrap rounded-pill border border-input bg-transparent px-4 text-sm
 	       font-medium shadow-xs hover:bg-accent hover:text-accent-foreground
 	       dark:bg-input/30 dark:hover:bg-input/50;
 	color: var(--on-color);
 }
 
-/* --- контурные семантические варианты ------------------------------------- */
+/* --- outline semantic variants -------------------------------------------- */
 
 .cbi-button-positive,
 .cbi-button-fieldadd,
@@ -55,9 +56,9 @@
 	@apply border-destructive/40 hover:bg-destructive/10;
 }
 
-/* --- залитые варианты: главное действие ----------------------------------- */
+/* --- filled variants: primary action -------------------------------------- */
 
-/* Save & Apply и «Log in» — рецепт Button default. */
+/* Save & Apply and "Log in" — the Button default recipe. */
 .btn.primary,
 .cbi-button-action.important,
 .cbi-page-actions .cbi-button-apply {
@@ -70,7 +71,7 @@
 	@apply border-transparent bg-primary hover:bg-primary/90 hover:text-primary-foreground;
 }
 
-/* «Save» рядом с «Save & Apply» — вторичное действие, рецепт Button secondary. */
+/* "Save" next to "Save & Apply" is a secondary action — Button secondary. */
 .cbi-page-actions .cbi-button-save {
 	--on-color: var(--secondary-foreground);
 	@apply border-transparent bg-secondary hover:bg-secondary/80 hover:text-secondary-foreground;
@@ -83,7 +84,7 @@
 	       dark:focus-visible:ring-destructive/40;
 }
 
-/* Апстрим возвращал такой Save в контурный вид — оставляем то же поведение. */
+/* Upstream reverted such a Save back to the outline look — same behaviour. */
 .cbi-page-actions .cbi-button-apply + .cbi-button-save,
 .cbi-page-actions .cbi-button-negative + .cbi-button-save {
 	--on-color: var(--foreground);
@@ -91,15 +92,16 @@
 	       dark:bg-input/30;
 }
 
-/* Edit в строке таблицы: у апстрима он был залит акцентом, но в палитре neutral
-   это белый блок в каждой строке — слишком громко. Оставляем контурным. */
+/* Edit inside a table row: upstream filled it with the accent, but in the
+   neutral palette that is a white block in every row — far too loud. Keep it
+   outlined. */
 .cbi-section-actions .cbi-button-edit {
 	--on-color: var(--foreground);
 	@apply border-input bg-transparent hover:bg-accent hover:text-accent-foreground
 	       dark:bg-input/30;
 }
 
-/* --- состояния и размеры -------------------------------------------------- */
+/* --- states and sizes ----------------------------------------------------- */
 
 .btn.active, .btn:active {
 	@apply shadow-none;
@@ -113,15 +115,15 @@
 }
 
 .btn.large {
-	@apply h-10 rounded-full px-6 text-sm;
+	@apply h-10 rounded-pill px-6 text-sm;
 	line-height: normal;
 }
 
 .btn.small {
-	@apply h-7 gap-1.5 rounded-full px-3 text-xs;
+	@apply h-7 gap-1.5 rounded-pill px-3 text-xs;
 }
 
-/* --- крестик закрытия (модалки, алерты) ----------------------------------- */
+/* --- close cross (modals, alerts) ----------------------------------------- */
 
 .close {
 	@apply float-right cursor-pointer rounded-xs text-xl font-medium leading-none
@@ -138,7 +140,7 @@
 	@apply font-sans leading-tight;
 }
 
-/* --- ряд действий страницы ------------------------------------------------ */
+/* --- page action row ------------------------------------------------------ */
 
 .cbi-page-actions::after {
 	@apply table clear-both;

@@ -1,37 +1,40 @@
 /*
- * Табы. Рецепт shadcn Tabs варианта default — сегмент-контрол на подложке
- * bg-muted. Underline-вариант не берём: табы LuCI переносятся на несколько
- * строк, и подчёркивание при переносе выглядит сломанным.
+ * Tabs. The shadcn Tabs default variant — a segmented control on a bg-muted
+ * backdrop. The underline variant is not used: LuCI tab strips wrap onto
+ * several lines, and an underline looks broken once it wraps.
  *
- * В .tabs активный элемент помечен классом .active, а в .cbi-tabmenu наоборот:
- * неактивные несут .cbi-tab-disabled. Оба контракта сохранены.
+ * In .tabs the active item carries the .active class; in .cbi-tabmenu it is the
+ * other way round — the inactive ones carry .cbi-tab-disabled. Both contracts
+ * are preserved.
  */
 
 .tabs, .cbi-tabmenu {
-	/* mx-0 гасит отступ общего правила ul из типографики — иначе полоса табов
-	   съезжает вправо на 24px относительно заголовка страницы.
-	   w-fit — как у TabsList в shadcn: полоса по содержимому, а не во всю ширину */
-	@apply mx-0 mb-4 flex w-fit max-w-full flex-wrap items-center gap-1 rounded-full
+	/* mx-0 cancels the margin from the generic ul rule in typography — without
+	   it the tab strip slides 24px to the right of the page heading.
+	   w-fit matches shadcn's TabsList: the strip hugs its content instead of
+	   spanning the full width. */
+	@apply mx-0 mb-4 flex w-fit max-w-full flex-wrap items-center gap-1 rounded-pill
 	       bg-muted p-1 text-muted-foreground;
 	list-style: none;
 }
 
 .tabs > li, .cbi-tabmenu > li {
-	/* max-width апстрима (48%) здесь не нужен: у него полоса тянулась во всю
-	   ширину страницы, а у нас она по контенту (w-fit), и 48% начинали
-	   считаться от неё же — подписи обрезались в «IPv4 Routi…». Длинные
-	   наборы табов теперь переносятся на вторую строку. */
-	/* Паддинга на li нет намеренно: фон-пилюля рисуется здесь, а кликабельна
-	   ссылка внутри — поэтому все отступы отданы ей, иначе зона наведения
-	   оказывается больше зоны клика. */
+	/* Upstream's max-width (48%) is not needed here: its strip spanned the
+	   full page width, whereas ours hugs its content (w-fit), so 48% was
+	   measured against the strip itself and labels got clipped to
+	   "IPv4 Routi…". Long tab sets now wrap onto a second line. */
+	/* The li deliberately has no padding: the pill background is drawn here
+	   while the link inside is what is clickable, so all the padding is given
+	   to the link — otherwise the hover area would exceed the click area. */
 	@apply inline-flex max-w-full flex-initial items-center justify-center
-	       rounded-full p-0 text-sm font-medium text-foreground/60 transition-all;
+	       rounded-pill p-0 text-sm font-medium text-foreground/60 transition-all;
 }
 
 .tabs > li > a, .cbi-tabmenu > li > a {
-	/* рамка тоже здесь, а не на li: иначе ссылка меньше пилюли на её толщину */
+	/* the border lives here too, not on the li: otherwise the link would be
+	   smaller than the pill by the border width */
 	@apply flex h-full w-full items-center justify-center gap-1.5 overflow-hidden
-	       text-ellipsis whitespace-nowrap rounded-full border border-transparent
+	       text-ellipsis whitespace-nowrap rounded-pill border border-transparent
 	       px-3.5 py-1 no-underline outline-none;
 	color: inherit;
 }
@@ -41,7 +44,7 @@
 	text-decoration: none;
 }
 
-/* активный сегмент */
+/* active segment */
 .tabs > li.active, .cbi-tabmenu > li:not(.cbi-tab-disabled) {
 	@apply bg-background text-foreground shadow-sm dark:bg-input/30;
 }
@@ -58,9 +61,9 @@
 	@apply bg-accent/50 text-foreground;
 }
 
-/* счётчик ошибок валидации на табе — рецепт Badge destructive */
+/* validation error counter on a tab — the Badge destructive recipe */
 .cbi-tab-disabled[data-errors]::after {
-	@apply ml-1 inline-flex min-w-4 flex-col justify-center rounded-full bg-destructive
+	@apply ml-1 inline-flex min-w-4 flex-col justify-center rounded-pill bg-destructive
 	       px-1.5 text-center text-xs font-medium;
 	content: attr(data-errors);
 	color: white;
@@ -79,7 +82,7 @@
 	@apply mb-4 mt-0 text-sm text-muted-foreground;
 }
 
-/* дропдаун внутри полосы табов */
+/* dropdown inside the tab strip */
 .tabs .menu-dropdown, .tabs .dropdown-menu {
 	@apply rounded-md border;
 	top: 35px;
@@ -98,7 +101,7 @@
 	border-top-color: var(--foreground);
 }
 
-/* --- панели табов: видимостью управляет атрибут, а не класс --------------- */
+/* --- tab panes: visibility is driven by an attribute, not a class --------- */
 
 .tab-content > .tab-pane,
 .tab-content > div {
@@ -117,10 +120,10 @@
 	@apply h-auto overflow-visible opacity-100 transition-opacity;
 }
 
-/* Узкое окно: полоса-пилюля с переносом строк превращается в бесформенное
-   пятно, поэтому становится прямоугольной карточкой, а табы — сеткой.
-   Медиазапрос по ширине вьюпорта, а не по max-device-width: последний не
-   реагирует на ресайз окна (см. комментарий в chrome.css). */
+/* Narrow window: a wrapping pill strip turns into a shapeless blob, so it
+   becomes a rectangular card and the tabs become a grid.
+   The media query is on viewport width rather than max-device-width: the
+   latter does not react to window resizing (see the note in chrome.css). */
 @media (max-width: 720px) {
 	.tabs, .cbi-tabmenu {
 		@apply w-full rounded-xl p-1.5;

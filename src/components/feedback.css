@@ -1,17 +1,18 @@
 /*
- * Бейджи, индикаторы, прогрессбар, спиннер и анимации.
+ * Badges, indicators, progress bar, spinner and animations.
  *
- * Индикаторы в шапке (#indicators) не имеют классов вообще — только атрибуты
- * [data-indicator]/[data-style]/[data-clickable], поэтому красятся ими.
+ * The header indicators (#indicators) carry no classes at all — only the
+ * [data-indicator]/[data-style]/[data-clickable] attributes, so they are styled
+ * through those.
  *
- * @keyframes переносим руками: с source(none) Tailwind ничего не генерирует,
- * а классы .flash/.fade-in/.fade-out ставит ui.js.
+ * The @keyframes are written by hand: with source(none) Tailwind generates
+ * nothing, and the .flash/.fade-in/.fade-out classes are set by ui.js.
  */
 
 .label,
 header [data-indicator] {
 	@apply inline-flex w-fit shrink-0 items-center justify-center gap-1 whitespace-nowrap
-	       rounded-full border border-transparent bg-secondary px-2 py-0.5 text-xs
+	       rounded-pill border border-transparent bg-secondary px-2 py-0.5 text-xs
 	       font-medium text-secondary-foreground;
 	margin: .125em 0 .125em .4em;
 	text-shadow: none;
@@ -47,15 +48,15 @@ header [data-indicator][data-style="active"] {
 	@apply bg-primary text-primary-foreground;
 }
 
-/* --- прогрессбар: рецепт Progress ---------------------------------------- */
+/* --- progress bar: the Progress recipe ----------------------------------- */
 
 .cbi-progressbar {
-	@apply relative h-2 min-w-[170px] overflow-hidden rounded-full border-0 bg-primary/20;
+	@apply relative h-2 min-w-[170px] overflow-hidden rounded-pill border-0 bg-primary/20;
 	margin: 1.4em 0 4px 0;
 }
 
 .cbi-progressbar > div {
-	@apply h-full rounded-full bg-primary;
+	@apply h-full rounded-pill bg-primary;
 	transition: width .25s ease-in;
 	width: 0%;
 }
@@ -67,7 +68,7 @@ header [data-indicator][data-style="active"] {
 	white-space: pre;
 }
 
-/* --- спиннер -------------------------------------------------------------- */
+/* --- spinner -------------------------------------------------------------- */
 
 #view > div.spinning:first-child {
 	@apply table;
@@ -86,13 +87,13 @@ header [data-indicator][data-style="active"] {
 	top: calc(50% - 10px);
 	left: 6px;
 	content: " ";
-	/* цвет берётся из токена, поэтому отдельная правка под тёмную тему не нужна */
+	/* the colour comes from a token, so no separate dark-theme tweak is needed */
 	background: var(--on-color, var(--foreground));
 	mask: var(--spinner-icon) center/cover no-repeat;
 	-webkit-mask: var(--spinner-icon) center/cover no-repeat;
 }
 
-/* --- анимации ------------------------------------------------------------- */
+/* --- animations ----------------------------------------------------------- */
 
 @keyframes flash {
 	0% { opacity: 1; }

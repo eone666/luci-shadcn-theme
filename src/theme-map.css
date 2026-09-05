@@ -1,12 +1,12 @@
 /*
- * Проброс токенов темы в утилиты Tailwind (@apply bg-card, text-muted-foreground,
- * border-border и т.д.).
+ * Maps the theme tokens onto Tailwind utilities (@apply bg-card,
+ * text-muted-foreground, border-border and so on).
  *
- * Официальные темы shadcn несут такой блок сами, но не все и не полностью,
- * поэтому здесь он объявлен целиком и через var(--x, <дефолт>): совпадающие
- * объявления безвредны, а недостающие подхватываются из src/theme-defaults.css.
- * Именно это позволяет положить в theme/globals.css любую тему с shadcn/ui
- * и ничего не править.
+ * Official shadcn themes carry such a block themselves, but not all of them
+ * and not completely, so it is declared here in full and through
+ * var(--x, <default>): duplicate declarations are harmless, and missing ones
+ * fall back to src/theme-defaults.css. This is what makes it possible to drop
+ * any shadcn/ui theme into theme/globals.css and change nothing.
  */
 
 @theme inline {
@@ -44,15 +44,37 @@
 	--color-chart-4: var(--chart-4, var(--muted-foreground));
 	--color-chart-5: var(--chart-5, var(--foreground));
 
-	/* чего у shadcn нет — берём из дефолтов, но тема может задать своё */
+	/* what shadcn lacks comes from our defaults, but a theme may override it */
 	--color-success: var(--success, var(--success-fallback));
 	--color-success-foreground: var(--success-foreground, var(--success-foreground-fallback));
 	--color-warning: var(--warning, var(--warning-fallback));
 	--color-warning-foreground: var(--warning-foreground, var(--warning-foreground-fallback));
 	--color-destructive-foreground: var(--destructive-foreground, var(--destructive-foreground-fallback));
 
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
+	/* The radius scale is proportional to --radius, not additive like shadcn's
+	   own (R-4px / R-2px / R / R+4px). At shadcn's default --radius: 0.625rem
+	   both agree to the pixel (6/8/10/14px, and 16px for 2xl -- Tailwind's own
+	   default), but a palette that ships --radius: 0 must come out square
+	   everywhere, and R-4px would leave 4px on every card. Multiplication also
+	   survives a unitless `--radius: 0`, which calc(0 - 4px) does not. */
+	--radius-xs: calc(var(--radius) * 0.2);
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.6);
+	/* Pills (buttons, tabs, badges): a full round-off while the palette has a
+	   radius at all, and square the moment it drops to zero -- which plain
+	   rounded-full could never do. */
+	--radius-pill: calc(var(--radius) * 100);
 }
+
+/*
+ * The dark variant, declared on our side as well.
+ * scripts/tokens.mjs rewrites the palette's own @custom-variant into this same
+ * prefix form, but a theme is free to ship without one at all (theme/pink.css
+ * does) -- and then every dark:* inside @apply would silently vanish. This file
+ * is imported after the palette, so the declaration below is the one that wins
+ * either way.
+ */
+@custom-variant dark (:is(.dark, [data-darkmode="true"]) &);

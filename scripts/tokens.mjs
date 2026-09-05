@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 /*
- * theme/globals.css — файл, скачанный с https://ui.shadcn.com/create, лежит в
- * репозитории как есть и руками не правится: перекраска темы = замена этого файла.
+ * theme/globals.css — the file downloaded from https://ui.shadcn.com/create —
+ * is kept in the repository as is and is never edited by hand: recolouring the
+ * theme means replacing that file.
  *
- * Проблема одна: shadcn отдаёт его как готовую точку входа приложения, то есть с
- * `@import "tailwindcss"` (это притащило бы preflight и автосканирование классов) и
- * иногда с `@import "tw-animate-css"` (такого пакета у нас нет). Импортами управляет
- * src/cascade.css, поэтому здесь мы их вырезаем, а остальное — переменные,
- * @custom-variant, @theme inline, @layer base — переносим байт-в-байт.
+ * There is exactly one problem: shadcn ships it as a ready-made application
+ * entry point, i.e. with `@import "tailwindcss"` (which would drag in preflight
+ * and class auto-scanning) and sometimes with `@import "tw-animate-css"` (a
+ * package we do not have). Imports are managed by src/cascade.css, so they are
+ * stripped here while everything else — variables, @custom-variant,
+ * @theme inline, @layer base — is carried over byte for byte.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -20,13 +22,13 @@ let css;
 try {
 	css = readFileSync(src, 'utf8');
 } catch {
-	console.error(`tokens: не найден ${src}\n` +
-		`Скачайте тему с https://ui.shadcn.com/create и положите файл как theme/globals.css`);
+	console.error(`tokens: ${src} not found\n` +
+		`Download a theme from https://ui.shadcn.com/create and save it as theme/globals.css`);
 	process.exit(1);
 }
 
-// Вырезаем только известные импорты: молча потерянный @import — это молча
-// потерянные стили, поэтому на незнакомом падаем.
+// Only known imports are stripped: an @import lost silently means styles lost
+// silently, so an unknown one is a hard error.
 const ALLOWED_IMPORTS = ['tailwindcss', 'tw-animate-css'];
 const dropped = [];
 const unknown = [];
@@ -40,22 +42,24 @@ css = css.replace(/^[ \t]*@import\s+([^;]+);[ \t]*\r?\n?/gm, (m, spec) => {
 	return '';
 });
 
-// shadcn кладёт тёмные значения в `.dark`, LuCI переключает режим атрибутом
-// data-darkmode. Дублируем селектор, чтобы палитра приезжала по любому из двух
-// признаков (класс ставит header.ut, атрибут — унаследованный контракт).
+// shadcn puts the dark values in `.dark`, while LuCI switches modes with the
+// data-darkmode attribute. The selector is duplicated so the palette applies
+// under either signal (the class is set by header.ut, the attribute is an
+// inherited contract).
 let darkDuped = 0;
 css = css.replace(/(^|\n)([ \t]*)\.dark(\s*\{)/, (m, pre, indent, brace) => {
 	darkDuped = 1;
 	return `${pre}${indent}.dark, :root[data-darkmode="true"]${brace}`;
 });
 
-// По той же причине расширяем сам вариант: `dark:*` в @apply должен срабатывать
-// и по атрибуту. Последнее объявление @custom-variant побеждает, но переписываем
-// прямо здесь — так результат не зависит от порядка импортов.
-/* Префиксная форма, а не shadcn-овская `&:is(.dark *)`: Tailwind разворачивает
-   вариант вложенным правилом, и для селектора с псевдоэлементом получается
-   невалидный `::before:is(.dark *)` — браузер выбрасывает такое правило целиком.
-   `.dark &` даёт валидный `.dark input::before`, а тема ими насыщена. */
+// For the same reason the variant itself is widened: `dark:*` in @apply must
+// also trigger on the attribute. The last @custom-variant declaration wins, but
+// it is rewritten right here so the result does not depend on import order.
+/* The prefix form, not shadcn's `&:is(.dark *)`: Tailwind expands the variant
+   as a nested rule, and for a selector with a pseudo-element that yields the
+   invalid `::before:is(.dark *)`, which browsers discard rule and all.
+   `.dark &` produces a valid `.dark input::before`, and this theme is full of
+   them. */
 const DARK_VARIANT =
 	'@custom-variant dark (:is(.dark, [data-darkmode="true"]) &);';
 let variantPatched = 0;
@@ -65,46 +69,50 @@ css = css.replace(/^[ \t]*@custom-variant\s+dark\b.*$/m, () => {
 });
 
 const header =
-	'/* СГЕНЕРИРОВАНО из theme/globals.css — не редактировать (см. scripts/tokens.mjs) */\n\n';
+	'/* GENERATED from theme/globals.css — do not edit (see scripts/tokens.mjs) */\n\n';
 
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, header + css.replace(/^\n+/, ''));
 
 if (unknown.length) {
-	console.error(`tokens: незнакомый @import в ${src}: ${unknown.join(', ')}\n` +
-		`Импортами управляет src/cascade.css. Либо добавьте импорт туда вручную, ` +
-		`либо внесите его в ALLOWED_IMPORTS.`);
+	console.error(`tokens: unknown @import in ${src}: ${unknown.join(', ')}\n` +
+		`Imports are managed by src/cascade.css. Either add the import there by hand, ` +
+		`or list it in ALLOWED_IMPORTS.`);
 	process.exit(1);
 }
 
-const has = (re) => (re.test(css) ? 'да' : 'НЕТ');
+const has = (re) => (re.test(css) ? 'yes' : 'NO');
 console.log(`tokens: ${src.replace(root + '/', '')} -> ${out.replace(root + '/', '')}`);
 if (dropped.length)
-	console.log(`  вырезаны импорты: ${dropped.join(', ')}`);
+	console.log(`  imports stripped: ${dropped.join(', ')}`);
 console.log(`  :root: ${has(/:root\s*\{/)}   ` +
-	`тёмная палитра: ${has(/\.dark,\s*:root\[data-darkmode/)}` +
-	`${darkDuped ? ' (селектор продублирован)' : ''}   ` +
+	`dark palette: ${has(/\.dark,\s*:root\[data-darkmode/)}` +
+	`${darkDuped ? ' (selector duplicated)' : ''}   ` +
 	`@theme inline: ${has(/@theme\s+inline\s*\{/)}   ` +
-	`variant dark: ${variantPatched ? 'расширен на data-darkmode' : 'НЕТ'}`);
+	`variant dark: ${variantPatched ? 'widened to data-darkmode' : 'NO'}`);
 
 if (!/:root\s*\{/.test(css)) {
-	console.error('tokens: в файле нет блока :root — это не похоже на globals.css из shadcn');
+	console.error('tokens: the file has no :root block — this does not look like a shadcn globals.css');
 	process.exit(1);
 }
 
-/* Тема эпохи Tailwind v3 хранила цвета триплетами (`--background: 0 0% 100%`) и
-   разворачивала их через `hsl(var(--background))`. У нас переменные идут в
-   цветовые свойства напрямую, поэтому такой файл дал бы невалидные цвета —
-   лучше упасть с понятным сообщением. */
+/* Tailwind v3-era themes stored colours as triplets (`--background: 0 0% 100%`)
+   and expanded them with `hsl(var(--background))`. Here the variables go straight
+   into colour properties, so such a file would produce invalid colours — better
+   to fail with a clear message. */
 const legacyTriplet = css.match(/--(?:background|foreground|primary|border):\s*[\d.]+\s+[\d.]+%\s+[\d.]+%/);
 if (legacyTriplet) {
 	console.error(
-		`tokens: похоже на тему для Tailwind v3 — цвета заданы HSL-триплетами ` +
-		`(${legacyTriplet[0]}).\nНужен файл для Tailwind v4, где значения — готовые ` +
-		`цвета: oklch(...)/hsl(...)/#rrggbb.`);
+		`tokens: this looks like a Tailwind v3 theme — the colours are HSL triplets ` +
+		`(${legacyTriplet[0]}).\nA Tailwind v4 file is required, where the values are ` +
+		`ready-made colours: oklch(...)/hsl(...)/#rrggbb.`);
 	process.exit(1);
 }
 if (!darkDuped)
-	console.warn('tokens: ВНИМАНИЕ — в файле нет блока .dark, тёмная тема из палитры не приедет');
+	console.warn('tokens: WARNING — the file has no .dark block, the palette will not bring a dark theme');
+/* Not a problem in itself: src/theme-map.css declares the same variant and is
+   imported after the palette, so `dark:` inside @apply keeps working. Worth a
+   line in the log all the same -- it says which of the two is in force. */
 if (!variantPatched)
-	console.warn(`tokens: ВНИМАНИЕ — нет @custom-variant dark; добавьте в src/theme-map.css:\n  ${DARK_VARIANT}`);
+	console.log('  the palette has no @custom-variant dark of its own — ' +
+		'the one from src/theme-map.css applies');

@@ -1,273 +1,331 @@
 # luci-theme-shadcn
 
-Тема для LuCI (OpenWrt 25.12) в виде [shadcn/ui](https://ui.shadcn.com), base color
-**neutral**. Три варианта, как у штатной bootstrap-темы: `Shadcn` (следует
-`prefers-color-scheme`), `Shadcn-Light`, `Shadcn-Dark`.
+A theme for LuCI (OpenWrt 25.12) in the style of [shadcn/ui](https://ui.shadcn.com),
+base color **neutral**. Three variants, just like the stock bootstrap theme:
+`Shadcn` (follows `prefers-color-scheme`), `Shadcn-Light`, `Shadcn-Dark`.
 
-Селекторы и разметка остались от `luci-theme-bootstrap` — это контракт с ядром
-LuCI. Правила переписаны через `@apply` рецептами компонентов shadcn, а вся
-палитра вынесена в один файл `theme/globals.css`.
+The selectors and the markup are inherited from `luci-theme-bootstrap` — that is
+the contract with LuCI core. The rules were rewritten with `@apply` after the
+shadcn component recipes, and the entire palette lives in a single file,
+`theme/globals.css`.
 
-В собранном CSS следов Tailwind нет: ни баннера, ни `@layer`, ни `--tw-*`
-(см. «Сборка» ниже) — на роутер уезжает обычная тема LuCI.
+The built CSS carries no trace of Tailwind: no banner, no `@layer`, no `--tw-*`
+(see "Build" below) — what ships to the router is an ordinary LuCI theme.
 
-## Сменить палитру — один файл
+## Changing the palette — one file
 
-Заменить `theme/globals.css` и выполнить `npm run build`. Больше ничего.
+Replace `theme/globals.css` and run `npm run build`. That is all.
 
-Подходит **любой официальный набор shadcn** — `globals.css` от `shadcn init`,
-готовые base color (neutral, zinc, slate, stone, gray) или тема, собранная на
-https://ui.shadcn.com/create. Файл кладётся как есть и руками не правится.
-Проверено сборкой на официальных neutral/zinc/slate/stone/gray.
+Two palettes are kept in the repository, so switching is a copy:
 
-Совместимость обеспечивают три вещи:
+```sh
+cp theme/neutral.css theme/globals.css && npm run build   # shadcn neutral (default)
+cp theme/pink.css    theme/globals.css && npm run build   # pink, square corners
+```
 
-- `src/theme-defaults.css` идёт **до** палитры и задаёт только дефолты (шрифты,
-  радиус, `--success`/`--warning`, которых у shadcn нет вовсе). Всё, что тема
-  описывает сама, перебивает их.
-- `src/theme-map.css` идёт **после** и пробрасывает токены в утилиты целиком
-  через `var(--x, <дефолт>)` — поэтому неполный набор переменных в теме не ломает
-  сборку, а `@theme inline` внутри самой темы просто дублирует наш.
-- `scripts/tokens.mjs` вырезает из файла `@import`-ы (ими управляет
-  `src/cascade.css`), дублирует селектор тёмной палитры в
-  `.dark, :root[data-darkmode="true"]` и расширяет вариант `dark:` на оба
-  признака. Остальное — переменные, `@theme inline`, `@layer base` — переносится
-  байт-в-байт.
+**Any official shadcn set** works — the `globals.css` from `shadcn init`, one of
+the ready-made base colors (neutral, zinc, slate, stone, gray), or a theme built
+at https://ui.shadcn.com/create. The file is dropped in as is and never edited by
+hand. Verified by building against the official neutral/zinc/slate/stone/gray.
 
-Единственное ограничение: файл должен быть в формате Tailwind v4, где значения
-переменных — готовые цвета (`oklch(...)`, `hsl(...)`, `#rrggbb`). Тему эпохи v3
-с HSL-триплетами (`--background: 0 0% 100%`) сборка отклонит с понятным
-сообщением.
+Three things make that compatibility work:
 
-## Разработка
+- `src/theme-defaults.css` comes **before** the palette and only sets defaults
+  (fonts, radius, `--success`/`--warning`, which shadcn does not have at all).
+  Anything the theme defines itself overrides them.
+- `src/theme-map.css` comes **after** and maps the tokens onto the utilities in
+  full through `var(--x, <default>)` — so an incomplete set of variables in a
+  theme does not break the build, and an `@theme inline` block inside the theme
+  itself simply duplicates ours.
+- `scripts/tokens.mjs` strips the `@import`s out of the file (they are managed by
+  `src/cascade.css`), duplicates the dark-palette selector as
+  `.dark, :root[data-darkmode="true"]` and widens the `dark:` variant to cover
+  both signals. Everything else — variables, `@theme inline`, `@layer base` — is
+  carried over byte for byte.
+
+The only limitation: the file must be in the Tailwind v4 format, where variable
+values are ready-made colors (`oklch(...)`, `hsl(...)`, `#rrggbb`). A v3-era theme
+with HSL triplets (`--background: 0 0% 100%`) is rejected by the build with a
+clear message.
+
+### `--radius` really controls the geometry
+
+The whole radius scale in `src/theme-map.css` is derived from `--radius` by
+multiplication (`xs .2` / `sm .6` / `md .8` / `lg 1` / `xl 1.4` / `2xl 1.6`,
+plus `pill 100` for buttons, tabs and badges). At shadcn's default
+`--radius: 0.625rem` that reproduces its own scale to the pixel, and a palette
+with `--radius: 0` comes out square everywhere — including the pills, which a
+hardcoded `rounded-full` could never do. The only deliberate exception is the
+radio button, which stays a circle.
+
+One catch worth remembering: `luci-mod-dashboard` ships its own `custom.css`
+that pins `border-radius: 16px` on `.dashboard-bg`, and the core's CSS is loaded
+**after** the theme. Our rule repeats the class to win on specificity — the same
+trick as for `.devices-info`. If a new core module starts overriding geometry,
+`--radius: 0` is the quickest way to spot it.
+
+## Development
 
 ```sh
 cp .env.example .env
-docker compose up -d --wait      # стенд: OpenWrt 25.12.4 + полный LuCI
+docker compose up -d --wait      # test bench: OpenWrt 25.12.4 + full LuCI
 npm install
-npm run dev                      # watch-сборка cascade.css и mobile.css
+npm run dev                      # watch build for cascade.css and mobile.css
 open http://localhost:8080       # root / openwrt
 ```
 
-Правка `src/**` видна по F5 — CSS монтируется в контейнер напрямую. Кэш: на стенде
-у файлов нет `?v=`, поэтому держите DevTools с «Disable cache» или жмите
-Cmd+Shift+R (в собранном пакете версию подставляет `SubstituteVersion` из `luci.mk`).
+Edits under `src/**` show up on F5 — the CSS is mounted into the container
+directly. Caching: on the bench the files carry no `?v=`, so keep DevTools open
+with "Disable cache" or press Cmd+Shift+R (in the built package the version is
+substituted by `SubstituteVersion` from `luci.mk`).
 
-Вариант темы выбирается переменной `LUCI_THEME`:
+The theme variant is selected with the `LUCI_THEME` variable:
 
 ```sh
 LUCI_THEME=shadcn-light docker compose up -d --force-recreate --wait
 ```
 
-### Скрипты
+### Scripts
 
 | | |
 |---|---|
-| `npm run build` | сборка `cascade.css` + `mobile.css` (минификация + чистка следов Tailwind) |
-| `npm run dev` | то же в watch-режиме, включая пересборку токенов при правке палитры |
-| `npm run tokens` | пересобрать `src/generated/tokens.css` из `theme/globals.css` |
-| `npm run audit` | сверить селекторы с апстримом: `MISSING` должен быть пуст |
-| `npm run shots` | скриншоты страниц стенда (`shots/`); `-- --light` переключает стенд на светлый вариант темы |
-| `npm run shots:states` | скриншоты интерактивных состояний: дропдаун, диалог Save & Apply, ошибка валидации, модалка |
-| `npm run inspect` | вычисленные стили элемента на живой странице: `npm run inspect -- system 'input[type=checkbox]'` |
+| `npm run build` | build `cascade.css` + `mobile.css` (minify + strip Tailwind traces) |
+| `npm run dev` | the same in watch mode, including a token rebuild when the palette changes |
+| `npm run tokens` | rebuild `src/generated/tokens.css` from `theme/globals.css` |
+| `npm run audit` | diff the selectors against upstream: `MISSING` must be empty |
+| `npm run shots` | screenshots of the bench pages (`shots/`); `-- --light` switches the bench to the light variant |
+| `npm run shots:states` | screenshots of interactive states: dropdown, Save & Apply dialog, validation error, modal |
+| `npm run inspect` | computed styles of an element on a live page: `npm run inspect -- system 'input[type=checkbox]'` |
 
-Скриншоты нужны потому, что вью LuCI рендерятся на клиенте — `curl` видит только
-каркас темы. Браузер берётся из кэша Playwright, `playwright-core` ничего не качает.
+Screenshots are needed because LuCI views render on the client — `curl` only sees
+the theme's shell. The browser comes from the Playwright cache; `playwright-core`
+downloads nothing.
 
-`npm run audit` — главная страховка: тема не контролирует разметку, классы
-генерирует ядро LuCI, поэтому единственный способ поймать потерянное при переносе
-правило — сравнить список селекторов с апстримом в `refs/upstream-25.12/`.
+`npm run audit` is the main safety net: the theme does not control the markup, the
+classes come from LuCI core, so the only way to catch a rule lost during the port
+is to compare the selector list against upstream in `refs/upstream-25.12/`.
 
-## Структура
+## Layout
 
 ```
-theme/globals.css          палитра с ui.shadcn.com/create (не редактируется)
+theme/globals.css          the active palette (never edited by hand)
+theme/neutral.css          shadcn neutral -- the shipped default
+theme/pink.css             pink palette with --radius: 0, as an alternative
 src/
-  cascade.css              точка входа -> htdocs/luci-static/shadcn/cascade.css
-  mobile.css               точка входа -> htdocs/luci-static/shadcn/mobile.css
-  theme-map.css            токены, которых нет у shadcn: success/warning/шрифты
-  compat/bootstrap-vars.css  переменные bootstrap -> токены shadcn (нужен постоянно)
-  base/                    reset, каркас, типографика
-  components/              кнопки, формы, таблицы, табы, шапка, модалки, бейджи,
-                           дропдаун-виджет, uci-дифф, файлбраузер
-  mobile/screens.css       адаптив (≤854/600/375px)
-luci-theme-shadcn/         сам пакет: htdocs, ucode-шаблоны, uci-defaults, Makefile
-refs/upstream-25.12/       референс апстрима для npm run audit
+  cascade.css              entry point -> htdocs/luci-static/shadcn/cascade.css
+  mobile.css               entry point -> htdocs/luci-static/shadcn/mobile.css
+  theme-map.css            tokens shadcn lacks: success/warning/fonts
+  compat/bootstrap-vars.css  bootstrap variables -> shadcn tokens (permanent)
+  base/                    reset, scaffolding, typography
+  components/              buttons, forms, tables, tabs, header, modals, badges,
+                           dropdown widget, uci diff, file browser
+  mobile/screens.css       responsive rules (≤854/600/375px)
+luci-theme-shadcn/         the package itself: htdocs, ucode templates, uci-defaults, Makefile
+refs/upstream-25.12/       upstream reference for npm run audit
 ```
 
-Собранный CSS коммитится: в OpenWrt SDK нет node, пакет собирается из готового
-артефакта. Каталог `src/` лежит в корне репозитория, а не внутри
-`luci-theme-shadcn/` — там `luci.mk` считает `src/` каталогом C-исходников.
+The built CSS is committed: the OpenWrt SDK has no node, so the package is built
+from a ready artifact. The `src/` directory sits at the repository root rather
+than inside `luci-theme-shadcn/` — there `luci.mk` would treat `src/` as a
+directory of C sources.
 
-## Сборка
+## Build
 
 `src/**` → Tailwind (`.build/`) → `scripts/postprocess.mjs` → `htdocs/luci-static/shadcn/`.
 
-Постобработка приводит вывод к виду обычной темы LuCI:
+The postprocessing turns the output into an ordinary LuCI theme:
 
-- снимает баннер `/*! tailwindcss … */` и ставит свой заголовок;
-- разворачивает `@layer theme` и `@layer base` — в теме своих слоёв нет,
-  правила лежат плоско, как в апстримном `cascade.css`;
-- удаляет `@layer properties` (это фолбэк для браузеров без `@property`);
-- **сплющивает** `@supports (color: color-mix(…))`: внутри такого блока лежит
-  нужное значение с прозрачностью, а снаружи непрозрачный фолбэк, поэтому блок
-  именно сплющивается, а не удаляется;
-- переименовывает служебные `--tw-*` в `--th-*`.
+- removes the `/*! tailwindcss … */` banner and puts our own header there;
+- unwraps `@layer theme` and `@layer base` — the theme has no layers of its own,
+  the rules sit flat as in upstream's `cascade.css`;
+- drops `@layer properties` (a fallback for browsers without `@property`);
+- **flattens** `@supports (color: color-mix(…))`: the value we want, the one with
+  transparency, lives inside such a block while the opaque fallback is outside,
+  which is why the block is flattened rather than dropped;
+- renames the internal `--tw-*` to `--th-*`.
 
-В конце скрипт проверяет, что в выводе не осталось ни слова `tailwind`, ни
-`--tw-`, ни `@layer` — иначе падает. `npm run audit` работает по такому же
-постобработанному файлу, так что ошибки чистки он тоже поймает.
+At the end the script checks that neither the word `tailwind`, nor `--tw-`, nor
+`@layer` is left in the output — otherwise it fails. `npm run audit` works off the
+same postprocessed file, so it catches cleanup errors too.
 
-## Что унаследовано от bootstrap-темы
+## What is inherited from the bootstrap theme
 
-`header.ut`, `footer.ut`, `sysauth.ut`, `menu-shadcn.js` и `view/shadcn/sysauth.js` —
-копии апстрима (Apache-2.0, коммит `e9ebca7`). Изменены только имена темы и одна
-строка в `header.ut`: тёмному варианту добавлен `class="dark"` рядом с
-`data-darkmode="true"`, чтобы скачанный `globals.css` работал вербатим.
+`header.ut`, `footer.ut`, `sysauth.ut`, `menu-shadcn.js` and
+`view/shadcn/sysauth.js` are copies from upstream (Apache-2.0, commit `e9ebca7`).
+Only the theme names changed, plus one line in `header.ut`: the dark variant gets
+`class="dark"` alongside `data-darkmode="true"`, so that a downloaded
+`globals.css` works verbatim.
 
-## Принятые решения по внешнему виду
+## Visual design decisions
 
-Ориентир — то, как выглядит сам сайт shadcn/ui: крупные скругления, кнопки-пилюли,
-контент на карточках, шапка без выделения.
+The reference is the shadcn/ui site itself: large radii, pill-shaped buttons,
+content on cards, a header that is not set apart.
 
-- **Кнопки — пилюли** (`rounded-full`), база это вариант `outline` размера `sm`:
-  они живут в строках таблиц, где залитая кнопка в каждой строке слишком громкая.
-  Заливка остаётся за реально главными действиями: `Save & Apply` (primary),
-  `Save` рядом с ним (secondary), `Delete`/`Reset` (destructive outline).
-- **Секции — карточки.** `.cbi-section` это существующий контейнер LuCI, разметку
-  не трогали: ему добавлены фон `bg-card`, рамка и `rounded-xl`. Панель действий
-  под ними — такая же карточка.
-- **Шапка не отделена от тела**: ни рамки, ни своей заливки. Так как она `sticky`,
-  под ней полупрозрачный фон с размытием — только чтобы контент не просвечивал.
-  Пункты меню тянутся на всю её высоту (это зона наведения), а подсветка — пилюля
-  с отступом; у логотипа ховер без плашки.
-- **Подменю прилипает к кромке пункта** (`top: 100%`), а не висит на фиксированных
-  40px, как у апстрима: иначе между пунктом и меню оставался зазор и курсор терял
-  hover, не доезжая до содержимого.
-- **Геометрия — shadcn.** Поля `h-9`, радиусы из токена `--radius`, базовый размер
-  текста `text-sm`. Двухколоночная раскладка `.cbi-value` (заголовок 180px)
-  сохранена — на неё опирается вёрстка вьюх.
-- **Градиенты и инсет-тени убраны.** Фокус — `ring-[3px] ring-ring/50`.
-- **Табы** — сегмент-контрол-пилюля по ширине содержимого, а не подчёркивание:
-  табы LuCI переносятся на несколько строк, и underline при переносе ломается.
-- **Алерты** — нейтральная карточка с цветным акцентом вместо жёлто-красных
-  плашек. `.ifacebox-head.active` — `accent`, а не `primary`: в палитре neutral
-  primary это белый блок.
-- **Дашборд** рисуется собственным CSS ядра (`luci-mod-dashboard`), который
-  красит карточки в `--background-color-medium` без рамки и задаёт своим
-  таблицам `width: auto`. В светлой палитре это давало невидимые подложки, а
-  список устройств жался к левому краю. Тема приводит `.dashboard-bg` к тем же
-  карточкам, что и секции, и тянет только таблицу устройств — маленьким
-  таблицам «ключ-значение» ширина по содержимому нужна. Селектор с тегом взят
-  намеренно: `custom.css` ядра грузится после темы и при равной специфичности
-  выиграл бы он.
-- **Иконки дашборда** (`.svgmonotone`) — это `<img>` с зашитым `stroke="#000"`,
-  цветом их не покрасить, поэтому в тёмной теме они инвертируются фильтром.
-  Штатные темы LuCI этого не делают вовсе. Цветные статусные иконки не трогаем:
-  там цвет несёт смысл.
-- **Экран авторизации** сделан по блоку login из shadcn: карточка по центру
-  экрана, подписи над полями, поля и кнопка во всю ширину, разделитель перед
-  кнопкой скрыт. Полотно страницы — `bg-muted`, карточка — `bg-card`, то есть
-  фон светлее карточки (у shadcn именно так, а не наоборот). Затемняющей пелены
-  нет: за модалкой на этой странице ничего нет. Разметку `sysauth.ut` при этом
-  не трогали — только раскладку.
-- **Узкие окна и телефон — разные механизмы.** `mobile.css` шаблон подключает по
-  `max-device-width`, то есть он реагирует на физический экран устройства и при
-  ресайзе окна на десктопе не срабатывает вовсе. Поэтому раскладка шапки и табов
-  для узких окон продублирована в `cascade.css` медиазапросами по ширине
-  вьюпорта (`max-width: 860px` и `720px`). На телефоне оба механизма совпадают
-  по смыслу, конфликта нет.
-- **Мобильный режим.** Шапка выравнивается по центру: имя устройства первой
-  строкой (апстрим его на телефоне прятал), под ним меню, перенесённые пункты
-  тоже остаются центрированными, а индикаторы уезжают отдельной строкой ниже:
-  если прижимать их вправо, они съедают ширину и центровка ломается. Полоса
-  табов на узком экране становится прямоугольной карточкой — пилюля с переносом
-  строк превращается в бесформенное пятно. Таблицы дашборда выведены из
-  карточного режима: подписей `data-title` у них нет, и режим их только ломает.
-- **Ссылки монохромные.** В палитре neutral `--primary` это почти чёрный в
-  светлой теме и почти белый в тёмной — так задумано в shadcn. Нужен цветной
-  акцент: возьмите палитру с ненулевой хромой, код менять не придётся.
-- **`--success` и `--warning`** shadcn не описывает, а LuCI без них не живёт
-  (`.cbi-button-save`, `.alert-message.warning`, uci-дифф) — они объявлены в
-  `src/theme-defaults.css` и переживают замену палитры.
+- **Buttons are pills** (`rounded-full`), the base being the `outline` variant in
+  size `sm`: they live inside table rows, where a filled button on every row is
+  far too loud. Fills are reserved for genuinely primary actions: `Save & Apply`
+  (primary), the `Save` next to it (secondary), `Delete`/`Reset` (destructive
+  outline).
+- **Sections are cards.** `.cbi-section` is an existing LuCI container and the
+  markup was left alone: it just gets a `bg-card` background, a border and
+  `rounded-xl`. The action bar below them is the same kind of card.
+- **The header is not separated from the body**: no border, no fill of its own.
+  Since it is `sticky`, it has a translucent blurred background underneath — only
+  so that content does not show through. Menu items span its full height (that is
+  the hover area), and the highlight is a pill with some margin; the brand has no
+  hover plate.
+- **Submenus stick to the edge of their item** (`top: 100%`) instead of hanging at
+  a fixed 40px as upstream did: otherwise a gap was left between the item and the
+  menu, and the cursor lost hover before reaching the contents.
+- **The geometry is shadcn's.** Fields are `h-9`, radii come from the `--radius`
+  token, the base text size is `text-sm`. The two-column `.cbi-value` layout
+  (180px title) is preserved — the views' layout depends on it.
+- **Gradients and inset shadows are gone.** Focus is `ring-[3px] ring-ring/50`.
+- **Tabs** are a pill-shaped segmented control sized to its content rather than an
+  underline: LuCI tab strips wrap onto several lines, and an underline breaks once
+  it wraps.
+- **Alerts** are a neutral card with a colored accent instead of yellow-red
+  banners. `.ifacebox-head.active` uses `accent`, not `primary`: in the neutral
+  palette primary is a white block.
+- **The dashboard** is drawn by the core's own CSS (`luci-mod-dashboard`), which
+  paints the cards `--background-color-medium` with no border and sets
+  `width: auto` on its tables. In a light palette that produced invisible
+  surfaces, and the device list huddled at the left edge. The theme brings
+  `.dashboard-bg` in line with the same cards the sections use and stretches the
+  device table only — the small key/value tables need width to follow their
+  content. The tag in the selector is deliberate: the core's `custom.css` loads
+  after the theme and would win on equal specificity.
+- **Dashboard icons** (`.svgmonotone`) are `<img>` elements with `stroke="#000"`
+  baked in; they cannot be recolored, so in the dark theme they are inverted with
+  a filter. The stock LuCI themes do not do this at all. Colored status icons are
+  left alone: there the color carries meaning.
+- **The login screen** follows shadcn's login block: a card centred on screen,
+  labels above the fields, full-width fields and button, and the rule before the
+  button hidden. The page canvas is `bg-muted` and the card is `bg-card`, i.e. the
+  background is lighter than the card (which is how shadcn does it, not the other
+  way round). There is no dimming scrim: nothing sits behind the modal on this
+  page. The `sysauth.ut` markup was not touched — only the layout.
+- **Narrow windows and phones are two different mechanisms.** The template links
+  `mobile.css` by `max-device-width`, so it reacts to the device's physical screen
+  and never fires when a desktop window is resized. That is why the header and tab
+  layout for narrow windows is duplicated in `cascade.css` with viewport-width
+  media queries (`max-width: 860px` and `720px`). On a phone both mechanisms mean
+  the same thing, so there is no conflict.
+- **Mobile mode.** The header is centred: the device name on the first line
+  (upstream hid it on phones), the menu below it, wrapped items stay centred as
+  well, and the indicators move to their own row underneath — pushing them right
+  would eat into the width and break the centring. On a narrow screen the tab
+  strip becomes a rectangular card, because a pill that wraps onto several lines
+  turns into a shapeless blob. The dashboard tables are taken out of card mode:
+  they carry no `data-title` labels, and the mode only breaks them.
+- **Links are monochrome.** In the neutral palette `--primary` is nearly black in
+  the light theme and nearly white in the dark one — that is shadcn's intent. If
+  you want a colored accent, take a palette with non-zero chroma; no code changes
+  needed.
+- **`--success` and `--warning`** are not defined by shadcn, but LuCI cannot live
+  without them (`.cbi-button-save`, `.alert-message.warning`, the uci diff) — they
+  are declared in `src/theme-defaults.css` and survive a palette swap.
 
-## Ограничения
+## Limitations
 
-- `oklch()` и `color-mix()` требуют Chrome 111+, Safari 16.4+, Firefox 113+.
-- Собранный `cascade.css` ~80 КБ против 44 КБ у апстрима: `@apply` разворачивает
-  утилиты в объявления, плюс Tailwind добавляет `@supports`-фолбэки для
-  `color-mix()`. Для флеша роутера это приемлемо, но место для оптимизации есть.
-- Фон `.zonebadge[style]` и `.ifacebox-head[style]` приходит инлайновым стилем из
-  `resources/firewall.js`, инлайн бьёт любой класс — эти элементы тема не красит.
+- `oklch()` and `color-mix()` require Chrome 111+, Safari 16.4+, Firefox 113+.
+- The built `cascade.css` is ~80 KB against upstream's 44 KB: `@apply` expands
+  utilities into declarations, and Tailwind adds `@supports` fallbacks for
+  `color-mix()`. That is acceptable for router flash, but there is room to
+  optimise.
+- The background of `.zonebadge[style]` and `.ifacebox-head[style]` arrives as an
+  inline style from `resources/firewall.js`, and inline beats any class — the
+  theme does not paint these elements.
 
-## Стенд
+## Test bench
 
-Внутри контейнера полноценный OpenWrt: procd, netifd, firewall4/nftables, dnsmasq,
-odhcpd, uhttpd и весь LuCI из release-образа плюс `luci-mod-dashboard`.
-Интерфейсы: `docker` (eth0, связь с хостом), `lan` (br-lan + veth, 192.168.1.1/24
-с DHCP), `wan` (veth, 10.10.10.2/24) — чтобы страницы Network и зоны firewall были
-не пустыми.
+Inside the container runs a full OpenWrt: procd, netifd, firewall4/nftables,
+dnsmasq, odhcpd, uhttpd and all of LuCI from the release image plus
+`luci-mod-dashboard`. Interfaces: `docker` (eth0, the link to the host), `lan`
+(br-lan + veth, 192.168.1.1/24 with DHCP), `wan` (veth, 10.10.10.2/24) — so that
+the Network pages and the firewall zones are not empty.
 
-Три вещи, из-за которых стенд выглядит именно так:
+Three things shape the bench the way it is:
 
-- **`platform: linux/aarch64_generic`.** У образов `openwrt/rootfs` в манифесте
-  вместо `linux/arm64` стоит имя цели OpenWrt, без явной platform docker отвечает
-  `no matching manifest`. Для Intel/AMD — `x86_64` в `.env`.
-- **Свой `/etc/config/network` в образе.** Иначе первый boot зовёт
-  `config_generate`, тот заворачивает `eth0` в `br-lan`, и контейнер теряет адрес
-  docker'а вместе с опубликованными портами.
-- **`eth0` отдан netifd** (интерфейс `docker` + одноимённая зона fw4 с
-  `input ACCEPT`). netifd на старте сбрасывает состояние всех устройств, поэтому
-  прятать от него uplink бесполезно: `entrypoint.sh` переносит выданные docker'ом
-  адрес и шлюз в uci до запуска init. Так конфигурация переживает boot, Save & Apply
-  и restart сети из LuCI.
+- **`platform: linux/aarch64_generic`.** The `openwrt/rootfs` images carry the
+  OpenWrt target name in their manifest instead of `linux/arm64`, and without an
+  explicit platform docker answers `no matching manifest`. For Intel/AMD use
+  `x86_64` in `.env`.
+- **A custom `/etc/config/network` in the image.** Otherwise the first boot calls
+  `config_generate`, which wraps `eth0` into `br-lan`, and the container loses its
+  docker address along with the published ports.
+- **`eth0` is handed to netifd** (the `docker` interface plus an fw4 zone of the
+  same name with `input ACCEPT`). netifd resets the state of every device on
+  start, so hiding the uplink from it is pointless: `entrypoint.sh` moves the
+  address and gateway assigned by docker into uci before init starts. That way the
+  configuration survives boot, Save & Apply and a network restart from LuCI.
 
-`privileged: true` нужен для netifd, nftables и ujail (под ним работают dnsmasq и
-ntpd). Стенд локальный и одноразовый; `docker compose down` стирает его состояние.
+`privileged: true` is required by netifd, nftables and ujail (which dnsmasq and
+ntpd run under). The bench is local and disposable; `docker compose down` wipes
+its state.
 
-Симлинки вариантов (`shadcn-light`, `shadcn-dark` → `shadcn`) в контейнере создаёт
-`entrypoint.sh` — в пакете это настоящие симлинки в git, как у апстрима.
+The variant symlinks (`shadcn-light`, `shadcn-dark` → `shadcn`) are created inside
+the container by `entrypoint.sh` — in the package they are real symlinks in git,
+as upstream does it.
 
-## Сборка пакета
+## Building the package
 
 ```sh
-npm run package        # .apk в .sdk-out/
-sh scripts/package-check.sh   # поставить его в чистый OpenWrt и проверить
+npm run package        # .apk in .sdk-out/
+sh scripts/package-check.sh   # install it into a clean OpenWrt and verify
 ```
 
-`scripts/package.sh` собирает пакет в официальном SDK OpenWrt. SDK существует
-только под Linux, поэтому берётся docker-образ `openwrt/sdk:<цель>-<версия>`; в
-его `feeds.conf` фид luci закреплён на том же коммите `e9ebca7`, из которого
-перенесена тема, так что собирается ровно то, что проверялось на стенде. Версию
-и цель можно переопределить:
+`scripts/package.sh` builds the package in the official OpenWrt SDK. The SDK only
+exists for Linux, so the `openwrt/sdk:<target>-<version>` docker image is used; in
+its `feeds.conf` the luci feed is pinned to the same `e9ebca7` commit the theme
+was ported from, so what gets built is exactly what was tested on the bench. The
+version and the target can be overridden:
 
 ```sh
 OPENWRT_VERSION=25.12.5 OPENWRT_SDK_TARGET=x86-64 npm run package
 ```
 
-Перед сборкой скрипт пересобирает CSS: в SDK нет node, и пакет собирается из
-готового артефакта — поэтому собранный CSS и коммитится в репозиторий.
+Before building, the script rebuilds the CSS: the SDK has no node and the package
+is built from a ready artifact — which is why the built CSS is committed to the
+repository. A build from scratch (fresh container, feed update, compile) takes
+about two minutes on an arm64 Mac, where the amd64 SDK image runs under emulation.
 
-`scripts/package-check.sh` ставит получившийся `.apk` в свежий контейнер с голым
-OpenWrt (не в стенд: там тема примонтирована с хоста и симлинки создаёт
-`entrypoint.sh`, так что проверить настоящую установку невозможно) и сверяет:
-все файлы и симлинки на месте, `uci-defaults` зарегистрировали три темы,
-`SubstituteVersion` подставил `?v=` в шаблон, `csstidy` не покалечил CSS,
-LuCI отдаёт тему по HTTP. Затем удаляет пакет и проверяет, что `postrm` вычистил
-записи из uci.
+`scripts/package-check.sh` installs the resulting `.apk` into a fresh container
+with a bare OpenWrt (not into the bench: there the theme is mounted from the host
+and the symlinks are created by `entrypoint.sh`, so a real installation cannot be
+verified) and checks that all files and symlinks are in place, that the minifiers
+left no junk behind, that `uci-defaults` registered the three themes, that
+`SubstituteVersion` substituted `?v=` into the template, that `csstidy` did not
+mangle the CSS, and that LuCI serves a page with the theme linked in. It then
+removes the package and verifies that `postrm` cleaned the entries out of uci.
+Any mismatch makes the script exit non-zero.
 
-Что важно знать про сборку:
+Things worth knowing about the build:
 
-- `include $(TOPDIR)/feeds/luci/luci.mk` вместо апстримного `../../luci.mk`:
-  относительный путь работает только внутри дерева фида, а так пакет собирается
-  откуда угодно.
-- `PKG_VERSION` задан явно: `luci.mk` выводит версию из git-истории фида luci,
-  у отдельного репозитория её нет, и в шаблоны попало бы пустое `?v=`.
-- `LUCI_MINIFY_CSS:=0`: `csstidy`, которым `luci.mk` минифицирует `htdocs/**.css`,
-  не понимает `@layer`, `@property`, `oklch()` и `color-mix()` и молча покалечит
-  CSS — поломка проявится только в собранном пакете, не на стенде.
-- Фидов нужно два: `luci` даёт `luci.mk` и `luci-base`, а `packages` — `lua`, без
-  которого не собирается `lucihttp` (зависимость `luci-base`).
+- `include $(TOPDIR)/feeds/luci/luci.mk` instead of upstream's `../../luci.mk`:
+  the relative path only works inside the feed tree, whereas this way the package
+  builds from anywhere.
+- `PKG_VERSION` is set explicitly: `luci.mk` derives the version from the git
+  history of the luci feed, a standalone repository has none, and an empty `?v=`
+  would end up in the templates.
+- Only the `luci` feed is updated, and **nothing is installed** from it — all we
+  need is `luci.mk`. `./scripts/feeds install luci-base` would drag its whole
+  dependency chain (ucode, rpcd, lucihttp, …) into the build tree and buildroot
+  would compile all of it before our package: two more feed clones (`base`,
+  `packages`) and a failure in `liblucihttp-lua`, which needs `lua.h`. With
+  `luci-base` absent from the tree, `package-metadata.pl` prints
+  `WARNING: ... has a dependency on 'luci-base', which does not exist` and simply
+  drops the build-order edge. The dependency still ends up in the package
+  metadata (`depends: libc luci-base`), which is the only place it matters: the
+  theme is pure data and compiles nothing.
+- `LUCI_MINIFY_CSS:=0`: `csstidy`, which `luci.mk` uses to minify `htdocs/**.css`,
+  does not understand `@layer`, `@property`, `oklch()` or `color-mix()` and would
+  silently mangle the CSS — a breakage that only shows up in the built package,
+  never on the bench.
+- `LUCI_MINIFY_JS:=0`: `jsmin` lives in `luci-base/host`, which is not in the
+  tree. `JsMin` in `luci.mk` redirects into `"$src.o"` **before** checking whether
+  `jsmin` exists, so without it the package would ship empty `*.js.o` files.
 
-Установка темы не переключает интерфейс: `uci-defaults` только регистрирует три
-варианта в `luci.themes`, выбор остаётся за System → Language and Style → Design.
+Installing the theme does not switch the interface: `uci-defaults` only registers
+the three variants in `luci.themes`, and the choice stays with
+System → Language and Style → Design.
