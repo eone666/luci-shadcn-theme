@@ -1,13 +1,14 @@
 #!/bin/sh
-# Точка входа стенда: готовим окружение под procd и применяем настройки из
-# переменных окружения, затем передаём управление init'у.
+# Bench entry point: prepare the environment for procd, apply the settings from
+# the environment variables, then hand control over to init.
 
-# --- сеть -------------------------------------------------------------------
-# netifd при старте сбрасывает состояние всех сетевых устройств, включая
-# eth0, через который работает docker (адрес и default route исчезают, а
-# вместе с ними и опубликованные порты). Поэтому eth0 не прячем от netifd,
-# а наоборот отдаём ему же с теми параметрами, что уже выдал docker: тогда
-# конфигурация переживает и boot, и Save & Apply, и restart сети из LuCI.
+# --- network ----------------------------------------------------------------
+# On start netifd resets the state of every network device, eth0 included —
+# the very one docker works through (its address and default route disappear,
+# and the published ports along with them). So instead of hiding eth0 from
+# netifd we hand it over to netifd with the parameters docker already assigned:
+# that way the configuration survives boot, Save & Apply and a network restart
+# from LuCI.
 adopt_uplink() {
 	cidr=$(ip -4 -o addr show dev eth0 2>/dev/null | awk '{print $4; exit}')
 	[ -n "$cidr" ] || return 0
@@ -20,8 +21,9 @@ adopt_uplink() {
 	[ -n "$gw" ] && uci -q set network.docker.gateway="$gw"
 	uci -q commit network
 
-	# fw4 по умолчанию режет input, а устройство вне зон попадает под
-	# defaults input REJECT — без своей зоны стенд отвечал бы только внутри.
+	# fw4 blocks input by default, and a device outside every zone falls under
+	# defaults input REJECT — without its own zone the bench would only answer
+	# from inside.
 	uci -q set firewall.docker=zone
 	uci -q set firewall.docker.name='docker'
 	uci -q set firewall.docker.input='ACCEPT'
@@ -31,16 +33,17 @@ adopt_uplink() {
 	uci -q add_list firewall.docker.network='docker'
 	uci -q commit firewall
 
-	# DHCP-сервер на сети docker'а не нужен
+	# no DHCP server is needed on the docker network
 	uci -q set dhcp.docker=dhcp
 	uci -q set dhcp.docker.interface='docker'
 	uci -q set dhcp.docker.ignore='1'
 	uci -q commit dhcp
 }
 
-# Порты для br-lan/br-wan: veth есть в любом ядре (docker сам на них живёт),
-# а kmod-dummy из фидов не загрузится — ядро здесь хостовое. Мост без портов
-# netifd не поднимает, поэтому без этой пары страницы Network пустые.
+# Ports for br-lan/br-wan: veth exists in every kernel (docker itself runs on
+# it), whereas kmod-dummy from the feeds would not load — the kernel here is
+# the host's. netifd does not bring up a bridge with no ports, so without this
+# pair the Network pages are empty.
 ensure_veth() {
 	ip link show "$1" >/dev/null 2>&1 || ip link add "$1" type veth peer name "$1p"
 	ip link set "$1" up
@@ -56,9 +59,10 @@ if [ -n "$ROOT_PASSWORD" ]; then
 	printf '%s\n%s\n' "$ROOT_PASSWORD" "$ROOT_PASSWORD" | passwd root >/dev/null 2>&1
 fi
 
-# Симлинки вариантов темы — то же, что делает пакет: shadcn-dark и shadcn-light
-# это тот же каталог, режим выбирается именем (см. darkpref в header.ut).
-# В контейнере их создаём здесь, потому что примонтирован только сам shadcn.
+# Theme variant symlinks — the same thing the package does: shadcn-dark and
+# shadcn-light are the same directory, the mode is picked by the name (see
+# darkpref in header.ut). In the container they are created here, because only
+# shadcn itself is mounted.
 for variant in light dark; do
 	[ -e "/www/luci-static/shadcn-$variant" ] || \
 		ln -s shadcn "/www/luci-static/shadcn-$variant"
@@ -66,13 +70,13 @@ for variant in light dark; do
 		ln -s shadcn "/usr/share/ucode/luci/template/themes/shadcn-$variant"
 done
 
-# themes.<Name> — пункты в System / Language and Style / Design
+# themes.<Name> — the entries under System / Language and Style / Design
 uci -q set luci.themes.Shadcn='/luci-static/shadcn'
 uci -q set luci.themes.ShadcnLight='/luci-static/shadcn-light'
 uci -q set luci.themes.ShadcnDark='/luci-static/shadcn-dark'
 
 if [ -n "$LUCI_THEME" ]; then
-	# mediaurlbase — активная тема
+	# mediaurlbase — the active theme
 	uci -q get "luci.themes.$LUCI_THEME" >/dev/null 2>&1 || \
 		uci -q set "luci.themes.$LUCI_THEME=/luci-static/$LUCI_THEME"
 	uci -q set "luci.main.mediaurlbase=/luci-static/$LUCI_THEME"

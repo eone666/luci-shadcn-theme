@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /*
- * Осмотр вычисленных стилей на живой странице стенда — чтобы не гадать,
- * какое правило победило в каскаде.
+ * Inspect computed styles on a live page of the test bench — so there is no
+ * guessing about which rule won the cascade.
  *
- *   node scripts/inspect.mjs <страница> <селектор> [ещё селекторы...]
+ *   node scripts/inspect.mjs <page> <selector> [more selectors...]
  *   node scripts/inspect.mjs system 'input[type=checkbox]' '.tabs > li'
- *   node scripts/inspect.mjs system '.cbi-value input' --shot   # + скриншот элемента
+ *   node scripts/inspect.mjs system '.cbi-value input' --shot   # + element shot
  *
- * Имена страниц — как в scripts/shots.mjs.
+ * Page names are the same as in scripts/shots.mjs.
  */
 import { chromium } from 'playwright-core';
 import { mkdirSync, readdirSync } from 'node:fs';
@@ -31,7 +31,7 @@ const PAGES = {
 	routes: '/cgi-bin/luci/admin/status/routes',
 };
 
-/* Свойства, из-за которых обычно всё и ломается. */
+/* The properties that usually turn out to be the culprits. */
 const PROPS = [
 	'display', 'width', 'height', 'padding', 'margin', 'border', 'border-radius',
 	'background-color', 'background-image', 'color', 'box-shadow', 'font-size',
@@ -49,7 +49,7 @@ const args = process.argv.slice(2);
 const shot = args.includes('--shot');
 const [pageName, ...selectors] = args.filter((a) => !a.startsWith('--'));
 if (!pageName || !selectors.length) {
-	console.error('нужны страница и хотя бы один селектор');
+	console.error('a page and at least one selector are required');
 	process.exit(1);
 }
 
@@ -84,7 +84,7 @@ for (const sel of selectors) {
 		for (const p of props) out.styles[p] = cs.getPropertyValue(p);
 		out.classes = el.className;
 		out.tag = el.tagName.toLowerCase();
-		// псевдоэлементы тоже интересны: LuCI рисует ими галочки и стрелки
+		// pseudo-elements matter too: LuCI draws check marks and arrows with them
 		for (const pseudo of ['::before', '::after']) {
 			const ps = getComputedStyle(el, pseudo);
 			if (ps.content && ps.content !== 'none') {
@@ -101,10 +101,10 @@ for (const sel of selectors) {
 
 	console.log(`\n=== ${sel} ===`);
 	if (!data) {
-		console.log('  не найден на странице');
+		console.log('  not found on the page');
 		continue;
 	}
-	console.log(`  <${data.tag}> class="${data.classes}"  бокс ${data.box}`);
+	console.log(`  <${data.tag}> class="${data.classes}"  box ${data.box}`);
 	for (const [k, v] of Object.entries(data.styles))
 		if (v && v !== 'none' && v !== 'auto' && v !== 'normal') console.log(`  ${k}: ${v}`);
 	for (const pseudo of ['::before', '::after'])
@@ -115,7 +115,7 @@ for (const sel of selectors) {
 		const name = sel.replace(/[^a-z0-9]+/gi, '-').slice(0, 40);
 		await page.locator(sel).first().screenshot({
 			path: resolve(root, 'shots', `el-${name}.png`),
-		}).catch((e) => console.log(`  скриншот не вышел: ${e.message.split('\n')[0]}`));
+		}).catch((e) => console.log(`  screenshot failed: ${e.message.split('\n')[0]}`));
 	}
 }
 

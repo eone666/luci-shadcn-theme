@@ -1,10 +1,11 @@
 /*
- * Сетевые бейджи: ifacebox (карточка интерфейса), ifacebadge (устройство),
- * zonebadge (зона firewall), таблица статуса сети.
+ * Network badges: ifacebox (interface card), ifacebadge (device), zonebadge
+ * (firewall zone) and the network status table.
  *
- * Важное ограничение: фон .zonebadge[style] и .ifacebox-head[style] приходит
- * инлайновым стилем из resources/firewall.js (--zone-color-rgb), инлайн бьёт
- * любой класс — поэтому фон этих элементов мы не красим вообще.
+ * An important constraint: the background of .zonebadge[style] and
+ * .ifacebox-head[style] arrives as an inline style from resources/firewall.js
+ * (--zone-color-rgb), and inline styles beat any class — so we do not paint
+ * the background of these elements at all.
  */
 
 .ifacebox {
@@ -26,16 +27,16 @@
 	text-shadow: none;
 }
 
-/* Апстрим красил активную голову в акцент; в палитре neutral это белый блок,
-   поэтому берём нейтральную «выделенную» поверхность. */
+/* Upstream painted the active head with the accent; in the neutral palette
+   that is a white block, so a neutral "highlighted" surface is used. */
 .ifacebox .ifacebox-head.active {
 	@apply bg-accent text-accent-foreground;
 }
 
-/* Цвет зоны приходит инлайном из firewall.js, поэтому перебить его можно только
-   через !important. Вместо градиента апстрима — плоская подложка: цвет зоны
-   подмешан в поверхность карточки, так он остаётся узнаваемым, но не спорит с
-   остальной темой. */
+/* The zone colour arrives inline from firewall.js, so !important is the only
+   way to override it. Instead of upstream's gradient this is a flat surface:
+   the zone colour is mixed into the card surface, so it stays recognisable
+   without fighting the rest of the theme. */
 [data-darkmode="true"] .zonebadge[style],
 [data-darkmode="true"] .ifacebox-head[style] {
 	background: color-mix(in oklab, rgb(var(--zone-color-rgb)) 26%, var(--card)) !important;
@@ -46,11 +47,12 @@
 	background: color-mix(in oklab, rgb(var(--zone-color-rgb)) 55%, var(--card)) !important;
 }
 
-/* Иконки устройств — это <img> с готовым SVG внутри (ethernet.svg и родня),
-   покрасить их нельзя. В силуэт превращать нельзя тоже: это заливные
-   иллюстрации, а не линейные глифы, и brightness(0) даёт сплошное пятно.
-   Поэтому просто обесцвечиваем — форма читается, а синева из 2000-х уходит
-   и не спорит с монохромной палитрой. */
+/* Device icons are <img> elements with a ready-made SVG inside (ethernet.svg
+   and friends), so they cannot be recoloured. Turning them into silhouettes
+   is not an option either: they are filled illustrations, not line glyphs,
+   and brightness(0) would give a solid blob. So they are simply desaturated —
+   the shape stays readable while the 2000s-era blue is gone and no longer
+   clashes with the monochrome palette. */
 .ifacebox img,
 .ifacebadge img {
 	filter: grayscale(1) opacity(.8);
@@ -126,7 +128,7 @@
 	margin: 0 .125em;
 }
 
-/* --- зоны firewall -------------------------------------------------------- */
+/* --- firewall zones ------------------------------------------------------- */
 
 .zonebadge {
 	@apply inline-block whitespace-nowrap rounded-md px-1 py-0.5 text-foreground;
@@ -150,7 +152,7 @@
 	@apply border border-dashed border-border text-xs italic text-muted-foreground;
 }
 
-/* фон здесь наследуется от цвета зоны — inherit трогать нельзя */
+/* the background here is inherited from the zone colour — do not touch inherit */
 .zonebadge .cbi-tooltip {
 	@apply pointer-events-none rounded-md p-px shadow-md;
 	background: inherit;

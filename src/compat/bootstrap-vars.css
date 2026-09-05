@@ -1,40 +1,43 @@
 /*
- * Слой совместимости: переменные luci-theme-bootstrap -> токены shadcn.
+ * Compatibility layer: luci-theme-bootstrap variables -> shadcn tokens.
  *
- * Апстрим строил палитру покомпонентно (H/S/L + знак дельты) и считал оттенки
- * через calc()/hsl(). Здесь те же имена получают значения из токенов shadcn.
+ * Upstream built its palette component-wise (H/S/L plus a delta sign) and
+ * derived shades with calc()/hsl(). Here the very same names take their values
+ * from the shadcn tokens instead.
  *
- * Файл ПОСТОЯННЫЙ, а не временный: на эти переменные опирается не только наш
- * унаследованный CSS, но и сторонние вьюхи ядра. Проверенный потребитель —
- * /www/luci-static/resources/view/dashboard/css/custom.css из luci-mod-dashboard:
+ * This file is PERMANENT, not temporary: these variables are relied on not
+ * only by our inherited CSS but also by third-party core views. A confirmed
+ * consumer is /www/luci-static/resources/view/dashboard/css/custom.css from
+ * luci-mod-dashboard:
  *   .Dashboard { color: var(--text-color-high, #212529) !important }
  *   .Dashboard hr { border-top: 1px solid var(--border-color-medium, rgba(0,0,0,.1)) }
- * Без этих переменных дашборд молча уедет в свои светлые фолбэки на тёмной теме.
- * Тот же приём позволяет переносить "длинный хвост" правил дословно.
+ * Without these variables the dashboard silently falls back to its light
+ * values on a dark theme. The same trick lets the "long tail" of rules be
+ * ported verbatim.
  *
- * Чего здесь принципиально НЕТ — H/S/L-триплетов (--border-color-low-hsl и т.п.):
- * oklch-токен нельзя разложить в компоненты HSL. Все их использования переписаны
- * на color-mix() в src/legacy/.
+ * What is deliberately NOT here are the H/S/L triplets (--border-color-low-hsl
+ * and friends): an oklch token cannot be decomposed into HSL components. All
+ * of their uses were rewritten with color-mix() in src/legacy/.
  */
 
 :root {
-	/* фон: high — полотно, medium — карточки/панели, low — приглушённые зоны */
+	/* background: high — canvas, medium — cards/panels, low — muted areas */
 	--background-color-high: var(--background);
 	--background-color-medium: var(--card);
 	--background-color-low: var(--muted);
 
-	/* текст: highest — заголовки, high — основной, medium — описания, low — плейсхолдеры */
+	/* text: highest — headings, high — body, medium — descriptions, low — placeholders */
 	--text-color-highest: var(--foreground);
 	--text-color-high: var(--foreground);
 	--text-color-medium: var(--muted-foreground);
 	--text-color-low: color-mix(in oklab, var(--muted-foreground) 70%, var(--background));
 
-	/* границы: у shadcn один --border, разделение на три уровня даём прозрачностью */
+	/* borders: shadcn has a single --border, the three levels come from alpha */
 	--border-color-high: var(--border);
 	--border-color-medium: var(--border);
 	--border-color-low: color-mix(in oklab, var(--border) 60%, transparent);
 
-	/* акцент: medium/low в апстриме — состояния hover/active */
+	/* accent: upstream's medium/low are the hover/active states */
 	--primary-color-high: var(--primary);
 	--primary-color-medium: color-mix(in oklab, var(--primary) 90%, var(--background));
 	--primary-color-low: color-mix(in oklab, var(--primary) 80%, var(--background));

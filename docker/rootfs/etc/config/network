@@ -7,8 +7,8 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix 'fdca:1dea:beef::/48'
 
-# lan0/wan0 — veth-заглушки, их создаёт entrypoint. Интерфейс 'docker'
-# (eth0) добавляется там же на этапе старта.
+# lan0/wan0 are veth stubs created by the entrypoint. The 'docker' interface
+# (eth0) is added there as well, at startup.
 config device
 	option name 'br-lan'
 	option type 'bridge'
@@ -26,4 +26,4 @@ config interface 'wan'
 	option proto 'static'
 	option ipaddr '10.10.10.2'
 	option netmask '255.255.255.0'
-	# gateway намеренно не задан: default route остаётся за docker'ом
+	# gateway is deliberately unset: the default route stays with docker

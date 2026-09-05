@@ -1,9 +1,9 @@
 /*
- * Reset. Перенесено из luci-theme-bootstrap: preflight Tailwind не подключаем,
- * потому что в v4 он ставит img/svg/video{display:block} (ломает .ifacebadge и
- * .zonebadge, где иконки идут инлайн с текстом) и обнуляет списки, на которых
- * держатся .uci-change-list и .cbi-section-error. Вьюхи LuCI написаны под
- * именно этот reset.
+ * Reset. Carried over from luci-theme-bootstrap: we do not pull in Tailwind's
+ * preflight, because in v4 it sets img/svg/video{display:block} (breaking
+ * .ifacebadge and .zonebadge, where icons sit inline with the text) and strips
+ * the list styling that .uci-change-list and .cbi-section-error depend on.
+ * LuCI's views are written against exactly this reset.
  */
 
 * {

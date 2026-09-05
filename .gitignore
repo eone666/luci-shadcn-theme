@@ -1,12 +1,12 @@
-# сборочный мусор
+# build artifacts
 node_modules/
 .build/
 .sdk-out/
 src/generated/
 *.bak
 
-# скриншоты стенда — рабочий материал, не часть темы
+# test bench screenshots — working material, not part of the theme
 shots/
 
-# локальные настройки стенда; образец лежит в .env.example
+# local bench settings; the sample lives in .env.example
 .env

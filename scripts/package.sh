@@ -1,16 +1,16 @@
 #!/bin/sh
-# Сборка устанавливаемого пакета темы в официальном SDK OpenWrt.
+# Build the installable theme package with the official OpenWrt SDK.
 #
-# SDK существует только под Linux, поэтому берём официальный docker-образ
-# openwrt/sdk нужной версии и цели. В его feeds.conf фид luci закреплён на том
-# же коммите, из которого перенесена тема, так что собирается ровно то, что
-# проверялось на стенде.
+# The SDK only exists for Linux, so we use the official openwrt/sdk docker image
+# for the wanted version and target. Its feeds.conf pins the luci feed to the
+# very commit the theme was ported from, so what is built is exactly what was
+# tested on the testbed.
 #
 #   ./scripts/package.sh                     # 25.12.4, armsr-armv8 (aarch64_generic)
 #   OPENWRT_VERSION=25.12.5 ./scripts/package.sh
 #   OPENWRT_SDK_TARGET=x86-64 ./scripts/package.sh
 #
-# Результат: .sdk-out/luci-theme-shadcn-*.apk
+# Result: .sdk-out/luci-theme-shadcn-*.apk
 set -eu
 
 VERSION="${OPENWRT_VERSION:-25.12.4}"
@@ -19,41 +19,64 @@ IMAGE="openwrt/sdk:${TARGET}-${VERSION}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/.sdk-out"
 
-# Пакет собирается из готового CSS, поэтому сначала пересобираем его: в SDK
-# нет node, и артефакт должен быть свежим.
-echo "== пересборка CSS =="
+# The package ships prebuilt CSS (there is no node inside the SDK), so rebuild it
+# first to make sure the artifact is current.
+echo "== rebuilding CSS =="
 ( cd "$ROOT" && npm run build >/dev/null )
 
 mkdir -p "$OUT"
 rm -f "$OUT"/*.apk "$OUT"/*.ipk 2>/dev/null || true
 
-cat > "$OUT/.build-inside.sh" <<'INNER'
-set -eu
-cp -r /pkg /builder/package/luci-theme-shadcn
-
-# luci даёт luci.mk и luci-base; packages нужен ради lua, без него не собирается
-# lucihttp (зависимость luci-base) — падает на отсутствующем lua.h.
-echo "== обновляю фиды =="
-./scripts/feeds update packages luci >/dev/null 2>&1
-./scripts/feeds install luci-base >/dev/null 2>&1
-
-echo "== defconfig =="
-make defconfig >/dev/null 2>&1
-
-echo "== сборка =="
-make package/luci-theme-shadcn/compile -j"$(nproc)" \
-    || make package/luci-theme-shadcn/compile V=s
-
-find bin -name 'luci-theme-shadcn*' -exec cp {} /out/ \;
-INNER
-
+# The build recipe, fed to the container over stdin so nothing is left on disk.
+#
+# Only the luci feed is updated, and nothing is installed from it: luci.mk is all
+# we need. Do NOT `feeds install luci-base` -- that would put luci-base and its
+# whole dependency chain (ucode, rpcd, lucihttp, ...) into the build tree, and
+# buildroot would then compile all of it before our package. That chain also
+# needs the base and packages feeds (two more git clones) and fails on
+# liblucihttp-lua unless lua is installed as well.
+#
+# With luci-base absent from the tree, scripts/package-metadata.pl prints
+#   WARNING: Makefile '...' has a dependency on 'luci-base', which does not exist
+# and simply drops the build-order edge. The dependency itself still lands in the
+# package metadata (apk mkpkg --info "depends:libc luci-base"), which is the only
+# place it matters: the theme is pure data and compiles nothing.
 echo "== SDK: $IMAGE =="
-docker run --rm \
+docker run --rm -i \
+	--platform linux/amd64 \
 	-v "$ROOT/luci-theme-shadcn:/pkg:ro" \
 	-v "$OUT:/out" \
-	"$IMAGE" sh /out/.build-inside.sh
+	"$IMAGE" sh -s <<'INNER'
+set -eu
+cd /builder
 
-rm -f "$OUT/.build-inside.sh"
+echo "== updating the luci feed (luci.mk) =="
+./scripts/feeds update luci >/dev/null 2>&1
+
+# cp -a keeps the theme-variant symlinks (shadcn-dark/shadcn-light -> shadcn) as
+# symlinks; the package is expected to install them as such.
+rm -rf package/luci-theme-shadcn
+cp -a /pkg package/luci-theme-shadcn
+
+# Select the package. `make package/<name>/compile` alone would build it, but the
+# .apk is only emitted for packages enabled in .config.
+echo "== defconfig =="
+grep -q '^CONFIG_PACKAGE_luci-theme-shadcn=' .config 2>/dev/null \
+	|| echo CONFIG_PACKAGE_luci-theme-shadcn=y >> .config
+make defconfig >/dev/null 2>&1
+
+echo "== building =="
+make package/luci-theme-shadcn/compile -j"$(nproc)" >/tmp/build.log 2>&1 || {
+	echo "-- build failed, last 60 lines --"
+	tail -60 /tmp/build.log
+	exit 1
+}
+
+found=$(find bin -name 'luci-theme-shadcn*.apk' -o -name 'luci-theme-shadcn*.ipk')
+[ -n "$found" ] || { echo "SDK produced no package"; tail -40 /tmp/build.log; exit 1; }
+for f in $found; do cp "$f" /out/; done
+INNER
+
 echo
-echo "== готово =="
+echo "== done =="
 ls -lh "$OUT"

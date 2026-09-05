@@ -1,26 +1,27 @@
 /*
- * Шапка, главное меню, дропдауны меню, breadcrumb и футер.
+ * Header, main menu, menu dropdowns, breadcrumb and footer.
  *
- * У апстрима шапка — тёмная градиентная панель с двумя десятками хардкод-цветов
- * (#333/#222/#bfbfbf/#999/#808080...). В shadcn для «хрома приложения» есть
- * отдельное семейство токенов --sidebar-*, оно и используется: в светлой теме
- * панель почти белая, в тёмной — на тон светлее полотна.
+ * Upstream's header is a dark gradient panel with a couple of dozen hardcoded
+ * colours (#333/#222/#bfbfbf/#999/#808080...). shadcn has a dedicated token
+ * family for "application chrome", --sidebar-*, and that is what is used here:
+ * in the light theme the panel is nearly white, in the dark one a shade
+ * lighter than the canvas.
  *
- * Раскрытие подменю у апстрима сделано без JS (левый вынос за экран плюс
- * .dropdown:hover), поэтому механика left:-9999px сохранена как есть.
+ * Upstream opens submenus without JS (parking them off-screen to the left plus
+ * .dropdown:hover), so the left:-9999px mechanic is kept as is.
  */
 
 header {
-	/* Шапка не отделена от тела — как на сайте shadcn: ни рамки, ни своей
-	   заливки. Полупрозрачный фон с размытием нужен только для того, чтобы
-	   контент не просвечивал сквозь неё при скролле (шапка sticky).
-	   items-stretch + min-h: пункты меню тянутся на всю высоту, поэтому у них
-	   крупная зона наведения, а подменю прилипает к нижней кромке
-	   (см. top:100% ниже) — иначе курсор теряет hover в зазоре. */
+	/* The header is not separated from the body — as on the shadcn site: no
+	   border, no fill of its own. The translucent blurred background exists
+	   only to keep content from showing through while scrolling (the header is
+	   sticky). items-stretch + min-h: menu items span the full height, which
+	   gives them a large hover area and lets submenus stick to the bottom edge
+	   (see top:100% below) — otherwise the cursor loses hover in the gap. */
 	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
 	       bg-background/80 text-foreground backdrop-blur-md;
 	margin: -5px -5px 15px -5px;
-	/* избыточные свойства ниже обходят баг csstidy */
+	/* the redundant properties below work around a csstidy bug */
 	padding-left: calc((100% - 1180px) / 2);
 	padding-right: calc((100% - 1180px) / 2);
 }
@@ -30,8 +31,8 @@ header a {
 	text-shadow: none;
 }
 
-/* У логотипа ховер без плашки: у апстрима она была во всю высоту шапки и с
-   прямыми углами, что рядом с пилюлями пунктов смотрится чужеродно. */
+/* The brand has no hover plate: upstream's spanned the full header height with
+   square corners, which looks alien next to the pill-shaped menu items. */
 header .brand:hover {
 	@apply bg-transparent text-foreground no-underline;
 }
@@ -55,11 +56,12 @@ header p {
 	line-height: 40px;
 }
 
-/* --- главное меню ---------------------------------------------------------- */
+/* --- main menu ------------------------------------------------------------- */
 
 .nav {
-	/* mx-0/mb-0 гасят отступы общего правила ul из типографики: иначе
-	   margin-bottom режет высоту полосы, и пункты не тянутся на всю шапку */
+	/* mx-0/mb-0 cancel the margins from the generic ul rule in typography:
+	   otherwise margin-bottom eats into the strip height and the items no
+	   longer span the whole header */
 	@apply relative left-0 mx-0 mb-0 mr-2.5 flex items-stretch;
 	float: none;
 }
@@ -70,8 +72,9 @@ header p {
 }
 
 .nav a {
-	/* li тянется на всю высоту шапки (это зона наведения и точка привязки
-	   подменю), а сама ссылка — «пилюля» с вертикальным отступом */
+	/* the li spans the full header height (it is both the hover area and the
+	   anchor for the submenu), while the link itself is a "pill" with vertical
+	   margin */
 	@apply my-1.5 flex items-center rounded-md px-3 text-sm font-medium no-underline;
 	float: none;
 }
@@ -88,7 +91,7 @@ header p {
 	@apply bg-accent;
 }
 
-/* --- дропдаун меню: рецепт DropdownMenuContent ----------------------------- */
+/* --- menu dropdowns: the DropdownMenuContent recipe ------------------------ */
 
 .nav .dropdown-menu {
 	@apply bg-popover;
@@ -130,10 +133,10 @@ a.menu:after {
 }
 
 .dropdown-menu {
-	/* mx-0/mb-0 гасят отступы общего правила для ul из типографики: без них
-	   подменю уезжало на 24px вправо.
-	   top:100% вместо фиксированных 40px апстрима — подменю прилипает к
-	   кромке пункта, между ними нет зазора, и hover не теряется. */
+	/* mx-0/mb-0 cancel the margins from the generic ul rule in typography:
+	   without them the submenu drifted 24px to the right.
+	   top:100% instead of upstream's fixed 40px — the submenu sticks to the
+	   edge of its item, leaving no gap where hover could be lost. */
 	@apply absolute z-[900] mx-0 mb-0 min-w-[8rem] rounded-xl border border-border
 	       bg-popover p-1.5 text-popover-foreground shadow-lg;
 	float: none;
@@ -160,7 +163,7 @@ a.menu:after {
 	background-image: none;
 }
 
-/* вынос за экран и есть механика показа — трогать нельзя */
+/* parking it off-screen IS the show/hide mechanic — do not touch */
 .dropdown:hover ul.dropdown-menu {
 	left: 0;
 }
@@ -175,10 +178,10 @@ a.menu:after {
 	@apply relative;
 }
 
-/* --- breadcrumb и футер --------------------------------------------------- */
+/* --- breadcrumb and footer ------------------------------------------------ */
 
 .breadcrumb {
-	/* mx-0 — по той же причине, что и у табов: это ul */
+	/* mx-0 for the same reason as on the tabs: this is a ul */
 	@apply mx-0 mb-4 flex flex-none rounded-xl border border-border bg-card px-3 py-2
 	       text-sm;
 }
@@ -197,11 +200,18 @@ a.menu:after {
 }
 
 footer {
-	@apply mt-auto flex flex-wrap items-baseline justify-between border-t border-border
-	       pt-4 text-xs text-muted-foreground;
-	/* избыточные свойства ниже обходят баг csstidy */
-	padding-left: calc((100% - 940px) / 2);
-	padding-right: calc((100% - 940px) / 2);
+	/* Upstream centred the footer with padding sized for a 940px strip, but our
+	   page container is 1180px — the text ended up shifted to the left. We centre
+	   it as a column instead: the caption and the mode switch both land in the
+	   middle, however many of them there are. Some breathing room at the bottom
+	   is needed, or the footer sticks to the edge. */
+	@apply flex flex-col items-center gap-2 border-t border-border px-4 pb-8 pt-6
+	       text-center text-xs text-muted-foreground;
+	/* auto pushes the footer to the bottom of the screen on short pages; the gap
+	   before the separator comes from the content margin (see #maincontent
+	   below), because on long pages auto collapses to zero and the footer would
+	   butt against the text */
+	margin-top: auto;
 }
 
 footer a {
@@ -209,19 +219,20 @@ footer a {
 }
 
 footer span {
-	@apply mb-4;
+	@apply mb-0;
 }
 
 footer ul.breadcrumb {
-	@apply ml-auto;
+	/* ml-auto is no longer needed: the footer centres its content itself */
+	@apply ml-0;
 }
 
-/* --- узкое окно ------------------------------------------------------------
- * mobile.css подключён шаблоном по `max-device-width`, то есть реагирует на
- * физический экран устройства, а не на размер окна: при ресайзе на десктопе он
- * не срабатывает вовсе. Поэтому раскладку шапки для узких окон задаём здесь,
- * по ширине вьюпорта. На телефоне обе медиазапроса совпадают по смыслу, так
- * что конфликта нет.
+/* --- narrow window ---------------------------------------------------------
+ * The template links mobile.css with `max-device-width`, so it reacts to the
+ * device's physical screen rather than the window size: resizing a desktop
+ * window never triggers it. The header layout for narrow windows is therefore
+ * defined here, by viewport width. On a phone both media queries mean the same
+ * thing, so there is no conflict.
  */
 @media (max-width: 860px) {
 	header {
@@ -247,8 +258,13 @@ footer ul.breadcrumb {
 		flex: 0 0 auto;
 	}
 
-	/* подменю привязано к пункту, а не к фиксированной высоте шапки */
+	/* the submenu is anchored to its item, not to a fixed header height */
 	.dropdown-menu {
 		top: 100%;
 	}
+}
+
+/* Breathing room between the content and the footer at any page length. */
+#maincontent {
+	@apply mb-10;
 }

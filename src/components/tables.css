@@ -1,9 +1,9 @@
 /*
- * Таблицы. Ядро LuCI выдаёт их в двух видах: настоящие <table> и div-таблицы
- * (.table/.tr/.th/.td с display:table*). Из рецепта shadcn Table берём
- * типографику, паддинги и hover, но бордер-модель оставляем апстримную:
- * на display:table-row граница не рисуется, поэтому линии идут border-top
- * по ячейкам.
+ * Tables. LuCI core emits them in two shapes: real <table> elements and div
+ * tables (.table/.tr/.th/.td with display:table*). Typography, padding and the
+ * hover state come from the shadcn Table recipe, but the border model stays
+ * upstream's: display:table-row does not paint a border, so the rules are
+ * drawn as border-top on the cells.
  */
 
 .tr { display: table-row; }
@@ -50,7 +50,7 @@
 	border-width: 0 0 2px 0;
 }
 
-/* --- cbi-секции в виде таблицы -------------------------------------------- */
+/* --- cbi sections rendered as tables -------------------------------------- */
 
 .cbi-section-table .tr:hover .td,
 .cbi-section-table .tr:hover .th,
@@ -95,8 +95,8 @@
 	width: inherit;
 }
 
-/* Колонка действий: ui.js вызывает stabilizeActionColumnWidth() и опирается на
-   эту раскладку — меняем только отступы. */
+/* Actions column: ui.js calls stabilizeActionColumnWidth() and depends on this
+   layout — only the spacing is changed. */
 .td.cbi-section-actions {
 	@apply w-[15%] text-right align-middle;
 }
@@ -129,7 +129,7 @@ th[data-sortable-row] { @apply cursor-pointer; }
 th[data-sort-direction="asc"]::after { content: "\a0\25b2"; }
 th[data-sort-direction="desc"]::after { content: "\a0\25bc"; }
 
-/* --- описание поля и ошибки секции ---------------------------------------- */
+/* --- field description and section errors --------------------------------- */
 
 .cbi-value-description {
 	@apply relative ml-5 mt-1 text-sm text-muted-foreground;
@@ -150,7 +150,7 @@ th[data-sort-direction="desc"]::after { content: "\a0\25bc"; }
 	-webkit-mask-size: cover;
 }
 
-/* Рецепт Alert destructive вместо жёлто-красной плашки апстрима. */
+/* The Alert destructive recipe instead of upstream's yellow-red banner. */
 .cbi-section-error {
 	@apply mb-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm
 	       text-destructive;
@@ -162,10 +162,10 @@ th[data-sort-direction="desc"]::after { content: "\a0\25bc"; }
 	@apply font-medium text-destructive;
 }
 
-/* --- секции как карточки --------------------------------------------------
- * Разметку не трогаем: .cbi-section — существующий контейнер, которым LuCI и
- * так оборачивает каждый блок настроек. Дочерний комбинатор от .cbi-map важен,
- * иначе карточка появится и у вложенных секций внутри .cbi-value.
+/* --- sections as cards -----------------------------------------------------
+ * The markup is left alone: .cbi-section is the container LuCI already wraps
+ * every settings block in. The child combinator from .cbi-map matters, or the
+ * card would also appear on nested sections inside .cbi-value.
  */
 
 .cbi-map > .cbi-section {

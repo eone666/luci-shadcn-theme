@@ -1,7 +1,7 @@
 /*
- * Файловый браузер (System -> Backup, загрузка прошивки).
- * Раскрытие сделано переходом height/opacity — механику сохраняем,
- * поверхность берём из рецепта DropdownMenuContent.
+ * File browser (System -> Backup, firmware upload).
+ * Expansion is done with a height/opacity transition — that mechanic is kept,
+ * while the surface comes from the DropdownMenuContent recipe.
  */
 
 .cbi-filebrowser {
@@ -76,7 +76,7 @@
 	@apply w-full;
 }
 
-/* --- список клиентов Wi-Fi ------------------------------------------------ */
+/* --- Wi-Fi client list ---------------------------------------------------- */
 
 .assoclist .ifacebadge {
 	@apply flex flex-col items-center text-center;

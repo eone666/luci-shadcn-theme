@@ -1,8 +1,8 @@
 /*
- * UIDynamicList: список значений с перетаскиванием и кнопкой удаления,
- * нарисованной псевдоэлементом ::after. Логику drag-and-drop
- * (pointer-events, user-select, cursor) переносим как есть — на неё
- * опирается ui.js.
+ * UIDynamicList: a list of values with drag-and-drop reordering and a remove
+ * button drawn by the ::after pseudo-element. The drag-and-drop mechanics
+ * (pointer-events, user-select, cursor) are carried over as is, because ui.js
+ * relies on them.
  */
 
 .cbi-dynlist {
@@ -12,9 +12,9 @@
 .cbi-dynlist > .item {
 	@apply relative mb-1 overflow-hidden rounded-lg border border-input bg-transparent
 	       py-1.5 pl-2 pr-8 text-sm text-foreground shadow-xs dark:bg-input/30;
-	pointer-events: auto;   /* нужно для drag-and-drop */
+	pointer-events: auto;   /* required for drag-and-drop */
 	cursor: move;
-	user-select: text;      /* выделение текста при перетаскивании */
+	user-select: text;      /* keep text selectable while dragging */
 	word-break: break-all;
 }
 
@@ -25,18 +25,18 @@
 	pointer-events: auto;
 }
 
-/* индикатор места вставки при drag-and-drop */
+/* drop-position indicator during drag-and-drop */
 .cbi-dynlist > .item.drag-over {
 	@apply border-t-primary;
 	border-top-width: 2px;
 }
 
-/* перетаскиваемый элемент делаем полупрозрачным */
+/* the item being dragged is made semi-transparent */
 .cbi-dynlist > .item.dragging {
 	@apply opacity-50;
 }
 
-/* чтобы курсор не менялся над span внутри элемента */
+/* keep the cursor from changing over the span inside the item */
 .cbi-dynlist > .item > span {
 	@apply pointer-events-none;
 }

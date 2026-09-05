@@ -1,7 +1,7 @@
 /*
- * Типографика. Шкала переведена на шкалу shadcn (text-sm как база, заголовки
- * font-semibold), геометрия строк LuCI сохранена там, где на неё опирается
- * вёрстка таблиц и описаний.
+ * Typography. The scale is moved onto shadcn's (text-sm as the base, headings
+ * font-semibold); LuCI's line geometry is kept wherever the layout of tables
+ * and descriptions relies on it.
  */
 
 p,

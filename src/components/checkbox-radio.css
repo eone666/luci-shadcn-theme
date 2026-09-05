@@ -1,9 +1,9 @@
 /*
- * Чекбоксы и радио. LuCI рисует нативные input с appearance:none и двумя
- * псевдоэлементами: ::before — коробка, ::after — маска-SVG галочки/точки.
- * Механику апстрима (включая переменные --bd-color/--fg-color как хук для
- * состояния invalid) сохраняем, меняем размер и краску под рецепт shadcn
- * Checkbox: size-4, rounded-[4px], checked -> bg-primary.
+ * Checkboxes and radios. LuCI draws native inputs with appearance:none and two
+ * pseudo-elements: ::before is the box, ::after an SVG mask for the check mark
+ * or dot. Upstream's mechanics are kept (including the --bd-color/--fg-color
+ * variables used as a hook for the invalid state); only size and colour move to
+ * the shadcn Checkbox recipe: size-4, rounded-[4px], checked -> bg-primary.
  */
 
 input[type="checkbox"],
@@ -11,8 +11,8 @@ input[type="radio"] {
 	--bd-color: var(--input);
 	--fg-color: var(--primary-foreground);
 
-	/* сбрасываем геометрию общего правила полей: оттуда прилетают padding,
-	   border-radius и тень, из-за которых чекбокс расползается в прямоугольник */
+	/* reset the geometry inherited from the generic field rule: its padding,
+	   border-radius and shadow would smear the checkbox into a rectangle */
 	@apply relative m-0 inline-block size-4 cursor-pointer appearance-none rounded-none
 	       border-0 bg-transparent p-0 shadow-none;
 	color: var(--fg-color);

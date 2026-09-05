@@ -11,9 +11,9 @@
 	const boardinfo = ubus.call('system', 'board');
 	const darkpref = (theme == 'shadcn-dark' ? 'true' : (theme == 'shadcn-light' ? 'false' : null));
 
-	/* Токены shadcn лежат в `:root` (светлые) и `.dark` (тёмные), поэтому тёмному
-	   варианту нужен класс `dark`; атрибут data-darkmode оставлен для правил,
-	   унаследованных от luci-theme-bootstrap. */
+	/* The shadcn tokens live in `:root` (light) and `.dark` (dark), so the dark
+	   variant needs the `dark` class; the data-darkmode attribute is kept for the
+	   rules inherited from luci-theme-bootstrap. */
 	const rootattrs = darkpref
 		? `data-darkmode="${darkpref}"${darkpref == 'true' ? ' class="dark"' : ''}`
 		: '';

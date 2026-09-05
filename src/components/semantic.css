@@ -1,7 +1,7 @@
 /*
- * Семантические поверхности, общие для кнопок, алертов и тултипов.
- * Вместо цветных градиентов апстрима — манера shadcn: нейтральная подложка
- * с цветным акцентом текста и рамки.
+ * Semantic surfaces shared by buttons, alerts and tooltips.
+ * Instead of upstream's coloured gradients this follows the shadcn style: a
+ * neutral backdrop with the colour carried by the text and the border.
  */
 
 .btn.danger,

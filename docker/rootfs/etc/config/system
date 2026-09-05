@@ -4,6 +4,6 @@ config system
 	option ttylogin '0'
 	option log_size '64'
 
-# В контейнере время берётся с хоста, ntpd только шумит в лог.
+# In a container the time comes from the host, ntpd only spams the log.
 config timeserver 'ntp'
 	option enabled '0'

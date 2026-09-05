@@ -1,9 +1,9 @@
 /*
- * Формы и поля ввода. Рецепты shadcn Input/Textarea/Label, состояние фокуса —
- * ring вместо инсет-тени апстрима.
+ * Forms and input fields. shadcn Input/Textarea/Label recipes; the focus state
+ * is a ring instead of upstream's inset shadow.
  *
- * Геометрия LuCI сохранена там, где на неё опирается вёрстка: двухколоночный
- * .cbi-value с заголовком в 180px и поля по 210px.
+ * LuCI's geometry is preserved wherever the layout depends on it: the
+ * two-column .cbi-value with a 180px title and 210px fields.
  */
 
 fieldset {
@@ -19,7 +19,7 @@ label, input, button, select {
 	line-height: normal;
 }
 
-/* --- раскладка строки настройки ------------------------------------------- */
+/* --- option row layout ---------------------------------------------------- */
 
 .cbi-value {
 	@apply mb-4 flex flex-wrap items-baseline;
@@ -47,7 +47,8 @@ label[for] {
 	@apply cursor-pointer;
 }
 
-/* Группа связанных полей: инпут + кнопка встык (напр. поле со «Найти»). */
+/* Group of related controls: an input with a button butted against it
+   (e.g. a field with "Find"). */
 .control-group {
 	@apply inline-flex gap-0.5;
 }
@@ -58,7 +59,7 @@ label[for] {
 	margin-left: calc(-.2em + -2px);
 }
 
-/* --- поля: рецепт Input --------------------------------------------------- */
+/* --- fields: Input recipe ------------------------------------------------- */
 
 input,
 textarea,
@@ -99,10 +100,10 @@ select,
 	@apply text-muted-foreground;
 }
 
-/* --- состояния ------------------------------------------------------------ */
+/* --- states --------------------------------------------------------------- */
 
-/* Апстрим вешал здесь инсет-тень; в shadcn роль подсветки играет ring,
-   поэтому остаётся только переход. Список селекторов сохранён как был. */
+/* Upstream put an inset shadow here; in shadcn the highlight is a ring, so
+   only the transition remains. The selector list is kept as it was. */
 .item::after,
 .btn,
 .cbi-button,
@@ -115,8 +116,8 @@ input, button, textarea, select {
 	@apply transition-[color,box-shadow,background-color,border-color];
 }
 
-/* !important на border-color — из апстрима: иначе рамку перебивает
-   собственный border у .btn/.cbi-button, объявленный ниже по каскаду. */
+/* The !important on border-color comes from upstream: otherwise the border of
+   .btn/.cbi-button, declared further down the cascade, wins over it. */
 .item:hover::after,
 .btn:hover, .btn:focus,
 .cbi-button:hover, .cbi-button:focus,
@@ -129,7 +130,7 @@ input:focus, button:hover, textarea:focus, select:focus {
 	@apply border-ring! outline-none ring-[3px] ring-ring/50 no-underline;
 }
 
-/* невалидное значение — рецепт aria-invalid из shadcn */
+/* invalid value — shadcn's aria-invalid recipe */
 .cbi-input-invalid,
 .cbi-input-invalid.cbi-dropdown:not(.btn):not(.cbi-button),
 .cbi-input-invalid.cbi-dropdown:not([open]) > ul > li,
@@ -164,7 +165,7 @@ textarea[readonly] {
 	pointer-events: auto;
 }
 
-/* --- служебные блоки формы ------------------------------------------------ */
+/* --- auxiliary form blocks ------------------------------------------------ */
 
 .cbi-optionals,
 .cbi-section-create {
@@ -183,7 +184,7 @@ textarea[readonly] {
 	@apply w-full;
 }
 
-/* Панель действий — отдельная карточка под секциями, в тон остальным. */
+/* Action bar: a separate card below the sections, matching the rest. */
 .actions,
 .cbi-page-actions {
 	@apply mb-4 flex flex-wrap items-center justify-end gap-2 rounded-xl border

@@ -1,14 +1,15 @@
 /*
- * .cbi-dropdown — собственный select LuCI (он же ComboButton у «Save & Apply»).
+ * .cbi-dropdown is LuCI's own select (and the ComboButton on "Save & Apply").
  *
- * Это не стиль, а конечный автомат: всё состояние живёт в атрибутах
+ * This is not styling but a state machine: all of the state lives in attributes
  * ([open], [multiple], [empty], [more], [display], [selected], [unselectable],
- * [optional]) и классах .preview/.open/.more/.hide-open/.hide-close, а
- * показом управляет ui.js через десяток `display: … !important`.
+ * [optional]) and in the .preview/.open/.more/.hide-open/.hide-close classes,
+ * while visibility is driven by ui.js through a dozen `display: … !important`
+ * declarations.
  *
- * Поэтому вся логика (display/flex/order/!important/переходы) перенесена
- * дословно, а изменены только поверхность, радиус, тень и цвета — по рецептам
- * shadcn Select и DropdownMenu.
+ * So the whole logic (display/flex/order/!important/transitions) is carried
+ * over verbatim; only the surface, radius, shadow and colours changed, after
+ * the shadcn Select and DropdownMenu recipes.
  */
 
 .cbi-dropdown {
@@ -18,14 +19,14 @@
 	padding: 0 !important;
 }
 
-/* Закрытое поле — рецепт SelectTrigger (у апстрима здесь был градиент). */
+/* The closed control follows SelectTrigger (upstream had a gradient here). */
 .cbi-dropdown:not(.btn):not(.cbi-button) {
 	@apply rounded-lg border border-input bg-transparent text-foreground dark:bg-input/30;
 	background-image: none;
 }
 
 .cbi-dropdown img {
-	/* ограничиваем картинки любого размера по высоте строки */
+	/* clamp images of any size to the line height */
 	max-height: 1.6em;
 	width: auto;
 }
@@ -57,7 +58,7 @@
 	line-height: 2em;
 }
 
-/* каретка ComboButton отделяется линией того же цвета, что текст кнопки */
+/* the ComboButton caret is separated by a line matching the button text */
 .cbi-dropdown.btn > .open,
 .cbi-dropdown.cbi-button > .open {
 	@apply ml-2 border-l px-2;
@@ -116,7 +117,7 @@
 	@apply relative;
 }
 
-/* Раскрытый список — рецепт SelectContent. */
+/* The open list follows the SelectContent recipe. */
 .cbi-dropdown[open] > ul.dropdown {
 	@apply absolute z-[1100] block w-auto min-w-full overflow-y-auto rounded-xl border
 	       border-border bg-popover p-1.5 text-popover-foreground shadow-lg;
@@ -147,7 +148,7 @@
 .cbi-dropdown[open] > ul.dropdown > li .hide-open { display: none; }
 .cbi-dropdown[open] > ul.dropdown > li .hide-close { display: block; display: initial; }
 
-/* Пункты списка — рецепт SelectItem; разделителей между ними у shadcn нет. */
+/* List items follow SelectItem; shadcn has no separators between them. */
 .cbi-dropdown[open] > ul.dropdown > li {
 	@apply cursor-default select-none rounded-lg border-b-0 px-2.5 py-1.5 text-sm;
 }

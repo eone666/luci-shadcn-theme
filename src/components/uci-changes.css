@@ -1,7 +1,7 @@
 /*
- * Диалог «Save & Apply»: список изменений uci и легенда.
- * Ядро выдаёт дифф семантическими тегами ins/del/var, поэтому красим их
- * напрямую: добавленное — success, удалённое — destructive.
+ * The "Save & Apply" dialog: the uci change list and its legend.
+ * The core emits the diff with semantic ins/del/var tags, so they are styled
+ * directly: additions in success, removals in destructive.
  */
 
 .uci-change-list {
@@ -68,8 +68,9 @@
 	line-height: 300%;
 }
 
-/* Спиннер красится токеном, поэтому отдельная тёмная правка апстрима не нужна,
-   но селектор оставляем — на него мог рассчитывать сторонний CSS. */
+/* The spinner is coloured from a token, so upstream's separate dark-theme
+   override is unnecessary — but the selector is kept, since third-party CSS
+   may have relied on it. */
 [data-darkmode="true"] .spinning::before {
 	background: var(--on-color, var(--foreground));
 }

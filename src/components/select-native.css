@@ -1,7 +1,8 @@
 /*
- * Нативный select в обёртке .cbi-select и файловый input.
- * Градиенты апстрима заменены на плоскую поверхность рецепта shadcn Select,
- * стрелка «▾» оставлена текстом (иконок в теме нет) и покрашена в muted.
+ * Native select inside the .cbi-select wrapper, plus the file input.
+ * Upstream's gradients are replaced by the flat surface of the shadcn Select
+ * recipe; the "▾" arrow stays a text glyph (the theme ships no icons) and is
+ * painted in muted.
  */
 
 .cbi-value-field > .cbi-checkbox,

@@ -1,13 +1,14 @@
-# Референс апстрима
+# Upstream reference
 
-`cascade.css` и `mobile.css` из `luci-theme-bootstrap`, коммит `e9ebca7`
-(= версия пакета `luci-theme-bootstrap-26.133.20346~e9ebca7` в OpenWrt 25.12.4),
-ветка `openwrt-25.12`, не минифицированные.
+`cascade.css` and `mobile.css` from `luci-theme-bootstrap`, commit `e9ebca7`
+(= package version `luci-theme-bootstrap-26.133.20346~e9ebca7` in OpenWrt
+25.12.4), branch `openwrt-25.12`, unminified.
 
-Нужны для `npm run audit`: сверка списка селекторов апстрима с нашим выводом
-ловит правила, потерянные при переносе на `@apply`. В пакет не попадают.
+They are needed by `npm run audit`: comparing upstream's selector list with our
+output catches rules lost while porting to `@apply`. They are not shipped in
+the package.
 
-Обновление:
+Updating:
 
 ```sh
 curl -sO https://raw.githubusercontent.com/openwrt/luci/<commit>/themes/luci-theme-bootstrap/htdocs/luci-static/bootstrap/cascade.css

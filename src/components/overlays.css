@@ -1,9 +1,9 @@
 /*
- * Модалки, алерты, тултипы. Рецепты shadcn Dialog / Alert / Tooltip.
+ * Modals, alerts, tooltips. The shadcn Dialog / Alert / Tooltip recipes.
  *
- * Механику видимости не трогаем: оверлей показывается классом
- * body.modal-overlay-active, который ставит ui.js, а Escape ищет кнопку по
- * .right > button и .button-row > .btn — эти обёртки обязаны сохраниться.
+ * The visibility mechanics are left alone: the overlay is shown through the
+ * body.modal-overlay-active class set by ui.js, and Escape looks for a button
+ * via .right > button and .button-row > .btn — those wrappers must survive.
  */
 
 #modal_overlay {
@@ -52,7 +52,7 @@ body.modal-overlay-active #modal_overlay {
 	visibility: visible;
 }
 
-/* --- алерты: рецепт Alert -------------------------------------------------- */
+/* --- alerts: the Alert recipe ---------------------------------------------- */
 
 .alert-message {
 	@apply relative mb-2 rounded-xl border border-border bg-card px-4 py-3 text-sm
@@ -95,7 +95,7 @@ body.modal-overlay-active #modal_overlay {
 	@apply my-1;
 }
 
-/* --- тултипы: рецепт TooltipContent --------------------------------------- */
+/* --- tooltips: the TooltipContent recipe ---------------------------------- */
 
 .cbi-title-ref {
 	@apply text-primary underline-offset-4 hover:underline;
@@ -109,7 +109,8 @@ body.modal-overlay-active #modal_overlay {
 	@apply cursor-help;
 }
 
-/* переход по opacity — часть контракта: ui.js прячет тултип, снимая инлайн-стиль */
+/* the opacity transition is part of the contract: ui.js hides the tooltip by
+   removing the inline style */
 .cbi-tooltip {
 	@apply absolute z-[1000] w-fit rounded-lg bg-foreground px-3 py-1.5 text-xs
 	       text-background shadow-md;
@@ -125,20 +126,21 @@ body.modal-overlay-active #modal_overlay {
 	transition: opacity .25s ease-in;
 }
 
-/* --- экран авторизации -----------------------------------------------------
- * Ядро показывает форму логина в модалке (`ui.showModal(..., 'login')`), внутри
- * обычная двухколоночная раскладка .cbi-value. Ориентир — блок login из
- * shadcn: карточка по центру экрана, подписи над полями, поля и кнопка во всю
- * ширину. Разметку не трогаем, только раскладку.
+/* --- login screen ----------------------------------------------------------
+ * The core renders the login form inside a modal (`ui.showModal(..., 'login')`)
+ * holding the usual two-column .cbi-value layout. The reference is shadcn's
+ * login block: a card centred on screen, labels above the fields, full-width
+ * fields and button. The markup is untouched, only the layout changes.
  */
 
-/* Оверлей превращаем в центрирующий контейнер только для логина: у остальных
-   модалок своя механика прокрутки. */
+/* The overlay becomes a centring container for the login modal only: the other
+   modals have their own scrolling mechanics. */
 #modal_overlay:has(> .modal.login) {
-	/* Фон страницы логина — bg-muted, карточка — bg-card: именно так устроен
-	   блок login у shadcn, то есть полотно светлее карточки, а не наоборот.
-	   Затемняющую пелену не используем: за модалкой на этой странице ничего
-	   нет, и серая накладка только пачкает фон. */
+	/* The login page canvas is bg-muted and the card is bg-card: that is how
+	   shadcn's login block is built, i.e. the canvas is lighter than the card
+	   rather than the other way round. No dimming scrim is used: there is
+	   nothing behind the modal on this page, and a grey overlay would only
+	   muddy the background. */
 	@apply grid place-items-center bg-muted p-4;
 }
 
@@ -150,13 +152,13 @@ body.modal-overlay-active #modal_overlay {
 	@apply mb-1 text-center text-xl font-semibold tracking-tight;
 }
 
-/* «Log in» и так единственное действие, разделитель перед ним лишний */
+/* "Log in" is the only action anyway, so the rule before it is redundant */
 .modal.login > hr {
 	@apply hidden;
 }
 
-/* Внутри модалки логина .cbi-section — просто обёртка формы, а не блок
-   настроек: карточка в карточке здесь лишняя. */
+/* Inside the login modal .cbi-section is just a form wrapper, not a settings
+   block: a card inside a card would be redundant here. */
 .modal.login .cbi-section,
 .modal.login .cbi-section-node,
 .modal.login form.cbi-map {

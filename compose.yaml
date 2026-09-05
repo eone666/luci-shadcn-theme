@@ -8,29 +8,31 @@ services:
         OPENWRT_ARCH: ${OPENWRT_ARCH:-aarch64_generic}
         OPENWRT_VERSION: ${OPENWRT_VERSION:-25.12.4}
     image: luci-testbed:${OPENWRT_VERSION:-25.12.4}-${OPENWRT_ARCH:-aarch64_generic}
-    # У openwrt/rootfs в манифесте architecture == имя цели OpenWrt, а не
-    # linux/arm64. Без этой строки docker скажет "no matching manifest".
+    # In the openwrt/rootfs manifest, architecture is the OpenWrt target name,
+    # not linux/arm64. Without this line docker says "no matching manifest".
     platform: linux/${OPENWRT_ARCH:-aarch64_generic}
     container_name: luci-testbed
     hostname: openwrt-testbed
-    # procd поднимает netifd, firewall4/nftables, ujail для dnsmasq и ntpd —
-    # всё это требует полных капабилити. Стенд локальный и одноразовый.
+    # procd brings up netifd, firewall4/nftables and ujail for dnsmasq and ntpd —
+    # all of which need full capabilities. The bench is local and disposable.
     privileged: true
     environment:
       ROOT_PASSWORD: ${ROOT_PASSWORD:-openwrt}
-      # shadcn-dark | shadcn-light | shadcn (авто) | openwrt2020 | bootstrap
+      # shadcn-dark | shadcn-light | shadcn (auto) | openwrt2020 | bootstrap
       LUCI_THEME: ${LUCI_THEME:-shadcn-dark}
     ports:
       - "${HTTP_PORT:-8080}:80"
       - "${HTTPS_PORT:-8443}:443"
       - "${SSH_PORT:-2222}:22"
     volumes:
-      # Живая правка темы: статика и ucode-шаблоны подкладываются прямо в
-      # те пути, куда их положил бы .ipk. Перезапуск контейнера не нужен —
-      # достаточно F5 (для .ut-шаблонов см. README, там нужен сброс кэша).
+      # Live theme editing: the static files and ucode templates are mounted
+      # straight into the paths the .ipk would install them to. No container
+      # restart is needed — F5 is enough (for .ut templates see the README, the
+      # cache has to be cleared).
       - ./luci-theme-shadcn/htdocs/luci-static/shadcn:/www/luci-static/shadcn:ro
       - ./luci-theme-shadcn/ucode/template/themes/shadcn:/usr/share/ucode/luci/template/themes/shadcn:ro
-      # menu-JS и вьюха логина живут вне каталога темы, в resources/ — как и у bootstrap
+      # the menu JS and the login view live outside the theme directory, in
+      # resources/ — same as in bootstrap
       - ./luci-theme-shadcn/htdocs/luci-static/resources/menu-shadcn.js:/www/luci-static/resources/menu-shadcn.js:ro
       - ./luci-theme-shadcn/htdocs/luci-static/resources/view/shadcn:/www/luci-static/resources/view/shadcn:ro
     healthcheck:

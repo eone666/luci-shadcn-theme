@@ -12,10 +12,11 @@ set_opt() {
 	fi
 }
 
-# Три варианта одной темы: shadcn следует prefers-color-scheme, остальные два
-# жёстко фиксируют режим (см. darkpref в ucode/template/themes/shadcn/header.ut).
-# mediaurlbase намеренно не меняем: установка темы не должна молча переключать
-# интерфейс, выбор остаётся за System -> Language and Style -> Design.
+# Three variants of one theme: shadcn follows prefers-color-scheme, the other
+# two pin the mode (see darkpref in ucode/template/themes/shadcn/header.ut).
+# mediaurlbase is deliberately left alone: installing a theme must not silently
+# switch the interface — that choice stays with System -> Language and Style
+# -> Design.
 set_opt themes.Shadcn /luci-static/shadcn
 set_opt themes.ShadcnDark /luci-static/shadcn-dark
 set_opt themes.ShadcnLight /luci-static/shadcn-light

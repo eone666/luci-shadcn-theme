@@ -1,4 +1,4 @@
-/* Каркас страницы: полотно, контейнер, ссылки, утилиты выравнивания. */
+/* Page scaffolding: canvas, container, links, alignment utilities. */
 
 body {
 	@apply flex min-h-full flex-col overflow-y-scroll bg-background p-[5px]
@@ -10,10 +10,10 @@ body {
 	zoom: 1;
 }
 
-/* shadcn красит ссылки в --primary. В палитре neutral это почти чёрный (светлая
-   тема) и почти белый (тёмная), то есть ссылки монохромные — так и задумано.
-   Цветной акцент появится сам, если положить в theme/globals.css палитру с
-   ненулевой хромой. */
+/* shadcn colours links with --primary. In the neutral palette that is nearly
+   black (light theme) and nearly white (dark), so links come out monochrome —
+   that is intended. A coloured accent appears on its own once a palette with
+   non-zero chroma is dropped into theme/globals.css. */
 a {
 	@apply font-normal text-primary underline-offset-4 no-underline;
 	font-weight: inherit;
@@ -28,8 +28,8 @@ a:hover {
 .pull-right { @apply float-right }
 .pull-left { @apply float-left }
 
-/* Иногда перенос нужен: бейджи на узких экранах выглядят странно, а nowrap
-   вдобавок сводит на нет ограничения по ширине — поэтому span исключён. */
+/* Sometimes wrapping is needed: badges look odd on narrow screens, and nowrap
+   also defeats the width constraints — hence span is excluded. */
 .nowrap:not(span) {
 	@apply whitespace-nowrap;
 }

@@ -1,22 +1,22 @@
 # syntax=docker/dockerfile:1
 
-# Официальные rootfs-образы OpenWrt. В манифесте у них нестандартная строка
-# платформы (linux/aarch64_generic вместо linux/arm64), поэтому compose
-# обязан пробрасывать platform: — иначе docker не найдёт manifest.
+# The official OpenWrt rootfs images. Their manifest carries a non-standard
+# platform string (linux/aarch64_generic instead of linux/arm64), so compose
+# must pass platform: through — otherwise docker will not find the manifest.
 ARG OPENWRT_ARCH=aarch64_generic
 ARG OPENWRT_VERSION=25.12.4
 FROM openwrt/rootfs:${OPENWRT_ARCH}-${OPENWRT_VERSION}
 
-# Конфиги стенда. Главное здесь — /etc/config/network: в образе его нет, и
-# на первом бутe procd зовёт config_generate, который засовывает eth0 в
-# br-lan. После этого контейнер теряет адрес docker'а и опубликованные
-# порты перестают отвечать.
+# Bench configuration. The important one is /etc/config/network: the image has
+# none, so on first boot procd calls config_generate, which pushes eth0 into
+# br-lan. After that the container loses its docker address and the published
+# ports stop responding.
 COPY rootfs/ /
 COPY --chmod=0755 entrypoint.sh /entrypoint.sh
 
-# LuCI уже входит в release-rootfs (luci, mod-network/status/system,
-# app-firewall, theme-bootstrap). Здесь докидываем только то, что нужно
-# для отладки темы.
+# LuCI is already part of the release rootfs (luci, mod-network/status/system,
+# app-firewall, theme-bootstrap). Only what is needed to debug the theme is
+# added here.
 ARG EXTRA_PACKAGES="luci-mod-dashboard luci-theme-openwrt-2020"
 RUN set -eux; \
     if [ -n "$EXTRA_PACKAGES" ]; then \

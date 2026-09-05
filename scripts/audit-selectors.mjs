@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /*
- * Сверка селекторов: что было в luci-theme-bootstrap против того, что собралось у нас.
+ * Selector diff: what luci-theme-bootstrap had versus what our build produces.
  *
- * Тема не контролирует разметку — классы генерирует ядро LuCI. Значит единственный
- * способ поймать правило, потерянное при переносе на @apply, это сравнить списки
- * селекторов с апстримом. MISSING должен быть пуст (кроме осознанных исключений).
+ * The theme does not control the markup — the classes come from LuCI core. So
+ * the only way to catch a rule lost while porting to @apply is to compare the
+ * selector lists against upstream. MISSING must stay empty (apart from the
+ * deliberate exceptions).
  *
  *   node scripts/audit-selectors.mjs            # cascade.css + mobile.css
- *   node scripts/audit-selectors.mjs --verbose  # ещё и EXTRA
+ *   node scripts/audit-selectors.mjs --verbose  # EXTRA as well
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -16,12 +17,12 @@ import { execFileSync } from 'node:child_process';
 const root = resolve(import.meta.dirname, '..');
 const verbose = process.argv.includes('--verbose');
 
-/* Селекторы, которых у нас осознанно нет: механика апстрима, заменённая на
-   токены/утилиты. Каждая строка — с причиной. */
+/* Selectors we deliberately do not have: upstream mechanics replaced by tokens
+   or utilities. Every entry carries its reason. */
 const EXPECTED_MISSING = new Map([
-	[':root', 'палитра приходит из theme/globals.css'],
-	[':root[data-darkmode="true"]', 'тёмная палитра там же, селектор дублирует tokens.mjs'],
-	['input[type="search"]::-webkit-search-decoration', 'вендорный префикс, вырезается минификатором'],
+	[':root', 'the palette comes from theme/globals.css'],
+	[':root[data-darkmode="true"]', 'dark palette lives there too, selector duplicated by tokens.mjs'],
+	['input[type="search"]::-webkit-search-decoration', 'vendor prefix, stripped by the minifier'],
 ]);
 
 function selectors(css) {
@@ -35,10 +36,10 @@ function selectors(css) {
 			continue;
 		}
 		if (css[i] === '{') {
-			// комментарий может стоять прямо перед селектором — вычищаем его из текста
+			// a comment may sit right before the selector — strip it out of the text
 			const raw = css.slice(selStart, i).replace(/\/\*[\s\S]*?\*\//g, '').trim();
-			// @media/@layer/@supports — обёртки, внутрь заходим; @keyframes и
-			// @property учитываем как единицу
+			// @media/@layer/@supports are wrappers, so we descend into them; @keyframes
+			// and @property count as a single unit
 			if (/^@(media|supports|layer|container)\b/.test(raw)) {
 				i++;
 				selStart = i;
@@ -56,8 +57,8 @@ function selectors(css) {
 				j++;
 			}
 			if (raw && !raw.startsWith('@')) {
-				// нормализация: каждый селектор из списка отдельно, пробелы сжаты,
-				// кавычки в атрибутах приведены к двойным
+				// normalisation: every selector in the list separately, whitespace collapsed,
+				// attribute quotes normalised to double quotes
 				for (const one of raw.split(',')) {
 					const s = one
 						.replace(/\s+/g, ' ')
@@ -85,10 +86,10 @@ function selectors(css) {
 
 function report(name, upstreamPath, entry) {
 	const upstream = selectors(readFileSync(resolve(root, upstreamPath), 'utf8'));
-	// Собираем БЕЗ минификации и прогоняем через ту же постобработку, что и
-	// релизный артефакт: минификатор переписывает селекторы (снимает кавычки в
-	// атрибутах, склеивает правила), и сравнивать с апстримом было бы нечестно,
-	// а постобработку проверить надо — она режет @layer и @supports.
+	// Build WITHOUT minification and run the same postprocessing as the release
+	// artifact: the minifier rewrites selectors (drops quotes in attributes, merges
+	// rules), which would make the comparison against upstream unfair — while the
+	// postprocessing does need checking, since it cuts @layer and @supports.
 	const raw = `.build/audit-${name}`;
 	const done = `.build/audit-${name}.out.css`;
 	execFileSync('npx', ['tailwindcss', '-i', entry, '-o', raw],
@@ -102,22 +103,22 @@ function report(name, upstreamPath, entry) {
 	const unexplained = missing.filter((s) => !EXPECTED_MISSING.has(s));
 
 	console.log(`\n=== ${name} ===`);
-	console.log(`  апстрим: ${upstream.size}   собрано: ${built.size}   ` +
-		`совпало: ${upstream.size - missing.length}`);
+	console.log(`  upstream: ${upstream.size}   built: ${built.size}   ` +
+		`matched: ${upstream.size - missing.length}`);
 	if (unexplained.length) {
-		console.log(`  MISSING (${unexplained.length}) — потерянные правила:`);
+		console.log(`  MISSING (${unexplained.length}) — lost rules:`);
 		for (const s of unexplained) console.log(`    ${s}`);
 	} else {
-		console.log('  MISSING: нет');
+		console.log('  MISSING: none');
 	}
 	const explained = missing.filter((s) => EXPECTED_MISSING.has(s));
 	if (explained.length)
-		console.log(`  осознанно отсутствуют: ${explained.length}`);
+		console.log(`  deliberately absent: ${explained.length}`);
 	if (verbose && extra.length) {
 		console.log(`  EXTRA (${extra.length}):`);
 		for (const s of extra) console.log(`    ${s}`);
 	} else {
-		console.log(`  EXTRA: ${extra.length} (--verbose чтобы посмотреть)`);
+		console.log(`  EXTRA: ${extra.length} (--verbose to list them)`);
 	}
 	return unexplained.length;
 }
