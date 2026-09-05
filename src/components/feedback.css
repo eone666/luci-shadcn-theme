@@ -48,6 +48,15 @@ header [data-indicator][data-style="active"] {
 	@apply bg-primary text-primary-foreground;
 }
 
+/* An active indicator is filled with --primary and keeps its text on
+   --primary-foreground, so it needs a hover of its own: the generic clickable
+   rule above fades the background to --secondary, and the near-black text left
+   over from the fill turned unreadable on a dark palette the moment the
+   pointer touched it. */
+header [data-indicator][data-clickable][data-style="active"] {
+	@apply hover:bg-primary/90;
+}
+
 /* --- progress bar: the Progress recipe ----------------------------------- */
 
 .cbi-progressbar {
