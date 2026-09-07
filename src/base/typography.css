@@ -11,6 +11,27 @@ p,
 	@apply mb-2 text-sm font-normal;
 }
 
+/* The page header block. Upstream leaves h2 at margin-bottom 0, so the
+   description sits flush against the heading (measured: a 0px gap) and the
+   whole block is 8px from the first card. shadcn keeps a title tight to its
+   description and sets the block off from the content by a full 24px.
+   The description is a .cbi-map-descr on most pages and a bare <p> on a few
+   (status, routes); dhcp and startup have a tab menu there instead and some
+   pages have nothing — hence the :has(), which tightens the heading only when
+   a description actually follows it. */
+h2 {
+	@apply mb-6;
+}
+
+h2:has(+ .cbi-map-descr, + p) {
+	@apply mb-1.5;
+}
+
+.cbi-map-descr,
+h2 + p {
+	@apply mb-6;
+}
+
 p small {
 	@apply text-xs text-muted-foreground;
 }

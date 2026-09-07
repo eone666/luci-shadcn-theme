@@ -1,8 +1,8 @@
 # luci-theme-shadcn
 
 A theme for **LuCI**, the OpenWrt web interface, in the style of
-[shadcn/ui](https://ui.shadcn.com): cards, pill buttons, a segmented tab strip
-and an `oklch` palette. Light and dark, and every LuCI page keeps working —
+[shadcn/ui](https://ui.shadcn.com): cards, a segmented tab strip, bordered data
+tables and an `oklch` palette. Light and dark, and every LuCI page keeps working —
 nothing about the markup or the workflow changes, only how it looks.
 
 ![LuCI with the theme, dark and light](docs/img/hero.png)
@@ -19,7 +19,7 @@ Grab `luci-theme-shadcn-*.apk` from the
 to the router and:
 
 ```sh
-apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.0-r1.apk
+apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.1-r1.apk
 ```
 
 The package is built for `apk`, the package manager of OpenWrt 25.12. On an

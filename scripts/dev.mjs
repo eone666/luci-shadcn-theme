@@ -9,7 +9,7 @@
  * reads it), so it is watched separately.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { watch } from 'node:fs';
+import { mkdirSync, watch } from 'node:fs';
 import { resolve } from 'node:path';
 import { root, OUT, ENTRIES } from './lib/entries.mjs';
 
@@ -24,18 +24,41 @@ const run = (cmd, args, opts = {}) => {
 	return c;
 };
 
-for (const e of ENTRIES) {
-	run('npx', ['tailwindcss', '-i', e.src, '-o', `.build/${e.name}`, '--minify', '--watch']);
-
-	let timer = null;
-	watch(resolve(root, '.build', e.name), () => {
-		// Tailwind writes the file in several passes — wait until it settles
-		clearTimeout(timer);
-		timer = setTimeout(() => {
-			run('node', ['scripts/postprocess.mjs', `.build/${e.name}`, `${OUT}/${e.name}`]);
-		}, 120);
+/* A watcher that dies has to say so: the failure mode this guards against is a
+   dev.mjs that keeps printing "watch: …" while nothing is rebuilding. */
+const supervise = (label, child) => {
+	child.on('exit', (code, signal) => {
+		if (signal) return;   // our own kill() on Ctrl+C
+		console.error(`\n${label} exited (code ${code}) — nothing is watching any more.` +
+			'\nRestart `npm run dev`.');
 	});
-}
+	return child;
+};
+
+// Tailwind's plain --watch stops the moment stdin is not a TTY: it prints its
+// banner and exits, leaving dev.mjs alive and apparently fine. That makes
+// `npm run dev` a no-op whenever it is not driven from a terminal — under nohup,
+// an IDE run configuration, CI, or a wrapper script. --watch=always keeps
+// watching regardless of stdin.
+for (const e of ENTRIES)
+	supervise(`tailwindcss (${e.name})`,
+		run('npx', ['tailwindcss', '-i', e.src, '-o', `.build/${e.name}`, '--minify', '--watch=always']));
+
+/* Watch the directory rather than the files inside it: on a clean tree (after
+   `npm run clean`) Tailwind has not written them yet, and fs.watch throws
+   ENOENT on a missing path — which used to take dev.mjs down with it. */
+mkdirSync(resolve(root, '.build'), { recursive: true });
+
+const timers = new Map();
+watch(resolve(root, '.build'), (_event, file) => {
+	const e = ENTRIES.find((x) => x.name === file);
+	if (!e) return;
+	// Tailwind writes the file in several passes — wait until it settles
+	clearTimeout(timers.get(file));
+	timers.set(file, setTimeout(() => {
+		run('node', ['scripts/postprocess.mjs', `.build/${e.name}`, `${OUT}/${e.name}`]);
+	}, 120));
+});
 
 // the palette sits outside the import graph: editing it requires rebuilding
 // tokens.css

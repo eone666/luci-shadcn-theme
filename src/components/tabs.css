@@ -13,7 +13,7 @@
 	   it the tab strip slides 24px to the right of the page heading.
 	   w-fit matches shadcn's TabsList: the strip hugs its content instead of
 	   spanning the full width. */
-	@apply mx-0 mb-4 flex w-fit max-w-full flex-wrap items-center gap-1 rounded-pill
+	@apply mx-0 mb-4 flex w-fit max-w-full flex-wrap items-center gap-1 rounded-xl
 	       bg-muted p-1 text-muted-foreground;
 	list-style: none;
 }
@@ -27,20 +27,20 @@
 	   while the link inside is what is clickable, so all the padding is given
 	   to the link — otherwise the hover area would exceed the click area. */
 	@apply inline-flex max-w-full flex-initial items-center justify-center
-	       rounded-pill p-0 text-sm font-medium text-foreground/60 transition-all;
+	       rounded-lg p-0 text-sm font-medium text-foreground/60 transition-all;
 }
 
 .tabs > li > a, .cbi-tabmenu > li > a {
 	/* the border lives here too, not on the li: otherwise the link would be
 	   smaller than the pill by the border width */
 	@apply flex h-full w-full items-center justify-center gap-1.5 overflow-hidden
-	       text-ellipsis whitespace-nowrap rounded-pill border border-transparent
+	       text-ellipsis whitespace-nowrap rounded-lg border border-transparent
 	       px-3.5 py-1 no-underline outline-none;
 	color: inherit;
 }
 
 .tabs > li > a:focus-visible, .cbi-tabmenu > li > a:focus-visible {
-	@apply rounded-sm ring-[3px] ring-ring/50;
+	@apply ring-[3px] ring-ring/50;
 	text-decoration: none;
 }
 
@@ -120,8 +120,10 @@
 	@apply h-auto overflow-visible opacity-100 transition-opacity;
 }
 
-/* Narrow window: a wrapping pill strip turns into a shapeless blob, so it
-   becomes a rectangular card and the tabs become a grid.
+/* Narrow window: the strip spans the full width and the tabs become a grid.
+   The radii here now restate the defaults — the strip stopped being a pill
+   once the tab radius was synced with the buttons — and are kept only so the
+   selectors stay in place for scripts/audit-selectors.mjs.
    The media query is on viewport width rather than max-device-width: the
    latter does not react to window resizing (see the note in chrome.css). */
 @media (max-width: 720px) {

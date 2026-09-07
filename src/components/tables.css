@@ -1,9 +1,11 @@
 /*
  * Tables. LuCI core emits them in two shapes: real <table> elements and div
- * tables (.table/.tr/.th/.td with display:table*). Typography, padding and the
- * hover state come from the shadcn Table recipe, but the border model stays
- * upstream's: display:table-row does not paint a border, so the rules are
- * drawn as border-top on the cells.
+ * tables (.table/.tr/.th/.td with display:table*). Typography, padding, the
+ * outline and the hover state follow shadcn's Table and DataTable.
+ *
+ * The dividers are drawn as border-bottom on the cells rather than on the row:
+ * display:table-row paints no border. That is also why the hover fill sits on
+ * the cells.
  */
 
 .tr { display: table-row; }
@@ -11,24 +13,53 @@
 .table[width="33%"], .th[width="33%"], .td[width="33%"] { @apply w-1/3; }
 .table[width="100%"], .th[width="100%"], .td[width="100%"] { @apply w-full; }
 
+/*
+ * The outline follows shadcn's DataTable, which wraps the table in a
+ * `rounded-md border` box. rounded-lg here rather than rounded-md because the
+ * whole theme sits one step up the radius scale (fields and buttons are 10px),
+ * and the table nests inside a rounded-xl card.
+ *
+ * border-collapse has to become separate for that: border-radius has no effect
+ * on a table whose borders are collapsed. With zero spacing the cells' own
+ * border-bottom still line up into one continuous rule per row, so the
+ * dividers are unchanged. There is deliberately no overflow:hidden — shadcn
+ * does not clip either, and clipping would cut the 3px focus ring off any
+ * control sitting in an edge cell.
+ */
 .table {
-	@apply relative mb-4 w-full p-0 text-sm;
+	@apply relative mb-4 w-full rounded-lg border border-border p-0 text-sm;
 	display: table;
-	border-collapse: collapse;
+	border-collapse: separate;
+	border-spacing: 0;
 }
 
 .table .th, .table .td {
-	@apply px-2 py-2 text-left align-middle;
+	@apply px-2 py-2 text-left align-middle transition-colors;
 	display: table-cell;
 	line-height: 18px;
 }
 
+/* TableHead: h-10, centred, medium. */
 .table .tr:first-child .th {
-	@apply pt-2 align-top font-medium text-foreground;
+	@apply h-10 font-medium text-foreground;
 }
 
+/* TableRow is `border-b`, so the divider hangs under each row — which also
+   draws the line under the header without a rule of its own. */
 .table .td, .table .th {
-	@apply border-t border-border;
+	@apply border-b border-border;
+}
+
+/* TableBody's [&_tr:last-child]:border-0. Both selectors are needed because
+   LuCI emits tables in two shapes: rows wrapped in thead/tbody (the cbi
+   section tables) and rows as direct children (the status tables). Matching
+   `.tr:last-child` alone would also strip the divider under the header, whose
+   row is the last one inside the thead. */
+.table > .tr:last-child > .td,
+.table > .tr:last-child > .th,
+.table > .tbody > .tr:last-child > .td,
+.table > .tbody > .tr:last-child > .th {
+	border-bottom: 0;
 }
 
 .tr.placeholder {
@@ -50,8 +81,24 @@
 	border-width: 0 0 2px 0;
 }
 
+/* The status includes (Status → Overview) head each block with a .cbi-title —
+   the h3 plus its "Hide" toggle — and the theme never gave it a margin, so the
+   heading and the button sat directly on the table below. 16px matches the
+   card headings (.cbi-map > .cbi-section > h3) and the gap the DataTable
+   leaves between its toolbar and the table. */
+.cbi-title {
+	@apply mb-4;
+}
+
 /* --- cbi sections rendered as tables -------------------------------------- */
 
+/* TableRow's hover:bg-muted/50. The first two selectors widen it from the cbi
+   section tables to every table: with the zebra striping gone, hover is the
+   only thing marking a row on the status tables too. The fill goes on the
+   cells rather than the row because the named sections draw a leading ::before
+   that has to pick it up as well. */
+.table .tr:hover .td,
+.table .tr:hover .th,
 .cbi-section-table .tr:hover .td,
 .cbi-section-table .tr:hover .th,
 .cbi-section-table .tr:hover::before {
@@ -119,10 +166,14 @@
 	@apply align-middle;
 }
 
+/* Upstream fills the header row and stripes every second row. The DataTable
+   does neither — it separates rows with dividers and marks the pointer with a
+   hover fill, which is what the rules above now do — so both fills are dropped.
+   The selectors stay so scripts/audit-selectors.mjs keeps matching upstream. */
 .cbi-rowstyle-2,
 .tr.table-titles,
 .tr.cbi-section-table-titles {
-	@apply bg-muted/50;
+	@apply bg-transparent;
 }
 
 th[data-sortable-row] { @apply cursor-pointer; }
@@ -132,15 +183,24 @@ th[data-sort-direction="desc"]::after { content: "\a0\25bc"; }
 /* --- field description and section errors --------------------------------- */
 
 .cbi-value-description {
-	@apply relative ml-5 mt-1 text-sm text-muted-foreground;
+	/* mt-2, not mt-1: shadcn's FormItem is a grid gap-2, so a control and its
+	   description sit 8px apart. */
+	@apply relative ml-5 mt-2 text-sm text-muted-foreground;
 }
 
 .cbi-value-description:not(:empty)::before {
 	--help-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M10 0A10 10 0 000 10a10 10 0 0010 10 10 10 0 0010-10A10 10 0 0010 0zm1 17H9v-2h2v2zm2.1-7.7l-.9.9c-.8.7-1.2 1.3-1.2 2.8H9v-.5c0-1.1.4-2.1 1.2-2.8l1.2-1.3c.4-.3.6-.8.6-1.4a2 2 0 00-2-2 2 2 0 00-2 2H6a4 4 0 014-4 4 4 0 014 4c0 .9-.4 1.7-.9 2.3z'/></svg>");
 
-	@apply absolute mr-1 inline-block;
+	/* mr-1 and inline-block were inert here — absolute positioning ignores
+	   both. What was missing is the vertical offset: with top left at its
+	   static position the 1em glyph sat at the top of the 1lh line box, 2.5px
+	   above the text's optical centre. The em value is the fallback for
+	   engines without the lh unit. */
+	@apply absolute;
 	content: "\a0";
 	left: -1.25em;
+	top: 0.214em;
+	top: calc((1lh - 1em) / 2);
 	width: 1em;
 	height: 1em;
 	background: var(--muted-foreground);

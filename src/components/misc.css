@@ -65,6 +65,15 @@ div.cbi-value var.cbi-tooltip-container,
 	@apply rounded-xl border border-border bg-card text-card-foreground;
 }
 
+/* The dashboard embeds bare data lists inside its own bordered panels, and its
+   custom.css sets `.Dashboard .table { width: auto }`. The DataTable outline
+   would therefore draw a second box inside the panel, sized to the data rather
+   than to the panel — which is what made the DHCP Devices list look cropped.
+   These tables keep the row dividers and drop the frame. */
+.Dashboard .table {
+	@apply rounded-none border-0;
+}
+
 /* The device list table: the dashboard sets width:auto on all of its tables,
    so it huddles at the left edge of a card that spans the whole page. Only
    this one is stretched — the small key/value tables in the Internet/System
@@ -128,4 +137,36 @@ div.cbi-value var.cbi-tooltip-container,
 /* the login button sizing lives in overlays.css with the rest of the card */
 #modal_overlay > .modal.login > button.important {
 	@apply w-full;
+}
+
+/* --- .controls: the package manager's filter/action strip ----------------- */
+
+/*
+ * This layout is not ours and not upstream's: view/package-manager.js ships its
+ * own inline <style>, which lays the strip out as a wrapping flex row —
+ *
+ *   .controls > *         { padding: .25em; flex: 1 1 33% ; display: flex }
+ *   .controls > * > label { flex-basis: 100% }
+ *
+ * — so the gutter between groups is .25em (7px between two neighbours) and the
+ * label, which is forced onto its own line, has no margin under it at all. With
+ * our reset zeroing margins the label ends up flush against its field.
+ *
+ * The inline <style> sits after cascade.css in document order, so matching its
+ * specificity is not enough to override it: hence `div.controls` rather than
+ * `.controls`. The label margin is only an addition — the view declares none —
+ * but it still has to outweigh the `*` in the reset.
+ */
+div.controls > * {
+	padding: 0.5rem;   /* 8px a side: a 16px gutter between groups, was 7px */
+}
+
+div.controls > * > label {
+	@apply mb-2;       /* shadcn pairs a Label with its control at gap-2 */
+}
+
+/* The progress bar already reserves 1.4em above itself for the percentage its
+   ::before paints there, so a second gap would only stretch that row. */
+div.controls > * > label:has(+ .cbi-progressbar) {
+	@apply mb-0;
 }

@@ -1,6 +1,6 @@
 {
   "name": "luci-theme-shadcn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "A shadcn/ui-styled theme for LuCI, the OpenWrt web interface",
   "license": "Apache-2.0",
@@ -19,6 +19,7 @@
     "check": "npm run build && npm run audit",
     "package": "sh scripts/package.sh",
     "package:check": "sh scripts/package-check.sh",
+    "release": "node scripts/release.mjs",
     "bench": "docker compose up -d --wait && echo \"LuCI on http://$(docker compose port openwrt 80 | sed 's/^0\\.0\\.0\\.0/localhost/')\"",
     "bench:down": "docker compose down",
     "bench:logs": "docker compose logs -f",

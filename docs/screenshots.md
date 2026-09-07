@@ -14,7 +14,7 @@ single screen.
 
 ### System — startup
 
-A long striped table with a row of pill buttons on every line.
+A long table with a row of buttons on every line.
 
 ![Initscripts](img/startup.png)
 
@@ -47,8 +47,8 @@ The shadcn login block: a card on a muted canvas, labels above the fields.
 ## On a phone
 
 The device name takes its own centred row, the menu wraps under it, and the tab
-strip becomes a rectangular card — a pill strip that wraps onto three lines is a
-blob. Option rows stack, labels above fields.
+strip spans the full width with the tabs laid out as a grid — a strip that wraps
+onto three lines is a blob. Option rows stack, labels above fields.
 
 <p align="center">
   <img src="img/system-mobile.png" alt="System settings on a phone" width="300">

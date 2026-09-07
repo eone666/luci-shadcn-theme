@@ -55,7 +55,10 @@ body.modal-overlay-active #modal_overlay {
 /* --- alerts: the Alert recipe ---------------------------------------------- */
 
 .alert-message {
-	@apply relative mb-2 rounded-xl border border-border bg-card px-4 py-3 text-sm
+	/* mb-4, the same rhythm as the .cbi-section cards: a notification is a card
+	   sitting above the page content (the firmware-upgrade notice is one), and
+	   upstream's mb-2 left it looking stuck to the heading below it. */
+	@apply relative mb-4 rounded-xl border border-border bg-card px-4 py-3 text-sm
 	       text-card-foreground shadow-none;
 	white-space: unset;
 }

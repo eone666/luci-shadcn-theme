@@ -1,9 +1,29 @@
 /*
- * Native select inside the .cbi-select wrapper, plus the file input.
- * Upstream's gradients are replaced by the flat surface of the shadcn Select
- * recipe; the "▾" arrow stays a text glyph (the theme ships no icons) and is
- * painted in muted.
+ * Native select, plus the file input.
+ *
+ * Two class names are in play here. `.cbi-select` is the wrapper upstream
+ * luci-theme-bootstrap styles, and it is dead on OpenWrt 25.12 — the class
+ * appears in no template or script, only in theme CSS. Its rules are kept
+ * verbatim so scripts/audit-selectors.mjs stays at MISSING: none, but nothing
+ * on a live page matches them.
+ *
+ * What LuCI actually renders is `ui.js` UISelect:
+ *
+ *   E('div', { id }) > E('select', { class: 'cbi-input-select' })
+ *
+ * an unclassed frame div wrapping the select. So the live rules hang off
+ * `.cbi-input-select`, and the chevron off that frame: pseudo-elements do not
+ * paint on a <select> in any engine, and masking the select itself would take
+ * its text with it. The frame carries an id and never a class, which is what
+ * `div:not([class])` keys on — a precise handle rather than "any div".
  */
+
+:root {
+	/* lucide ChevronDownIcon, the icon shadcn's SelectTrigger renders. Used
+	   here and by the .cbi-dropdown caret in dropdown-widget.css; the mask
+	   only reads alpha, so the stroke colour is arbitrary. */
+	--select-chevron-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+}
 
 .cbi-value-field > .cbi-checkbox,
 .cbi-value-field > div > .cbi-radio {
@@ -42,6 +62,55 @@
 
 .cbi-select select option:checked {
 	@apply bg-accent text-accent-foreground;
+}
+
+/* --- the live select: SelectTrigger ---------------------------------------- */
+
+/* Chrome draws the UA arrow at a fixed inset from the border box and ignores
+   padding-right entirely (measured: 5.8px, unmoved by padding-right 12px ->
+   48px), so appearance:none is the only way to place it on the recipe's 12px.
+   pr-9 is that 12px plus the 16px icon plus an 8px gap, the space the UA used
+   to reserve on its own. */
+select.cbi-input-select:not([multiple]) {
+	@apply cursor-pointer appearance-none pr-9;
+}
+
+select.cbi-input-select option {
+	@apply bg-popover text-popover-foreground;
+}
+
+select.cbi-input-select option:checked {
+	@apply bg-accent text-accent-foreground;
+}
+
+/* The UISelect frame. inline-block so it shrink-wraps the 210px field and the
+   chevron lands on the select's edge rather than the column's. */
+div:not([class]):has(> select.cbi-input-select:not([multiple])) {
+	@apply relative inline-block;
+}
+
+/* In a section table the select is w-full (tables.css), which against a
+   shrink-to-fit frame is circular and collapses it to the text width — so
+   there the frame goes back to being a full-width block. The frame is not a
+   direct child of the .td: in table mode form.js nests it one level deeper,
+   hence the descendant selector. */
+.table.cbi-section-table div:not([class]):has(> select.cbi-input-select:not([multiple])) {
+	@apply block w-full;
+}
+
+/* size-4 at muted-foreground/50, as shadcn's <ChevronDownIcon className="size-4
+   opacity-50" /> resolves inside SelectTrigger. */
+div:not([class]):has(> select.cbi-input-select:not([multiple]))::after {
+	@apply pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 opacity-50;
+	content: "";
+	background: var(--muted-foreground);
+	-webkit-mask: var(--select-chevron-icon) center/cover no-repeat;
+	mask: var(--select-chevron-icon) center/cover no-repeat;
+}
+
+/* Upstream has no hover on the trigger; shadcn does. */
+select.cbi-input-select:not([multiple]):hover {
+	@apply dark:bg-input/50;
 }
 
 input[type=file] {

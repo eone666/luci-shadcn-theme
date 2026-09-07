@@ -22,15 +22,36 @@ label, input, button, select {
 /* --- option row layout ---------------------------------------------------- */
 
 .cbi-value {
-	@apply mb-4 flex flex-wrap items-baseline;
+	@apply mb-4 flex flex-wrap items-start;
 }
 
 .cbi-value-field {
 	@apply ml-5 flex-1;
 }
 
+/* When a field holds more than one control, LuCI stacks them by inserting a
+   bare <br> — the Local Time row is an input followed by its two Sync buttons.
+   The line break leaves the second control flush against the first (measured:
+   a 0px gap), so it gets the same 8px the rest of the form pairs things with. */
+.cbi-value-field > br + * {
+	@apply mt-2;
+}
+
 .cbi-value label.cbi-value-title {
-	@apply flex-[0_0_180px] pt-1.5 text-right text-sm leading-tight font-medium text-foreground;
+	@apply flex-[0_0_180px] text-right text-sm leading-tight font-medium text-foreground;
+	/*
+	 * Centre the label's first line on a 36px control: (h-9 minus the label's
+	 * own line-height) / 2.
+	 *
+	 * Upstream aligned the row by baseline with a flat pt-1.5, which lands on a
+	 * text input but not on a checkbox — .cbi-checkbox is an inline-flex, and an
+	 * inline-flex takes its baseline from its first flex item, which for a bare
+	 * checkbox is the box's bottom edge rather than a text baseline. Those rows
+	 * therefore sat 2.5px low. Aligning to the top with an explicit offset makes
+	 * every control type agree (measured: within 0.25px for checkbox, radio,
+	 * text input, select and .cbi-dropdown).
+	 */
+	padding-top: calc((2.25rem - 1.25 * 0.875rem) / 2);
 }
 
 .cbi-value > .cbi-section,
@@ -48,15 +69,51 @@ label[for] {
 }
 
 /* Group of related controls: an input with a button butted against it
-   (e.g. a field with "Find"). */
+   (e.g. a field with "Find", or the package manager's "Clear" and "OK").
+ *
+ * Upstream joins them by pulling the button left with a negative margin, which
+ * leaves it overlapping the input by ~3px while the input keeps its own rounded
+ * right corner underneath — a visible seam, and the two differ in height on top
+ * of that (36px against the button's 32px).
+ *
+ * shadcn's ButtonGroup does it without any overlap: items-stretch for one
+ * height, then every child but the last drops its right radius, and every child
+ * but the first drops its left radius *and its left border*, so the pair shares
+ * a single edge:
+ *
+ *   [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0
+ *   [&>*:not(:last-child)]:rounded-r-none
+ */
 .control-group {
-	@apply inline-flex gap-0.5;
+	@apply inline-flex w-fit items-stretch;
 }
 
+/* The group is not always an input plus a button — the package manager puts
+   three buttons in one — so this follows ButtonGroup for every child, which
+   also leaves a single 1px divider between two buttons instead of the 2px
+   their two borders would stack up to. */
+.control-group > :not(:last-child) {
+	@apply rounded-r-none;
+}
+
+.control-group > :not(:first-child) {
+	@apply rounded-l-none border-l-0;
+}
+
+/* h-auto lets the button take the group's height: the .btn recipe pins it to
+   h-8, which items-stretch on its own cannot override. */
 .control-group > input + :not(input):not(select),
 .control-group > select + :not(input):not(select) {
-	@apply rounded-l-none px-1.5;
-	margin-left: calc(-.2em + -2px);
+	@apply h-auto px-3;
+	margin-left: 0;
+}
+
+/* The focus ring is 3px and would be clipped by the neighbour sharing the
+   edge, so the focused child is raised — as ButtonGroup does with
+   [&>*]:focus-visible:relative and :z-10. */
+.control-group > :focus,
+.control-group > :focus-visible {
+	@apply relative z-10;
 }
 
 /* --- fields: Input recipe ------------------------------------------------- */

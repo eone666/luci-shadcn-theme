@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 # Version is pinned explicitly: luci.mk derives it from the git history of the
 # luci feed, which a standalone repository does not have -- otherwise
 # SubstituteVersion would stamp an empty `?v=` into the templates.
-PKG_VERSION:=1.0.0
+PKG_VERSION:=1.0.1
 PKG_RELEASE:=1
 
 LUCI_TITLE:=shadcn/ui Theme for LuCI

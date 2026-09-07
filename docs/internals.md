@@ -32,7 +32,7 @@ clear message.
 
 The whole radius scale in `src/theme-map.css` is derived from `--radius` by
 multiplication (`xs .2` / `sm .6` / `md .8` / `lg 1` / `xl 1.4` / `2xl 1.6`,
-plus `pill 100` for buttons, tabs and badges). At shadcn's default
+plus `pill 100` for badges and the progress bar). At shadcn's default
 `--radius: 0.625rem` that reproduces its own scale to the pixel, and a palette
 with `--radius: 0` comes out square everywhere — including the pills, which a
 hardcoded `rounded-full` could never do. The only deliberate exception is the
@@ -91,6 +91,15 @@ The build is `scripts/build.mjs`, the entry points live in
 adding a stylesheet is one line in one file. There are no `pre*` hooks: what a
 script does is what it says.
 
+Two things about the watch build are worth knowing, because both used to fail
+silently. Tailwind is spawned with `--watch=always`, not `--watch`: the plain
+form quits the moment stdin is not a TTY, printing its banner and exiting, which
+left `dev.mjs` running and apparently healthy while nothing rebuilt — under
+`nohup`, an IDE run configuration or CI. And the rebuild trigger watches the
+`.build` directory rather than the files in it, since on a clean tree they do
+not exist yet and `fs.watch` throws `ENOENT` on a missing path. If a Tailwind
+child does die, `dev.mjs` now says so instead of going quiet.
+
 `npm run shots` takes arguments after `--`: page names to limit the run,
 `--light` for the light variant, `--viewport` to crop to the window instead of
 the full page, `--width`/`--height` for the viewport, and `--out`/`--suffix` to
@@ -128,6 +137,7 @@ scripts/
 luci-theme-shadcn/         the package itself: htdocs, ucode templates, uci-defaults, Makefile
 refs/upstream-25.12/       upstream reference for npm run audit
 docs/                      this file, the design log, screenshots.md and img/
+RELEASE_NOTES.md           the body of the next GitHub release, ready to upload
 ```
 
 The built CSS is committed: the OpenWrt SDK has no node, so the package is built
@@ -170,12 +180,14 @@ Only the theme names changed, plus one line in `header.ut`: the dark variant get
 
 ## Visual design decisions
 
-The reference is the shadcn/ui site itself: large radii, pill-shaped buttons,
-content on cards, a header that is not set apart.
+The reference is the shadcn/ui site itself: large radii, content on cards, a
+header that is not set apart.
 
-- **Buttons are pills** (`rounded-full`), the base being the `outline` variant in
-  size `sm`: they live inside table rows, where a filled button on every row is
-  far too loud. Fills are reserved for genuinely primary actions: `Save & Apply`
+- **Buttons carry the fields' radius** (`rounded-lg`), the base being the
+  `outline` variant in size `sm`: they live inside table rows, where a filled
+  button on every row is far too loud. An input with a button butted against it
+  is a `ButtonGroup` — one shared edge, no overlap, `border-l-0` on every child
+  but the first. Fills are reserved for genuinely primary actions: `Save & Apply`
   (primary), the `Save` next to it (secondary), `Delete`/`Reset` (destructive
   outline).
 - **Sections are cards.** `.cbi-section` is an existing LuCI container and the
@@ -193,9 +205,18 @@ content on cards, a header that is not set apart.
   token, the base text size is `text-sm`. The two-column `.cbi-value` layout
   (180px title) is preserved — the views' layout depends on it.
 - **Gradients and inset shadows are gone.** Focus is `ring-[3px] ring-ring/50`.
-- **Tabs** are a pill-shaped segmented control sized to its content rather than an
-  underline: LuCI tab strips wrap onto several lines, and an underline breaks once
-  it wraps.
+- **Tabs** are a segmented control sized to its content rather than an underline:
+  LuCI tab strips wrap onto several lines, and an underline breaks once it wraps.
+  A tab is a button, so it takes the button radius, and the strip around it goes
+  one step up the scale (`rounded-xl`) — with the strip's 4px padding that comes
+  out concentric with the tabs inside it.
+- **Tables follow the DataTable**: a `rounded-lg` outline with a divider under
+  every row and none under the last. Upstream's header fill and zebra striping
+  are dropped — the dividers separate the rows and a `bg-muted/50` hover marks
+  the pointer. `border-collapse` has to be `separate` for the outline, because
+  `border-radius` does nothing on a table whose borders are collapsed. The
+  dashboard is the exception: its panels are already framed, so the tables there
+  keep the dividers and drop the outline.
 - **Alerts** are a neutral card with a colored accent instead of yellow-red
   banners. `.ifacebox-head.active` uses `accent`, not `primary`: in the neutral
   palette primary is a white block.

@@ -66,6 +66,28 @@
 	color: inherit;
 }
 
+/* The select caret gets the same lucide chevron as the native select, so the
+   two widgets read identically (--select-chevron-icon is defined in
+   select-native.css). ui.js writes "▾" into .open as text, hence the
+   transparent colour: the glyph has to go without removing the node, which the
+   state machine still needs. w-7 is the recipe's 12px inset plus the 16px icon
+   — the 8px gap to the value comes from the li's own px-2.
+
+   The ComboButton above keeps its glyph: its caret sits at button contrast
+   behind a divider, not at muted/50. */
+.cbi-dropdown:not(.btn):not(.cbi-button) > .open {
+	@apply relative w-7 text-transparent;
+	padding: 0;
+}
+
+.cbi-dropdown:not(.btn):not(.cbi-button) > .open::after {
+	@apply pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 opacity-50;
+	content: "";
+	background: var(--muted-foreground);
+	-webkit-mask: var(--select-chevron-icon) center/cover no-repeat;
+	mask: var(--select-chevron-icon) center/cover no-repeat;
+}
+
 .cbi-dropdown > .more,
 .cbi-dropdown:not(.btn):not(.cbi-button) > ul > li[placeholder] {
 	@apply hidden text-muted-foreground;
@@ -117,10 +139,20 @@
 	@apply relative;
 }
 
-/* The open list follows the SelectContent recipe. */
+/* The open list follows the SelectContent recipe.
+ *
+ * my-1 is the recipe's sideOffset={4}. ui.js positions the list by setting
+ * either `top: <trigger height>` (opening downwards) or `bottom: <trigger
+ * height>` (upwards) as an inline style, and CSS cannot tell which — but it
+ * does not need to: on an absolutely positioned box only the margin on the
+ * side that is actually anchored has any effect, so declaring both gives the
+ * same 4px gap whichever way the list opens.
+ *
+ * The ! is needed because `.cbi-dropdown > ul` carries upstream's
+ * `margin: 0 !important`, which nothing but another !important can outrank. */
 .cbi-dropdown[open] > ul.dropdown {
-	@apply absolute z-[1100] block w-auto min-w-full overflow-y-auto rounded-xl border
-	       border-border bg-popover p-1.5 text-popover-foreground shadow-lg;
+	@apply absolute z-[1100] my-1! block w-auto min-w-full overflow-y-auto rounded-xl
+	       border border-border bg-popover p-1.5 text-popover-foreground shadow-lg;
 	max-width: none;
 	transition: max-height .125s ease-in;
 }
@@ -150,11 +182,36 @@
 
 /* List items follow SelectItem; shadcn has no separators between them. */
 .cbi-dropdown[open] > ul.dropdown > li {
-	@apply cursor-default select-none rounded-lg border-b-0 px-2.5 py-1.5 text-sm;
+	@apply relative cursor-default select-none rounded-lg border-b-0 px-2.5 py-1.5 text-sm;
 }
 
+/*
+ * SelectItem marks the current value with a check on the right and leaves the
+ * background alone, so bg-accent means "focused" and nothing else. Upstream
+ * used bg-accent/60 for the selection against bg-accent for the pointer — two
+ * neighbouring shades of one colour that were near indistinguishable, so it
+ * was impossible to tell the current value from the row under the cursor.
+ *
+ * A [multiple] dropdown is left out: its items carry a real checkbox already.
+ */
 .cbi-dropdown[open] > ul.dropdown > li[selected] {
-	@apply bg-accent/60 font-medium text-accent-foreground;
+	@apply font-medium;
+}
+
+.cbi-dropdown:not([multiple])[open] > ul.dropdown > li {
+	/* room for the check, as SelectItem's pr-8 */
+	@apply pr-8;
+}
+
+.cbi-dropdown:not([multiple])[open] > ul.dropdown > li[selected]::after {
+	/* the same mark the checkbox uses (checkbox-radio.css) */
+	--check-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='m2.5 7.4 7.5 7.5-2.5 2.4L0 10Zm15-5L20 4.9 7.5 17.3 5 15Z'/></svg>");
+
+	@apply pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2;
+	content: "";
+	background: currentColor;
+	-webkit-mask: var(--check-icon) center/contain no-repeat;
+	mask: var(--check-icon) center/contain no-repeat;
 }
 
 .cbi-dropdown[open] > ul.dropdown > li.focus,
