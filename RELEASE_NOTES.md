@@ -2,6 +2,10 @@ A visual release: the markup, the workflow and the uci contract are untouched, s
 it drops straight on top of 1.0.0. Every page keeps working — only the look moves
 closer to shadcn/ui.
 
+One correction rather than a change: the Firefox floor below is 121, not the 113
+the 1.0.0 notes quoted. `:has()` was already in the stylesheet then and that
+number was simply wrong; more of the layout leans on it now.
+
 ## What's new
 
 ### Selects finally look like the recipe
@@ -61,7 +65,12 @@ select and the dropdown widget are now within a quarter-pixel of each other.
   crashed on a clean tree. Only affects development, not the shipped theme.
 
 <!-- changelog:start -->
-_No commits since v1.0.0._
+<details>
+<summary>All commits since v1.0.0</summary>
+
+- Move selects, buttons, tabs and tables onto the shadcn recipe (258bb5f)
+
+</details>
 <!-- changelog:end -->
 
 ## Installation
@@ -129,8 +138,9 @@ The package takes its own uci entries with it.
 
 ## Good to know
 
-- The palette is `oklch()` and the translucent surfaces are `color-mix()`, so the
-  browser has to be Chrome 111+, Safari 16.4+ or Firefox 113+.
+- The palette is `oklch()`, the translucent surfaces are `color-mix()` and some
+  of the layout keys off `:has()`, so the browser has to be Chrome 111+,
+  Safari 16.4+ or Firefox 121+.
 - Your own colours: drop any official shadcn `globals.css` into
   `theme/globals.css` and rebuild — `--radius` included, a palette that sets it
   to `0` comes out square everywhere. See the README.
