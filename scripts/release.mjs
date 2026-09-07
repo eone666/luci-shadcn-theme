@@ -186,7 +186,7 @@ Still yours to do:
   1. Write the prose for this release above the commit list — the mechanical
      fields are current, the "What's new" text is not regenerated.
   2. git add -A && git commit -m "Release ${version}"
-  3. git tag v${version} && git push --follow-tags
+  3. git tag -a v${version} -m "v${version}" && git push --follow-tags
   4. Upload ${apk ? rel(apk) : 'the .apk'} to the release and paste
      RELEASE_NOTES.md as its body.
 `);

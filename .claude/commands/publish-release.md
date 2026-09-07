@@ -82,9 +82,14 @@ After they confirm:
 
 ```
 git add -A && git commit -m "Release $1"
-git tag v$1 && git push --follow-tags
+git tag -a v$1 -m "v$1" && git push --follow-tags
 gh release create v$1 .sdk-out/luci-theme-shadcn-$1-r<PKG_RELEASE>.apk \
   --title "v$1" --notes-file RELEASE_NOTES.md
 ```
+
+The `-a` matters: `--follow-tags` pushes annotated tags and silently skips
+lightweight ones, so a plain `git tag v$1` sends `main` up on its own and leaves
+the tag behind. Annotated also matches the existing tags. Check the push output
+names the tag before creating the release; if it does not, `git push origin v$1`.
 
 Then report the release URL `gh` prints.
