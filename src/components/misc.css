@@ -184,7 +184,9 @@ div.cbi-value var.cbi-tooltip-container,
  */
 .Dashboard .title,
 .Dashboard .internet-status-self.dashboard-bg .internet-status-info .title {
-	@apply flex items-center gap-2.5;
+	/* gap-3, not the 10px this started at: a 20px glyph beside 14px text needs
+	   a little more air than a pair of same-sized things would. */
+	@apply flex items-center gap-3;
 	height: auto;
 	text-align: left;
 }
