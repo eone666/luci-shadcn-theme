@@ -22,6 +22,7 @@
     "release": "node scripts/release.mjs",
     "bench": "docker compose up -d --wait && echo \"LuCI on http://$(docker compose port openwrt 80 | sed 's/^0\\.0\\.0\\.0/localhost/')\"",
     "bench:down": "docker compose down",
+    "bench:seed": "node scripts/seed-bench.mjs",
     "bench:logs": "docker compose logs -f",
     "shots": "node scripts/shots.mjs",
     "shots:states": "node scripts/states.mjs",
