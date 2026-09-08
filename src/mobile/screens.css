@@ -505,6 +505,39 @@ header h3 a, header .brand {
 		transform: translate(-50%, -50%);
 	}
 
+	/*
+	 * The change indicator collapses the same way, and it needed it more:
+	 * "Unsaved Changes: 3" was by far the widest thing in the bar — measured
+	 * 270px of a 460px row, against the poll button's 32.
+	 *
+	 * The count goes with the words. It cannot be kept: the core writes the
+	 * whole label as one text node ('%s: %d'), so there is nothing to hide the
+	 * words by and leave the number. What remains is the signal that matters —
+	 * that there is something unsaved — and the dialog this opens lists every
+	 * change, which is where the number was useful anyway.
+	 */
+	header [data-indicator="uci-changes"][data-clickable] {
+		--uci-changes-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/><path d='M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7'/><path d='M7 3v4a1 1 0 0 0 1 1h7'/></svg>");
+
+		position: relative;
+		width: 2rem;
+		padding: 0;
+		font-size: 0;
+	}
+
+	header [data-indicator="uci-changes"]::before {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 1rem;
+		height: 1rem;
+		transform: translate(-50%, -50%);
+		background: currentColor;
+		-webkit-mask: var(--uci-changes-icon) center/contain no-repeat;
+		mask: var(--uci-changes-icon) center/contain no-repeat;
+	}
+
 	.menu-dropdown, .dropdown-menu {
 		top: 23px;
 	}
