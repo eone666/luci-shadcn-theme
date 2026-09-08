@@ -13,13 +13,17 @@ workflow changes, only how it looks.
   <sub>initscripts, interfaces, the dashboard, a modal, the login screen, a phone</sub>
 </p>
 
-> **Not a shadcn/ui project.** This is an independent theme, not affiliated with
-> or endorsed by shadcn/ui, and it ships none of its code — LuCI is not React,
-> and there is nothing here to install a component into. What it borrows is the
-> look: the styles were written after the publicly documented component recipes.
-> The one real connection is the palette — a `globals.css` from the official
-> [theme generator](https://ui.shadcn.com/create) drops in unchanged, `--radius`
-> included. See [Your own colours](#your-own-colours).
+> **Not a shadcn/ui project.** This is an independent theme, officially
+> unaffiliated with shadcn/ui and not endorsed by it, and it ships none of its
+> code — LuCI is not React, and there is nothing here to install a component
+> into. It is *inspired by* it: the styles were written after the publicly
+> documented component recipes.
+>
+> What it does have is **compatibility with shadcn/ui themes**. A `globals.css`
+> from the official [theme generator](https://ui.shadcn.com/create), from
+> `shadcn init`, or one of the base colours drops in unchanged and recolours the
+> whole interface — `--radius` included. See
+> [Your own colours](#your-own-colours).
 
 ## On a narrow screen
 
@@ -42,7 +46,7 @@ appears only when there is somewhere to go, and never when the table fits.
 ## Install
 
 Grab `luci-theme-shadcnui-*.apk` from the
-[Releases page](https://github.com/eone666/luci-shadcn-theme/releases), copy it
+[Releases page](https://github.com/eone666/luci-theme-shadcnui/releases), copy it
 to the router and:
 
 ```sh
@@ -107,8 +111,8 @@ theme ships with shadcn **neutral**.
 ## Building from source
 
 ```sh
-git clone https://github.com/eone666/luci-shadcn-theme.git
-cd luci-shadcn-theme
+git clone https://github.com/eone666/luci-theme-shadcnui.git
+cd luci-theme-shadcnui
 npm install
 npm run build                  # CSS -> luci-theme-shadcnui/htdocs/
 npm run package                # .apk in .sdk-out/ (OpenWrt SDK in docker)

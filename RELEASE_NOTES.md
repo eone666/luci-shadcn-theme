@@ -82,7 +82,7 @@ same file fits every target, x86_64 or aarch64 or mipsel alike. It weighs 21 KB.
 
 ```sh
 cd /tmp
-wget https://github.com/eone666/luci-shadcn-theme/releases/download/v1.0.1/luci-theme-shadcnui-1.0.1-r1.apk
+wget https://github.com/eone666/luci-theme-shadcnui/releases/download/v1.0.1/luci-theme-shadcnui-1.0.1-r1.apk
 sha256sum luci-theme-shadcnui-1.0.1-r1.apk
 # 06a6567a3b46b8b7a7d676560f8d93921ac95c51f7818dad2f67464dfb17c799
 
