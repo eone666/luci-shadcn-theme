@@ -184,9 +184,13 @@ div.cbi-value var.cbi-tooltip-container,
  */
 .Dashboard .title,
 .Dashboard .internet-status-self.dashboard-bg .internet-status-info .title {
-	/* gap-3, not the 10px this started at: a 20px glyph beside 14px text needs
-	   a little more air than a pair of same-sized things would. */
-	@apply flex items-center gap-3;
+	/* gap-4: a 20px glyph beside 14px text needs more air than a pair of
+	   same-sized things would, and a round one — the globe — needs more still,
+	   having no flat edge to sit against the letters. 10px and 12px both still
+	   read as one crowded lump.
+	   pb-2 for the same reason downwards: the core's <hr> follows this block
+	   with margin:0, so the heading sat 8px off the rule under it. */
+	@apply flex items-center gap-4 pb-2;
 	height: auto;
 	text-align: left;
 }
