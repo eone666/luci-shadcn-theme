@@ -148,8 +148,32 @@
 	@apply w-[15%] text-right align-middle;
 }
 
+/* Lays out the wrapper the section tables put in the actions cell — the div
+   holding Restart/Stop/Edit/Delete — as a right-aligned row. */
 .td.cbi-section-actions > * {
 	@apply flex justify-end gap-1;
+}
+
+/*
+ * Except when the cell's direct child is the control itself, with no wrapper
+ * around it — which is what Software's package list emits. The rule above is
+ * meant to right-align several buttons inside a wrapper; applied to a lone
+ * button it makes the button the flex box, so justify-end pushed its *label*
+ * against the right edge of a control stretched across the whole cell.
+ *
+ * Filling the cell is fine — it gives a wide, easy target on a narrow screen —
+ * so only the alignment changes: the label goes back to the middle.
+ *
+ * Written as a second rule rather than a :not() list on the one above, because
+ * `.td.cbi-section-actions > *` is an upstream selector and
+ * scripts/audit-selectors.mjs reports it MISSING the moment it is narrowed.
+ */
+.td.cbi-section-actions > .btn,
+.td.cbi-section-actions > .cbi-button,
+.td.cbi-section-actions > button,
+.td.cbi-section-actions > input,
+.td.cbi-section-actions > select {
+	@apply justify-center;
 }
 
 .td.cbi-section-actions > :not(.cbi-dropdown) > *,

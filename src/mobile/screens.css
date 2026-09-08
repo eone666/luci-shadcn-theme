@@ -128,6 +128,64 @@ header h3 a, header .brand {
 		margin: 0;
 	}
 
+	/*
+	 * Software: rows as cards.
+	 *
+	 * The package list is five columns of wildly different weight — name,
+	 * version, size, description, action — and upstream's .col-N grid keeps
+	 * them side by side at any width. At 390px that left "Size (.apk)" wrapping
+	 * onto two centred lines inside 71px, and the action cell stretching its
+	 * button to 336px with the label shoved to the right edge. So each row
+	 * becomes a card: the cells stack full-width, each one labelled by its own
+	 * data-title, the action last.
+	 *
+	 * Scoped by data-page rather than applied to every table: the .col-N grid
+	 * is a contract with the core, and Startup and Routes still read better as
+	 * columns. There is no body class to key on here — the page's node carries
+	 * no title, so `body.class` comes out empty on this one.
+	 *
+	 * flex: 0 0 auto !important is what it takes to get out of that grid: the
+	 * .col-N rules are themselves !important, and in a column flex container
+	 * their basis would size the cells vertically rather than horizontally.
+	 */
+	[data-page="admin-system-package-manager"] .table {
+		border: 0;
+		background: none;
+	}
+
+	[data-page="admin-system-package-manager"] .table .tr {
+		@apply mb-3 rounded-xl border border-border p-3;
+		flex-direction: column;
+		flex-wrap: nowrap;
+		align-items: stretch;
+	}
+
+	[data-page="admin-system-package-manager"] .table .tr > .td,
+	[data-page="admin-system-package-manager"] .table .tr > .th {
+		flex: 0 0 auto !important;
+		width: 100%;
+		max-width: 100%;
+		padding: 3px 0;
+		/* !important because the core tags these cells .center and .right, and
+		   misc.css carries upstream's !important on both. Column alignment is
+		   what those classes mean in a table; stacked in a card, every line
+		   reads from the left. */
+		text-align: left !important;
+	}
+
+	/* the label above its value, as the sheet labels its groups */
+	[data-page="admin-system-package-manager"] .table .td[data-title]::before {
+		@apply text-xs font-medium text-muted-foreground;
+		font-weight: 500;
+		text-align: left;
+	}
+
+	/* the action goes last and gets its own width back */
+	[data-page="admin-system-package-manager"] .table .td.cbi-section-actions {
+		padding-top: 10px;
+		text-align: left !important;
+	}
+
 	/* Both table shapes: rows as direct children (the status tables) and rows
 	   wrapped in a tbody (the cbi section tables). */
 	.table > .tr:last-child,
