@@ -2,15 +2,16 @@
 
 A theme for **LuCI**, the OpenWrt web interface, in the style of
 [shadcn/ui](https://ui.shadcn.com): cards, a segmented tab strip, bordered data
-tables, a full-screen menu sheet on a phone and an `oklch` palette. Light and
-dark, and every LuCI page keeps working — nothing about the markup or the
-workflow changes, only how it looks.
+tables that scroll themselves when they do not fit, a full-screen menu sheet on a
+phone and an `oklch` palette. Light and dark, and every LuCI page keeps working —
+nothing about the markup or the workflow changes, only how it looks.
 
 ![LuCI with the theme, dark and light](docs/img/hero.png)
 
 <p align="center">
   <a href="docs/screenshots.md"><b>More screenshots →</b></a><br>
-  <sub>initscripts, interfaces, the dashboard, a modal, the login screen, a phone</sub>
+  <sub>the dashboard, initscripts, interfaces, a modal, the login screen,
+  wide tables, a phone and its menu</sub>
 </p>
 
 > **Not a shadcn/ui project.** This is an independent theme, officially
@@ -24,24 +25,6 @@ workflow changes, only how it looks.
 > `shadcn init`, or one of the base colours drops in unchanged and recolours the
 > whole interface — `--radius` included. See
 > [Your own colours](#your-own-colours).
-
-## On a narrow screen
-
-The header collapses to one row — burger, mark, device name, poll button — and
-the menu opens as a sheet over the page: group labels in small caps, rows big
-enough to hit with a thumb, the page behind it locked and the sheet scrolling on
-its own. It needs no script of its own; the template puts a checkbox in front of
-the list LuCI builds, and the sheet is that checkbox's `:checked` state.
-
-A table too wide for the screen scrolls **itself** rather than dragging the page
-sideways with it, and marks the edge it can still be pulled from — a shade that
-appears only when there is somewhere to go, and never when the table fits.
-
-<p align="center">
-  <img src="docs/img/state-menu.png" alt="The menu sheet on a phone" width="260">
-  &nbsp;&nbsp;
-  <img src="docs/img/state-table-scroll.png" alt="A wide table scrolling inside itself" width="420">
-</p>
 
 ## Install
 

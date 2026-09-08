@@ -44,7 +44,7 @@ The shadcn login block: a card on a muted canvas, labels above the fields.
 
 ![System settings, light variant](img/system-light.png)
 
-### Wide tables
+## Wide tables
 
 A table that does not fit scrolls inside itself instead of pushing the page
 sideways, and shades the edge it can still be pulled from. Here it is scrolled to
