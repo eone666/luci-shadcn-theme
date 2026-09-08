@@ -92,6 +92,42 @@ header h3 a, header .brand {
 		overflow: visible;
 	}
 
+	/*
+	 * Reconcile the flex layout above with the DataTable in tables.css.
+	 *
+	 * On desktop the divider is a border-bottom on the *cells*. Here the cells
+	 * are two flex items that take their own heights, so a row with a long
+	 * value drew one line under its label and a second, lower one under the
+	 * value; and every boundary came out doubled regardless, the row drawing a
+	 * border-top of its own on top of that.
+	 *
+	 * So the cells stop drawing dividers, the row's line becomes a
+	 * border-bottom — the desktop direction, which also leaves the last row
+	 * clean — and the row gives up the 3px it was pulled out by on each side:
+	 * on an outlined table that made every divider cross the rounded border.
+	 *
+	 * The padding grows from 3px to 7px/10px while we are here: 3px put the
+	 * text a hair off the outline, and these rows are touch targets.
+	 */
+	.table .th,
+	.table .td {
+		border-bottom: 0;
+		padding: 7px 10px;
+	}
+
+	.tr {
+		border-top: 0;
+		border-bottom: 1px solid var(--border);
+		margin: 0;
+	}
+
+	/* Both table shapes: rows as direct children (the status tables) and rows
+	   wrapped in a tbody (the cbi section tables). */
+	.table > .tr:last-child,
+	.table > .tbody > .tr:last-child {
+		border-bottom: 0;
+	}
+
 	.col-1 { flex: 1 1 30px !important; -webkit-flex: 1 1 30px !important; }
 	.col-2 { flex: 2 2 60px !important; -webkit-flex: 2 2 60px !important; }
 	.col-3 { flex: 3 3 90px !important; -webkit-flex: 3 3 90px !important; }
@@ -174,7 +210,10 @@ header h3 a, header .brand {
 	.td.cbi-section-actions {
 		overflow: initial;
 		max-width: 100%;
-		padding: 3px 2px;
+		/* matches the 10px the other cells get above — this rule sits later in
+		   the file and would otherwise keep its own 2px, leaving the last
+		   button touching the table's border */
+		padding: 3px 10px;
 		flex-basis: 100%;
 	}
 
