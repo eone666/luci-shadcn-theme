@@ -73,12 +73,6 @@
    to reserve on its own. */
 select.cbi-input-select:not([multiple]) {
 	@apply cursor-pointer appearance-none pr-9;
-	/* The chevron alone takes 36px of that padding, so in a narrow table cell —
-	   the Input/Output/Forward columns on Firewall > Zones — a w-full select
-	   collapsed to the arrow with none of the value left showing. It keeps a
-	   floor now and the table scrolls instead, which is what the scroll box in
-	   tables.css is for. */
-	min-width: 7.5rem;
 }
 
 select.cbi-input-select option {
@@ -102,6 +96,27 @@ div:not([class]):has(> select.cbi-input-select:not([multiple])) {
    hence the descendant selector. */
 .table.cbi-section-table div:not([class]):has(> select.cbi-input-select:not([multiple])) {
 	@apply block w-full;
+}
+
+/*
+ * A floor, so a narrow column cannot squeeze the value out of sight: the
+ * Input and Output columns on Firewall > Zones are as wide as the word
+ * "Input", and the select in them came out 52px — the chevron and nothing
+ * else, with "accept" clipped away entirely.
+ *
+ * It goes on the frame rather than on the select, even though the select is
+ * what looked wrong. A min-width on the select is matched and applied (checked
+ * through CDP: nothing outranks it) and still does not hold, because the
+ * select carries width:100% inside an auto-layout table — a circular
+ * percentage, which contributes nothing to the column's minimum, and the
+ * control ends up narrower than its own floor. The frame is a plain block, so
+ * the column does size to it. Measured: 52px before, 120px after.
+ *
+ * The table is free to be wider than its container now, so the cost is a
+ * horizontal scroll rather than an unreadable control.
+ */
+div:not([class]):has(> select.cbi-input-select:not([multiple])) {
+	min-width: 7.5rem;
 }
 
 /* size-4 at muted-foreground/50, as shadcn's <ChevronDownIcon className="size-4
