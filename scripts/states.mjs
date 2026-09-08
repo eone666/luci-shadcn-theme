@@ -7,23 +7,35 @@
  *   node scripts/states.mjs            # every state
  *   node scripts/states.mjs dropdown   # just one
  *   node scripts/states.mjs --light
+ *   node scripts/states.mjs --out docs/img menu    # somewhere other than shots/
+ *
+ * A couple of these states are the theme's own behaviour rather than the core's
+ * — the mobile menu sheet, a table scrolling inside itself — so they set their
+ * own viewport and are the ones worth keeping in docs/img.
  */
 import { mkdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { open, login, go as goTo, switchTheme } from './lib/bench.mjs';
 
-const OUT = resolve(import.meta.dirname, '..', 'shots');
+const root = resolve(import.meta.dirname, '..');
 
 const argv = process.argv.slice(2);
 const light = argv.includes('--light');
-const want = argv.filter((a) => !a.startsWith('--'));
+let dir = 'shots';
+const want = [];
+for (let i = 0; i < argv.length; i++) {
+	const a = argv[i];
+	if (a === '--out') dir = argv[++i];
+	else if (!a.startsWith('--')) want.push(a);
+}
+const OUT = resolve(root, dir);
 const suffix = light ? '-light' : '';
 
 mkdirSync(OUT, { recursive: true });
 switchTheme(light ? 'shadcn-light' : 'shadcn-dark');
 
 const { browser, page } = await open({ light, height: 900 });
-const shot = (name) => page.screenshot({ path: join(OUT, `state-${name}${suffix}.png`) });
+const shot = (name, opts) => page.screenshot({ path: join(OUT, `state-${name}${suffix}.png`), ...opts });
 const go = (url) => goTo(page, url);
 
 await login(page);
@@ -143,6 +155,59 @@ await step('modal', async () => {
 		await shot('modal');
 		await page.keyboard.press('Escape');
 	}
+});
+
+/*
+ * 6. The mobile menu sheet. This one is the theme's, not the core's: header.ut
+ *    puts a checkbox in front of #topmenu and the sheet is that checkbox's
+ *    :checked state, so there is nothing to drive but a click on the label.
+ */
+await step('menu', async () => {
+	await page.setViewportSize({ width: 420, height: 900 });
+	await go('/cgi-bin/luci/admin/status/overview');
+	const trigger = page.locator('.menu-trigger');
+	if (!await trigger.count()) {
+		console.log('menu: no trigger — is the viewport wide enough to hide it?');
+		return;
+	}
+	await trigger.click();
+	await page.waitForTimeout(500);
+	const open = await page.evaluate(() =>
+		getComputedStyle(document.querySelector('#topmenu')).position === 'fixed');
+	await shot('menu');
+	console.log(`menu: sheet ${open ? 'open' : 'did NOT open'}`);
+	await trigger.click();
+	await page.setViewportSize({ width: 1440, height: 900 });
+});
+
+/*
+ * 7. A table wider than its container, scrolled off its left edge so the shade
+ *    marking there is more to the side shows. Firewall > Zones is the widest
+ *    table the bench has; 760px is narrow enough to make it overflow and wide
+ *    enough to stay out of the card layout, which takes over below 600px and
+ *    has nothing to scroll.
+ */
+await step('table-scroll', async () => {
+	await page.setViewportSize({ width: 760, height: 900 });
+	await go('/cgi-bin/luci/admin/network/firewall/zones');
+	const box = page.locator('.table-scroller').first();
+	if (!await box.count()) {
+		console.log('table-scroll: no scroll box — menu-shadcn.js did not wrap');
+		return;
+	}
+	const scrolls = await box.evaluate((el) => {
+		el.scrollLeft = Math.round((el.scrollWidth - el.clientWidth) / 2);
+		return el.scrollWidth > el.clientWidth + 1;
+	});
+	await page.waitForTimeout(300);
+	await box.scrollIntoViewIfNeeded();
+	/* cropped to the table plus its heading: the point of the shot is the two
+	   shades at the edges, which a whole-page frame buries */
+	const b = await box.boundingBox();
+	await shot('table-scroll', { clip: { x: Math.max(b.x - 24, 0), y: Math.max(b.y - 56, 0),
+	                                     width: Math.min(b.width + 48, 760), height: b.height + 80 } });
+	console.log(`table-scroll: ${scrolls ? 'scrolls' : 'fits, nothing to show'}`);
+	await page.setViewportSize({ width: 1440, height: 900 });
 });
 
 await browser.close();

@@ -104,6 +104,16 @@ if (flags.has('--shots')) {
 	run('npm', ['run', 'shots', '--', '--out', 'docs/img', 'login', 'startup', 'interfaces', 'dashboard'], 'shots');
 	run('npm', ['run', 'shots', '--', '--light', '--out', 'docs/img', 'system'], 'shots (light)');
 	run('npm', ['run', 'shots', '--', '--width', '420', '--out', 'docs/img', '--suffix', '-mobile', 'system'], 'shots (mobile)');
+	/* The theme's own behaviour rather than the core's — the mobile menu sheet
+	   and a table scrolling inside itself — so they come from states.mjs, which
+	   is the script that can drive an interaction before it shoots. */
+	run('node', ['scripts/states.mjs', '--out', 'docs/img', 'menu', 'table-scroll'], 'states');
+	/* The uci change dialog shot goes under its own name in docs/img: the state
+	   that produces it also produces the "saved, not yet applied" frame, which
+	   the docs do not use, so it is taken from shots/ rather than written into
+	   docs/img directly. */
+	run('node', ['scripts/states.mjs', 'apply'], 'states (apply)');
+	run('cp', ['shots/state-apply-dialog.png', 'docs/img/uci-changes.png'], 'uci-changes shot');
 	run('node', ['scripts/hero.mjs'], 'hero');
 }
 

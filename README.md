@@ -2,14 +2,33 @@
 
 A theme for **LuCI**, the OpenWrt web interface, in the style of
 [shadcn/ui](https://ui.shadcn.com): cards, a segmented tab strip, bordered data
-tables and an `oklch` palette. Light and dark, and every LuCI page keeps working —
-nothing about the markup or the workflow changes, only how it looks.
+tables, a full-screen menu sheet on a phone and an `oklch` palette. Light and
+dark, and every LuCI page keeps working — nothing about the markup or the
+workflow changes, only how it looks.
 
 ![LuCI with the theme, dark and light](docs/img/hero.png)
 
 <p align="center">
   <a href="docs/screenshots.md"><b>More screenshots →</b></a><br>
   <sub>initscripts, interfaces, the dashboard, a modal, the login screen, a phone</sub>
+</p>
+
+## On a narrow screen
+
+The header collapses to one row — burger, mark, device name, poll button — and
+the menu opens as a sheet over the page: group labels in small caps, rows big
+enough to hit with a thumb, the page behind it locked and the sheet scrolling on
+its own. It needs no script of its own; the template puts a checkbox in front of
+the list LuCI builds, and the sheet is that checkbox's `:checked` state.
+
+A table too wide for the screen scrolls **itself** rather than dragging the page
+sideways with it, and marks the edge it can still be pulled from — a shade that
+appears only when there is somewhere to go, and never when the table fits.
+
+<p align="center">
+  <img src="docs/img/state-menu.png" alt="The menu sheet on a phone" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/img/state-table-scroll.png" alt="A wide table scrolling inside itself" width="420">
 </p>
 
 ## Install
@@ -70,10 +89,12 @@ theme ships with shadcn **neutral**.
 
 - OpenWrt 25.12 with LuCI — built and tested against `luci-base`
   26.133.20346 on OpenWrt 25.12.4.
-- A browser from 2023 or later: Chrome 111+, Safari 16.4+, Firefox 113+. The
-  palette is `oklch()` and the translucent surfaces are `color-mix()`.
-- Very little flash: a 24 KB `.apk`, ~112 KB installed (`cascade.css` is 73 KB of
-  that, `mobile.css` 8 KB).
+- A browser from late 2023 or later: Chrome 111+, Safari 16.4+, Firefox 121+.
+  The palette is `oklch()`, the translucent surfaces are `color-mix()`, and some
+  of the layout keys off `:has()` — which is what puts the Firefox floor at 121
+  rather than the 113 the other two features would need.
+- Very little flash: a 21 KB `.apk`, ~136 KB installed (`cascade.css` is 86 KB of
+  that, `mobile.css` 9 KB, and 12 KB of JS for the menu and the login view).
 
 ## Building from source
 
@@ -113,9 +134,10 @@ audit is what catches it. Comments and docs are in English.
 ## Credits and licence
 
 Built on `luci-theme-bootstrap` from [LuCI](https://github.com/openwrt/luci):
-the ucode templates, `menu.js` and `sysauth.js` are its files, and the selector
-list is its contract with LuCI core — which is what keeps every page working.
-The styles were rewritten after the [shadcn/ui](https://ui.shadcn.com) component
-recipes.
+the ucode templates and `sysauth.js` started as its files, and the selector list
+is its contract with LuCI core — which is what keeps every page working. The
+theme's own `menu-shadcn.js` renders the menus and wraps wide tables in a scroll
+box. The styles were rewritten after the [shadcn/ui](https://ui.shadcn.com)
+component recipes.
 
 Apache-2.0, like the theme it comes from. See [LICENSE](LICENSE).
