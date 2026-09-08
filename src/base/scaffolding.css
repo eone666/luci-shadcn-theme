@@ -1,8 +1,31 @@
 /* Page scaffolding: canvas, container, links, alignment utilities. */
 
+/*
+ * --page-gutter is the one place the page's outer margin is decided. The header
+ * pulls itself out of it with a negative margin and pays it back as padding
+ * (chrome.css), so both have to read the same number or the header column stops
+ * lining up with the content — keep them on this variable rather than repeating
+ * a literal.
+ *
+ * It only becomes visible once the viewport is narrower than the 1180px
+ * container: above that the margins come from centring, and the gutter is just
+ * the strip the sticky header bleeds into. Below it, the gutter *is* the
+ * margin, and the 5px this used to be left the text all but touching the edge.
+ */
+:root {
+	--page-gutter: 24px;
+}
+
+@media (max-width: 640px) {
+	:root {
+		--page-gutter: 16px;
+	}
+}
+
 body {
-	@apply flex min-h-full flex-col overflow-y-scroll bg-background p-[5px]
+	@apply flex min-h-full flex-col overflow-y-scroll bg-background
 	       font-sans text-sm font-normal text-foreground;
+	padding: var(--page-gutter);
 }
 
 .container {

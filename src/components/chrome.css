@@ -20,14 +20,17 @@ header {
 	   (see top:100% below) — otherwise the cursor loses hover in the gap. */
 	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
 	       bg-background/80 text-foreground backdrop-blur-md;
-	margin: -5px -5px 15px -5px;
-	/* The 5px term is the body padding the negative margin above cancels: the
-	   header box starts 5px left of the body content box, and 100% resolves
-	   against that content box — so without it the whole header column lands
-	   5px left of the page content instead of on it.
+	margin: calc(-1 * var(--page-gutter)) calc(-1 * var(--page-gutter)) 15px;
+	/* The gutter term is the body padding the negative margin above cancels: the
+	   header box starts one gutter left of the body content box, and 100%
+	   resolves against that content box — so without it the whole header column
+	   lands a gutter left of the page content instead of on it.
+	   max() because below 1180px the centring term goes negative, and a padding
+	   cannot: without the clamp the browser drops the whole declaration and the
+	   header loses its gutter while the content keeps one.
 	   The redundant properties below work around a csstidy bug. */
-	padding-left: calc(5px + (100% - 1180px) / 2);
-	padding-right: calc(5px + (100% - 1180px) / 2);
+	padding-left: calc(var(--page-gutter) + max(0px, (100% - 1180px) / 2));
+	padding-right: calc(var(--page-gutter) + max(0px, (100% - 1180px) / 2));
 }
 
 header a {
