@@ -3,7 +3,7 @@ description: Publish a release — bump the version, rebuild, write the changelo
 argument-hint: <version, e.g. 1.0.2>
 ---
 
-Publish release **$1** of luci-theme-shadcn.
+Publish release **$1** of luci-theme-shadcnui.
 
 `RELEASE_NOTES.md` is the body of the GitHub release, uploaded verbatim — so it
 has to be correct and readable on its own, not a dump of commit subjects.
@@ -27,7 +27,7 @@ has to be correct and readable on its own, not a dump of commit subjects.
 npm run release -- $1
 ```
 
-`scripts/release.mjs` bumps `PKG_VERSION` in `luci-theme-shadcn/Makefile` and
+`scripts/release.mjs` bumps `PKG_VERSION` in `luci-theme-shadcnui/Makefile` and
 `version` in `package.json` (they must match or `package.sh` refuses), runs the
 build and the selector audit, builds the `.apk` in the OpenWrt SDK, then updates
 `RELEASE_NOTES.md`: the version in the download URL and the filenames, the
@@ -66,8 +66,8 @@ page, and fix anything stale.
 
 ## 4. Check before publishing
 
-- `git diff RELEASE_NOTES.md package.json luci-theme-shadcn/Makefile`
-- the built artifact is `.sdk-out/luci-theme-shadcn-$1-r<PKG_RELEASE>.apk`;
+- `git diff RELEASE_NOTES.md package.json luci-theme-shadcnui/Makefile`
+- the built artifact is `.sdk-out/luci-theme-shadcnui-$1-r<PKG_RELEASE>.apk`;
   confirm the `sha256` in the notes matches `shasum -a 256` on that file
 - optionally `npm run package:check` — installs the `.apk` into a clean OpenWrt
   and verifies it
@@ -83,7 +83,7 @@ After they confirm:
 ```
 git add -A && git commit -m "Release $1"
 git tag -a v$1 -m "v$1" && git push --follow-tags
-gh release create v$1 .sdk-out/luci-theme-shadcn-$1-r<PKG_RELEASE>.apk \
+gh release create v$1 .sdk-out/luci-theme-shadcnui-$1-r<PKG_RELEASE>.apk \
   --title "v$1" --notes-file RELEASE_NOTES.md
 ```
 

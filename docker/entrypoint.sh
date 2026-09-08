@@ -65,21 +65,21 @@ if [ -n "$ROOT_PASSWORD" ]; then
 	printf '%s\n%s\n' "$ROOT_PASSWORD" "$ROOT_PASSWORD" | passwd root >/dev/null 2>&1
 fi
 
-# Theme variant symlinks — the same thing the package does: shadcn-dark and
-# shadcn-light are the same directory, the mode is picked by the name (see
+# Theme variant symlinks — the same thing the package does: shadcnui-dark and
+# shadcnui-light are the same directory, the mode is picked by the name (see
 # darkpref in header.ut). In the container they are created here, because only
-# shadcn itself is mounted.
+# shadcnui itself is mounted.
 for variant in light dark; do
-	[ -e "/www/luci-static/shadcn-$variant" ] || \
-		ln -s shadcn "/www/luci-static/shadcn-$variant"
-	[ -e "/usr/share/ucode/luci/template/themes/shadcn-$variant" ] || \
-		ln -s shadcn "/usr/share/ucode/luci/template/themes/shadcn-$variant"
+	[ -e "/www/luci-static/shadcnui-$variant" ] || \
+		ln -s shadcnui "/www/luci-static/shadcnui-$variant"
+	[ -e "/usr/share/ucode/luci/template/themes/shadcnui-$variant" ] || \
+		ln -s shadcnui "/usr/share/ucode/luci/template/themes/shadcnui-$variant"
 done
 
 # themes.<Name> — the entries under System / Language and Style / Design
-uci -q set luci.themes.Shadcn='/luci-static/shadcn'
-uci -q set luci.themes.ShadcnLight='/luci-static/shadcn-light'
-uci -q set luci.themes.ShadcnDark='/luci-static/shadcn-dark'
+uci -q set luci.themes.ShadcnUi='/luci-static/shadcnui'
+uci -q set luci.themes.ShadcnUiLight='/luci-static/shadcnui-light'
+uci -q set luci.themes.ShadcnUiDark='/luci-static/shadcnui-dark'
 
 if [ -n "$LUCI_THEME" ]; then
 	# mediaurlbase — the active theme

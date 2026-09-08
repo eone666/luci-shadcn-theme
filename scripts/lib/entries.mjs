@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 export const root = resolve(import.meta.dirname, '..', '..');
 
 /** Where the built stylesheets go — inside the package, as it ships. */
-export const OUT = 'luci-theme-shadcn/htdocs/luci-static/shadcn';
+export const OUT = 'luci-theme-shadcnui/htdocs/luci-static/shadcnui';
 
 /** Tailwind builds one file per entry; postprocess.mjs then strips it down. */
 export const ENTRIES = [

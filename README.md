@@ -1,4 +1,4 @@
-# luci-theme-shadcn
+# luci-theme-shadcnui
 
 A theme for **LuCI**, the OpenWrt web interface, in the style of
 [shadcn/ui](https://ui.shadcn.com): cards, a segmented tab strip, bordered data
@@ -12,6 +12,14 @@ workflow changes, only how it looks.
   <a href="docs/screenshots.md"><b>More screenshots →</b></a><br>
   <sub>initscripts, interfaces, the dashboard, a modal, the login screen, a phone</sub>
 </p>
+
+> **Not a shadcn/ui project.** This is an independent theme, not affiliated with
+> or endorsed by shadcn/ui, and it ships none of its code — LuCI is not React,
+> and there is nothing here to install a component into. What it borrows is the
+> look: the styles were written after the publicly documented component recipes.
+> The one real connection is the palette — a `globals.css` from the official
+> [theme generator](https://ui.shadcn.com/create) drops in unchanged, `--radius`
+> included. See [Your own colours](#your-own-colours).
 
 ## On a narrow screen
 
@@ -33,12 +41,12 @@ appears only when there is somewhere to go, and never when the table fits.
 
 ## Install
 
-Grab `luci-theme-shadcn-*.apk` from the
+Grab `luci-theme-shadcnui-*.apk` from the
 [Releases page](https://github.com/eone666/luci-shadcn-theme/releases), copy it
 to the router and:
 
 ```sh
-apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.1-r1.apk
+apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.1-r1.apk
 ```
 
 The package is built for `apk`, the package manager of OpenWrt 25.12. On an
@@ -49,21 +57,21 @@ Installing does not switch the interface over. Pick the theme in
 **System → System → Language and Style → Design**, or from the shell:
 
 ```sh
-uci set luci.main.mediaurlbase=/luci-static/shadcn-dark && uci commit luci
+uci set luci.main.mediaurlbase=/luci-static/shadcnui-dark && uci commit luci
 ```
 
 Three variants are registered, exactly like the stock bootstrap theme:
 
 | In the Design list | |
 |---|---|
-| `Shadcn` | follows the browser's `prefers-color-scheme` |
-| `ShadcnLight` | always light |
-| `ShadcnDark` | always dark |
+| `ShadcnUi` | follows the browser's `prefers-color-scheme` |
+| `ShadcnUiLight` | always light |
+| `ShadcnUiDark` | always dark |
 
 (No dashes: uci option names cannot carry them, which is why the stock theme
 lists `BootstrapDark` too.)
 
-To remove it, put your old theme back first, then `apk del luci-theme-shadcn` —
+To remove it, put your old theme back first, then `apk del luci-theme-shadcnui` —
 the package cleans its own entries out of uci.
 
 ## Your own colours
@@ -102,7 +110,7 @@ theme ships with shadcn **neutral**.
 git clone https://github.com/eone666/luci-shadcn-theme.git
 cd luci-shadcn-theme
 npm install
-npm run build                  # CSS -> luci-theme-shadcn/htdocs/
+npm run build                  # CSS -> luci-theme-shadcnui/htdocs/
 npm run package                # .apk in .sdk-out/ (OpenWrt SDK in docker)
 npm run package:check          # install it into a clean OpenWrt and verify
 ```
@@ -136,8 +144,13 @@ audit is what catches it. Comments and docs are in English.
 Built on `luci-theme-bootstrap` from [LuCI](https://github.com/openwrt/luci):
 the ucode templates and `sysauth.js` started as its files, and the selector list
 is its contract with LuCI core — which is what keeps every page working. The
-theme's own `menu-shadcn.js` renders the menus and wraps wide tables in a scroll
-box. The styles were rewritten after the [shadcn/ui](https://ui.shadcn.com)
-component recipes.
+theme's own `menu-shadcnui.js` renders the menus and wraps wide tables in a
+scroll box.
+
+The styles were written after the [shadcn/ui](https://ui.shadcn.com) component
+recipes, and that is the whole of the relationship: this project is not
+affiliated with shadcn/ui, is not endorsed by it, and contains no code from it.
+"shadcn" and "shadcn/ui" belong to their author; they are used here only to say
+which design this theme follows.
 
 Apache-2.0, like the theme it comes from. See [LICENSE](LICENSE).

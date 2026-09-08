@@ -28,12 +28,12 @@ LUCI_MINIFY_JS:=0
 
 PKG_LICENSE:=Apache-2.0
 
-define Package/luci-theme-shadcn/postrm
+define Package/luci-theme-shadcnui/postrm
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
-	uci -q delete luci.themes.Shadcn
-	uci -q delete luci.themes.ShadcnDark
-	uci -q delete luci.themes.ShadcnLight
+	uci -q delete luci.themes.ShadcnUi
+	uci -q delete luci.themes.ShadcnUiDark
+	uci -q delete luci.themes.ShadcnUiLight
 	uci commit luci
 }
 endef

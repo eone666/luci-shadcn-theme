@@ -1,5 +1,5 @@
 /*
- * Entry point for the theme's main CSS -> htdocs/luci-static/shadcn/cascade.css
+ * Entry point for the theme's main CSS -> htdocs/luci-static/shadcnui/cascade.css
  *
  * Tailwind is pulled in piece by piece rather than via `@import "tailwindcss"`:
  *   - preflight is deliberately left out: in v4 it sets img/svg/video{display:block},

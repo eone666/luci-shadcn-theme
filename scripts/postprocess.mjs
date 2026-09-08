@@ -27,7 +27,7 @@
 import { readFileSync, writeFileSync, renameSync } from 'node:fs';
 
 const HEADER = (name) => `/*!
- * luci-theme-shadcn — ${name}
+ * luci-theme-shadcnui — ${name}
  * A shadcn/ui-styled theme for LuCI. Built from sources (src/), do not edit.
  * Palette: theme/globals.css. License: Apache-2.0.
  */

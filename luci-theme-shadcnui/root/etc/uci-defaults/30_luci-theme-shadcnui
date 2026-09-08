@@ -1,0 +1,63 @@
+#!/bin/sh
+
+changed=0
+
+set_opt() {
+	local key=$1
+	local val=$2
+
+	if ! uci -q get "luci.$key" 2>/dev/null; then
+		uci set "luci.$key=$val"
+		changed=1
+	fi
+}
+
+# Three variants of one theme: ShadcnUi follows prefers-color-scheme, the other
+# two pin the mode (see darkpref in ucode/template/themes/shadcnui/header.ut).
+# mediaurlbase is deliberately left alone below: installing a theme must not
+# silently switch the interface — that choice stays with System -> Language and
+# Style -> Design.
+set_opt themes.ShadcnUi /luci-static/shadcnui
+set_opt themes.ShadcnUiDark /luci-static/shadcnui-dark
+set_opt themes.ShadcnUiLight /luci-static/shadcnui-light
+
+# --- migration from luci-theme-shadcn ---------------------------------------
+#
+# Up to 1.0.1 the package was luci-theme-shadcn and served /luci-static/shadcn.
+# Renaming it moves those files, so a router that had the theme *selected* would
+# come back with luci.main.mediaurlbase pointing at a directory that no longer
+# exists — an unstyled LuCI, with no clue as to why. So the one uci value the
+# install is otherwise careful not to touch does get rewritten here, and only
+# when it is one of the three paths this package used to own.
+old_base=$(uci -q get luci.main.mediaurlbase)
+
+case "$old_base" in
+	/luci-static/shadcn)       new_base=/luci-static/shadcnui ;;
+	/luci-static/shadcn-dark)  new_base=/luci-static/shadcnui-dark ;;
+	/luci-static/shadcn-light) new_base=/luci-static/shadcnui-light ;;
+	*)                         new_base= ;;
+esac
+
+if [ -n "$new_base" ]; then
+	uci set luci.main.mediaurlbase="$new_base"
+	changed=1
+fi
+
+# The old package's Design entries would linger as three options pointing at
+# nothing. They are only dropped once its files are actually gone: while both
+# packages are installed the old ones still work, and deleting another
+# package's registrations would be wrong.
+if [ ! -d /www/luci-static/shadcn ]; then
+	for old in Shadcn ShadcnDark ShadcnLight; do
+		if uci -q get "luci.themes.$old" >/dev/null 2>&1; then
+			uci -q delete "luci.themes.$old"
+			changed=1
+		fi
+	done
+fi
+
+if [ $changed = 1 ]; then
+	uci commit luci
+fi
+
+exit 0

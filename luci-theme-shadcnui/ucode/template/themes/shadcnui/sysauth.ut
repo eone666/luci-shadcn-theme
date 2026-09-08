@@ -40,7 +40,7 @@
 	<div class="spinning">{{ _('Loading view…') }}</div>
 	<script>
 		L.require('ui').then(function(ui) {
-			ui.instantiateView('shadcn.sysauth');
+			ui.instantiateView('shadcnui.sysauth');
 		});
 	</script>
 </div>

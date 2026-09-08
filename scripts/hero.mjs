@@ -21,7 +21,7 @@ const width = 1440, height = 880;
 
 const shots = {};
 for (const variant of ['dark', 'light']) {
-	switchTheme(`shadcn-${variant}`);
+	switchTheme(`shadcnui-${variant}`);
 	const { browser, page } = await open({ light: variant === 'light', width, height });
 	await login(page);
 	await go(page, PAGES[name].url);

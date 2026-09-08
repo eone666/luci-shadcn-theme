@@ -10,7 +10,7 @@
 #   OPENWRT_VERSION=25.12.5 ./scripts/package.sh
 #   OPENWRT_SDK_TARGET=x86-64 ./scripts/package.sh
 #
-# Result: .sdk-out/luci-theme-shadcn-*.apk
+# Result: .sdk-out/luci-theme-shadcnui-*.apk
 set -eu
 
 VERSION="${OPENWRT_VERSION:-25.12.4}"
@@ -22,7 +22,7 @@ OUT="$ROOT/.sdk-out"
 # Two files carry a version -- the Makefile's PKG_VERSION is what ships, and
 # package.json's is what a contributor is likely to bump. Drifting apart is
 # silent and confusing, so they have to agree.
-PKG_VER=$(sed -n 's/^PKG_VERSION:=//p' "$ROOT/luci-theme-shadcn/Makefile")
+PKG_VER=$(sed -n 's/^PKG_VERSION:=//p' "$ROOT/luci-theme-shadcnui/Makefile")
 NPM_VER=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/package.json" | head -1)
 if [ "$PKG_VER" != "$NPM_VER" ]; then
 	echo "version mismatch: Makefile PKG_VERSION=$PKG_VER, package.json=$NPM_VER" >&2
@@ -54,7 +54,7 @@ rm -f "$OUT"/*.apk "$OUT"/*.ipk 2>/dev/null || true
 echo "== SDK: $IMAGE =="
 docker run --rm -i \
 	--platform linux/amd64 \
-	-v "$ROOT/luci-theme-shadcn:/pkg:ro" \
+	-v "$ROOT/luci-theme-shadcnui:/pkg:ro" \
 	-v "$OUT:/out" \
 	"$IMAGE" sh -s <<'INNER'
 set -eu
@@ -63,26 +63,26 @@ cd /builder
 echo "== updating the luci feed (luci.mk) =="
 ./scripts/feeds update luci >/dev/null 2>&1
 
-# cp -a keeps the theme-variant symlinks (shadcn-dark/shadcn-light -> shadcn) as
+# cp -a keeps the theme-variant symlinks (shadcnui-dark/shadcnui-light -> shadcnui) as
 # symlinks; the package is expected to install them as such.
-rm -rf package/luci-theme-shadcn
-cp -a /pkg package/luci-theme-shadcn
+rm -rf package/luci-theme-shadcnui
+cp -a /pkg package/luci-theme-shadcnui
 
 # Select the package. `make package/<name>/compile` alone would build it, but the
 # .apk is only emitted for packages enabled in .config.
 echo "== defconfig =="
-grep -q '^CONFIG_PACKAGE_luci-theme-shadcn=' .config 2>/dev/null \
-	|| echo CONFIG_PACKAGE_luci-theme-shadcn=y >> .config
+grep -q '^CONFIG_PACKAGE_luci-theme-shadcnui=' .config 2>/dev/null \
+	|| echo CONFIG_PACKAGE_luci-theme-shadcnui=y >> .config
 make defconfig >/dev/null 2>&1
 
 echo "== building =="
-make package/luci-theme-shadcn/compile -j"$(nproc)" >/tmp/build.log 2>&1 || {
+make package/luci-theme-shadcnui/compile -j"$(nproc)" >/tmp/build.log 2>&1 || {
 	echo "-- build failed, last 60 lines --"
 	tail -60 /tmp/build.log
 	exit 1
 }
 
-found=$(find bin -name 'luci-theme-shadcn*.apk' -o -name 'luci-theme-shadcn*.ipk')
+found=$(find bin -name 'luci-theme-shadcnui*.apk' -o -name 'luci-theme-shadcnui*.ipk')
 [ -n "$found" ] || { echo "SDK produced no package"; tail -40 /tmp/build.log; exit 1; }
 for f in $found; do cp "$f" /out/; done
 INNER

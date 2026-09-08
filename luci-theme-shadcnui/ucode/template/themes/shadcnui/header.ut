@@ -9,7 +9,7 @@
 	import { getuid, getspnam } from 'luci.core';
 
 	const boardinfo = ubus.call('system', 'board');
-	const darkpref = (theme == 'shadcn-dark' ? 'true' : (theme == 'shadcn-light' ? 'false' : null));
+	const darkpref = (theme == 'shadcnui-dark' ? 'true' : (theme == 'shadcnui-light' ? 'false' : null));
 
 	/* The shadcn tokens live in `:root` (light) and `.dark` (dark), so the dark
 	   variant needs the `dark` class; the data-darkmode attribute is kept for the

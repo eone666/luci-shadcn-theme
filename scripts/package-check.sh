@@ -13,9 +13,9 @@ VERSION="${OPENWRT_VERSION:-25.12.4}"
 ARCH="${OPENWRT_ARCH:-aarch64_generic}"
 IMAGE="openwrt/rootfs:${ARCH}-${VERSION}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-NAME="luci-theme-shadcn-pkgcheck"
+NAME="luci-theme-shadcnui-pkgcheck"
 
-APK=$(ls "$ROOT"/.sdk-out/luci-theme-shadcn*.apk 2>/dev/null | head -1 || true)
+APK=$(ls "$ROOT"/.sdk-out/luci-theme-shadcnui*.apk 2>/dev/null | head -1 || true)
 [ -n "$APK" ] || { echo "no package in .sdk-out -- run ./scripts/package.sh first"; exit 1; }
 echo "== checking $(basename "$APK") =="
 
@@ -53,18 +53,18 @@ docker exec -i "$NAME" sh -s <<'INNER' || { echo; echo "== FAILED =="; exit 1; }
 fail=0
 
 echo "== what the package installed =="
-for f in /www/luci-static/shadcn/cascade.css /www/luci-static/shadcn/mobile.css \
-         /www/luci-static/shadcn/logo.svg /www/luci-static/shadcn/logo_48.png \
-         /www/luci-static/resources/menu-shadcn.js \
-         /www/luci-static/resources/view/shadcn/sysauth.js \
-         /usr/share/ucode/luci/template/themes/shadcn/header.ut \
-         /usr/share/ucode/luci/template/themes/shadcn/footer.ut \
-         /usr/share/ucode/luci/template/themes/shadcn/sysauth.ut; do
+for f in /www/luci-static/shadcnui/cascade.css /www/luci-static/shadcnui/mobile.css \
+         /www/luci-static/shadcnui/logo.svg /www/luci-static/shadcnui/logo_48.png \
+         /www/luci-static/resources/menu-shadcnui.js \
+         /www/luci-static/resources/view/shadcnui/sysauth.js \
+         /usr/share/ucode/luci/template/themes/shadcnui/header.ut \
+         /usr/share/ucode/luci/template/themes/shadcnui/footer.ut \
+         /usr/share/ucode/luci/template/themes/shadcnui/sysauth.ut; do
 	[ -s "$f" ] || { echo "  MISSING OR EMPTY: $f"; fail=1; }
 done
-for l in /www/luci-static/shadcn-dark /www/luci-static/shadcn-light \
-         /usr/share/ucode/luci/template/themes/shadcn-dark \
-         /usr/share/ucode/luci/template/themes/shadcn-light; do
+for l in /www/luci-static/shadcnui-dark /www/luci-static/shadcnui-light \
+         /usr/share/ucode/luci/template/themes/shadcnui-dark \
+         /usr/share/ucode/luci/template/themes/shadcnui-light; do
 	[ -L "$l" ] || { echo "  NOT A SYMLINK: $l"; fail=1; }
 done
 # luci.mk's JsMin/CssTidy redirect into "$src.o" before checking whether the host
@@ -81,19 +81,19 @@ echo "$themes" | sed 's/^/  /'
 
 echo "== version stamped into the template (SubstituteVersion) =="
 ver=$(grep -o 'cascade\.css?v=[0-9][^"]*' \
-	/usr/share/ucode/luci/template/themes/shadcn/header.ut | head -1)
+	/usr/share/ucode/luci/template/themes/shadcnui/header.ut | head -1)
 [ -n "$ver" ] || { echo "  NO VERSION IN header.ut"; fail=1; }
 echo "  $ver"
 
 echo "== csstidy left the CSS alone (LUCI_MINIFY_CSS:=0) =="
-head -c 60 /www/luci-static/shadcn/cascade.css | sed 's/^/  /'; echo
-n=$(grep -o oklch /www/luci-static/shadcn/cascade.css | wc -l)
+head -c 60 /www/luci-static/shadcnui/cascade.css | sed 's/^/  /'; echo
+n=$(grep -o oklch /www/luci-static/shadcnui/cascade.css | wc -l)
 echo "  oklch() occurrences: $n"
 [ "$n" -gt 0 ] || { echo "  CSS WAS MANGLED"; fail=1; }
 
 echo "== the web server serves the theme =="
 prev=$(uci -q get luci.main.mediaurlbase || true)
-uci set luci.main.mediaurlbase=/luci-static/shadcn-dark && uci commit luci
+uci set luci.main.mediaurlbase=/luci-static/shadcnui-dark && uci commit luci
 # LuCI answers an unauthenticated request with the login page under HTTP 403, and
 # busybox wget throws the body away on an error status -- hence a raw request.
 # stdin has to stay open while the CGI runs, or nc closes the socket too early.
@@ -103,17 +103,17 @@ grep -q 'x-luci-login-required: yes' /root/resp || { echo "  NO LOGIN PAGE"; fai
 html=$(grep -o '<html[^>]*>' /root/resp || true)
 echo "  $html"
 echo "$html" | grep -q 'class="dark"' || { echo "  THEME DID NOT RENDER DARK"; fail=1; }
-link=$(grep -o 'luci-static/shadcn-dark/cascade\.css?v=[0-9.]*' /root/resp | head -1 || true)
+link=$(grep -o 'luci-static/shadcnui-dark/cascade\.css?v=[0-9.]*' /root/resp | head -1 || true)
 [ -n "$link" ] || { echo "  THEME CSS NOT LINKED IN THE PAGE"; fail=1; }
 echo "  linked: $link"
-wget -q --spider http://127.0.0.1/luci-static/shadcn-dark/cascade.css \
+wget -q --spider http://127.0.0.1/luci-static/shadcnui-dark/cascade.css \
 	&& echo "  CSS served: 200" || { echo "  CSS NOT SERVED"; fail=1; }
 
 echo "== removing the package =="
 # Put the active theme back first: mediaurlbase is an admin choice, postrm has no
 # business touching it, and leaving it dangling would only confuse the check.
 uci set luci.main.mediaurlbase="${prev:-/luci-static/bootstrap}" && uci commit luci
-apk del --no-network luci-theme-shadcn 2>&1 | grep -v '^WARNING: opening from cache' | tail -2
+apk del --no-network luci-theme-shadcnui 2>&1 | grep -v '^WARNING: opening from cache' | tail -2
 left=$(uci show luci.themes 2>/dev/null | grep -ci shadcn || true)
 files=$(ls /www/luci-static/ 2>/dev/null | grep -c shadcn || true)
 echo "  uci entries left: $left, files left: $files"

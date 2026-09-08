@@ -32,7 +32,7 @@ const OUT = resolve(root, dir);
 const suffix = light ? '-light' : '';
 
 mkdirSync(OUT, { recursive: true });
-switchTheme(light ? 'shadcn-light' : 'shadcn-dark');
+switchTheme(light ? 'shadcnui-light' : 'shadcnui-dark');
 
 const { browser, page } = await open({ light, height: 900 });
 const shot = (name, opts) => page.screenshot({ path: join(OUT, `state-${name}${suffix}.png`), ...opts });
@@ -192,7 +192,7 @@ await step('table-scroll', async () => {
 	await go('/cgi-bin/luci/admin/network/firewall/zones');
 	const box = page.locator('.table-scroller').first();
 	if (!await box.count()) {
-		console.log('table-scroll: no scroll box — menu-shadcn.js did not wrap');
+		console.log('table-scroll: no scroll box — menu-shadcnui.js did not wrap');
 		return;
 	}
 	const scrolls = await box.evaluate((el) => {

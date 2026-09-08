@@ -18,8 +18,8 @@ services:
     privileged: true
     environment:
       ROOT_PASSWORD: ${ROOT_PASSWORD:-openwrt}
-      # shadcn-dark | shadcn-light | shadcn (auto) | openwrt2020 | bootstrap
-      LUCI_THEME: ${LUCI_THEME:-shadcn-dark}
+      # shadcnui-dark | shadcnui-light | shadcnui (auto) | openwrt2020 | bootstrap
+      LUCI_THEME: ${LUCI_THEME:-shadcnui-dark}
     ports:
       - "${HTTP_PORT:-8080}:80"
       - "${HTTPS_PORT:-8443}:443"
@@ -29,12 +29,12 @@ services:
       # straight into the paths the package installs them to. No container
       # restart is needed — F5 is enough (for .ut templates see the README, the
       # cache has to be cleared).
-      - ./luci-theme-shadcn/htdocs/luci-static/shadcn:/www/luci-static/shadcn:ro
-      - ./luci-theme-shadcn/ucode/template/themes/shadcn:/usr/share/ucode/luci/template/themes/shadcn:ro
+      - ./luci-theme-shadcnui/htdocs/luci-static/shadcnui:/www/luci-static/shadcnui:ro
+      - ./luci-theme-shadcnui/ucode/template/themes/shadcnui:/usr/share/ucode/luci/template/themes/shadcnui:ro
       # the menu JS and the login view live outside the theme directory, in
       # resources/ — same as in bootstrap
-      - ./luci-theme-shadcn/htdocs/luci-static/resources/menu-shadcn.js:/www/luci-static/resources/menu-shadcn.js:ro
-      - ./luci-theme-shadcn/htdocs/luci-static/resources/view/shadcn:/www/luci-static/resources/view/shadcn:ro
+      - ./luci-theme-shadcnui/htdocs/luci-static/resources/menu-shadcnui.js:/www/luci-static/resources/menu-shadcnui.js:ro
+      - ./luci-theme-shadcnui/htdocs/luci-static/resources/view/shadcnui:/www/luci-static/resources/view/shadcnui:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/luci-static/resources/luci.js"]
       interval: 5s

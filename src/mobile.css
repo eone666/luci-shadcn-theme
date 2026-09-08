@@ -1,5 +1,5 @@
 /*
- * Entry point for the mobile CSS -> htdocs/luci-static/shadcn/mobile.css
+ * Entry point for the mobile CSS -> htdocs/luci-static/shadcnui/mobile.css
  *
  * header.ut links this file separately via <link media="only screen and
  * (max-width: 854px)">, so the file must exist: without it the request 404s and

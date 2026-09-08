@@ -82,11 +82,11 @@ same file fits every target, x86_64 or aarch64 or mipsel alike. It weighs 21 KB.
 
 ```sh
 cd /tmp
-wget https://github.com/eone666/luci-shadcn-theme/releases/download/v1.0.1/luci-theme-shadcn-1.0.1-r1.apk
-sha256sum luci-theme-shadcn-1.0.1-r1.apk
+wget https://github.com/eone666/luci-shadcn-theme/releases/download/v1.0.1/luci-theme-shadcnui-1.0.1-r1.apk
+sha256sum luci-theme-shadcnui-1.0.1-r1.apk
 # 06a6567a3b46b8b7a7d676560f8d93921ac95c51f7818dad2f67464dfb17c799
 
-apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.1-r1.apk
+apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.1-r1.apk
 ```
 
 `--allow-untrusted` is needed because the file is not signed with an OpenWrt
@@ -95,8 +95,8 @@ repository key.
 ### Or copy it from your machine
 
 ```sh
-scp luci-theme-shadcn-1.0.1-r1.apk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-shadcn-1.0.1-r1.apk'
+scp luci-theme-shadcnui-1.0.1-r1.apk root@192.168.1.1:/tmp/
+ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.1-r1.apk'
 ```
 
 ### Or without a shell at all
@@ -110,14 +110,14 @@ Installing only registers the theme; it does not change how LuCI looks. Go to
 
 | | |
 |---|---|
-| **Shadcn** | follows the browser's light/dark preference |
-| **ShadcnLight** | always light |
-| **ShadcnDark** | always dark |
+| **ShadcnUi** | follows the browser's light/dark preference |
+| **ShadcnUiLight** | always light |
+| **ShadcnUiDark** | always dark |
 
 …then **Save & Apply**. From the shell instead:
 
 ```sh
-uci set luci.main.mediaurlbase=/luci-static/shadcn-dark   # or shadcn / shadcn-light
+uci set luci.main.mediaurlbase=/luci-static/shadcnui-dark   # or shadcn / shadcnui-light
 uci commit luci
 ```
 
@@ -131,7 +131,7 @@ longer exist:
 
 ```sh
 uci set luci.main.mediaurlbase=/luci-static/bootstrap && uci commit luci
-apk del luci-theme-shadcn
+apk del luci-theme-shadcnui
 ```
 
 The package takes its own uci entries with it.

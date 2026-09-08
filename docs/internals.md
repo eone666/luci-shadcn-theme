@@ -1,6 +1,6 @@
 # How it is built
 
-Internals of `luci-theme-shadcn` — how the CSS is produced, what the scripts do,
+Internals of `luci-theme-shadcnui` — how the CSS is produced, what the scripts do,
 and why the odd-looking bits are the way they are. For installing and using the
 theme see [the README](../README.md); for the design log, [plan.md](plan.md).
 
@@ -64,14 +64,14 @@ substituted by `SubstituteVersion` from `luci.mk`).
 The theme variant is selected with the `LUCI_THEME` variable:
 
 ```sh
-LUCI_THEME=shadcn-light docker compose up -d --force-recreate --wait
+LUCI_THEME=shadcnui-light docker compose up -d --force-recreate --wait
 ```
 
 ### Scripts
 
 | | |
 |---|---|
-| `npm run build` | palette → tokens → Tailwind → `luci-theme-shadcn/htdocs/` |
+| `npm run build` | palette → tokens → Tailwind → `luci-theme-shadcnui/htdocs/` |
 | `npm run dev` | the same in watch mode, the palette included |
 | `npm run tokens` | just the palette step, with a report on what it found in it |
 | `npm run audit` | diff the selectors against upstream: `MISSING` must be empty |
@@ -120,8 +120,8 @@ is to compare the selector list against upstream in `refs/upstream-25.12/`.
 ```
 theme/globals.css          the active palette, shadcn neutral (never edited)
 src/
-  cascade.css              entry point -> htdocs/luci-static/shadcn/cascade.css
-  mobile.css               entry point -> htdocs/luci-static/shadcn/mobile.css
+  cascade.css              entry point -> htdocs/luci-static/shadcnui/cascade.css
+  mobile.css               entry point -> htdocs/luci-static/shadcnui/mobile.css
   theme-map.css            tokens shadcn lacks: success/warning/fonts
   compat/bootstrap-vars.css  bootstrap variables -> shadcn tokens (permanent)
   base/                    reset, scaffolding, typography
@@ -134,7 +134,7 @@ scripts/
   audit-selectors.mjs      the safety net: our selectors vs upstream's
   lib/bench.mjs            shared browser plumbing for shots/states/inspect
   package.sh               .apk via the OpenWrt SDK; package-check.sh verifies it
-luci-theme-shadcn/         the package itself: htdocs, ucode templates, uci-defaults, Makefile
+luci-theme-shadcnui/         the package itself: htdocs, ucode templates, uci-defaults, Makefile
 refs/upstream-25.12/       upstream reference for npm run audit
 docs/                      this file, the design log, screenshots.md and img/
 RELEASE_NOTES.md           the body of the next GitHub release, ready to upload
@@ -142,12 +142,12 @@ RELEASE_NOTES.md           the body of the next GitHub release, ready to upload
 
 The built CSS is committed: the OpenWrt SDK has no node, so the package is built
 from a ready artifact. The `src/` directory sits at the repository root rather
-than inside `luci-theme-shadcn/` — there `luci.mk` would treat `src/` as a
+than inside `luci-theme-shadcnui/` — there `luci.mk` would treat `src/` as a
 directory of C sources.
 
 ## Build
 
-`src/**` → Tailwind (`.build/`) → `scripts/postprocess.mjs` → `htdocs/luci-static/shadcn/`.
+`src/**` → Tailwind (`.build/`) → `scripts/postprocess.mjs` → `htdocs/luci-static/shadcnui/`.
 
 The postprocessing turns the output into an ordinary LuCI theme:
 
@@ -172,8 +172,8 @@ same postprocessed file, so it catches cleanup errors too.
 
 ## What is inherited from the bootstrap theme
 
-`header.ut`, `footer.ut`, `sysauth.ut`, `menu-shadcn.js` and
-`view/shadcn/sysauth.js` are copies from upstream (Apache-2.0, commit `e9ebca7`).
+`header.ut`, `footer.ut`, `sysauth.ut`, `menu-shadcnui.js` and
+`view/shadcnui/sysauth.js` are copies from upstream (Apache-2.0, commit `e9ebca7`).
 Only the theme names changed, plus one line in `header.ut`: the dark variant gets
 `class="dark"` alongside `data-darkmode="true"`, so that a downloaded
 `globals.css` works verbatim.
@@ -298,7 +298,7 @@ Three things shape the bench the way it is:
 ntpd run under). The bench is local and disposable; `docker compose down` wipes
 its state.
 
-The variant symlinks (`shadcn-light`, `shadcn-dark` → `shadcn`) are created inside
+The variant symlinks (`shadcnui-light`, `shadcnui-dark` → `shadcn`) are created inside
 the container by `entrypoint.sh` — in the package they are real symlinks in git,
 as upstream does it.
 

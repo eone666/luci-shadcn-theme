@@ -1,4 +1,4 @@
-# luci-theme-shadcn — work plan
+# luci-theme-shadcnui — work plan
 
 A theme for LuCI (OpenWrt 25.12) in the style of shadcn/ui, base color **neutral**.
 
@@ -18,7 +18,7 @@ unwraps `@layer`, flattens `@supports(color-mix)` and renames `--tw-*`.
 
 | | |
 |---|---|
-| Theme variants | Three entries, as in bootstrap: **Shadcn** (auto, by `prefers-color-scheme`), **ShadcnLight**, **ShadcnDark** (uci option names take no dashes). `shadcn-light`/`shadcn-dark` are symlinks to the `shadcn` directory. There is no switcher in the UI. |
+| Theme variants | Three entries, as in bootstrap: **ShadcnUi** (auto, by `prefers-color-scheme`), **ShadcnUiLight**, **ShadcnUiDark** (uci option names take no dashes). `shadcnui-light`/`shadcnui-dark` are symlinks to the `shadcn` directory. There is no switcher in the UI. |
 | Dark mechanics | `header.ut` emits `<html data-darkmode="true" class="dark">`: the `class` is the shadcn contract (`.dark {…}`, `@custom-variant dark`), the attribute is the contract of the inherited rules. In the auto variant an inline script toggles both. |
 | Build | On the host: `@tailwindcss/cli@4.3.3`, `npm run dev` (watch) / `npm run build` (minify). |
 | Font | A system stack, no webfonts (the router has no internet). |
@@ -45,7 +45,7 @@ Done and verified on the bench:
 | Look | pill-shaped buttons, sections on cards, a header not set apart from the body, large radii — modelled on the shadcn/ui site |
 | Tooling | `audit` (selector diff), `shots` (pages), `shots:states` (dropdown/Save & Apply/validation/modal), `inspect` (computed styles) |
 
-Verified: the variant matrix (`shadcn` follows the OS, `shadcn-light`/`shadcn-dark` pin
+Verified: the variant matrix (`shadcn` follows the OS, `shadcnui-light`/`shadcnui-dark` pin
 the mode — 6 combinations), 13 pages behind the login return 200, the static files of
 all three variants are in place, the interactive parts (an open `.cbi-dropdown`, the
 Save & Apply dialog with the diff, `cbi-input-invalid`, the interface edit modal), and
@@ -107,14 +107,14 @@ Left for later:
 theme/globals.css              ← the file from ui.shadcn.com/create, kept as is, never edited
 scripts/tokens.mjs             ← normalises it into src/generated/tokens.css (strips the @imports)
 src/
-  cascade.css                  entry point #1 → htdocs/luci-static/shadcn/cascade.css
-  mobile.css                   entry point #2 → htdocs/luci-static/shadcn/mobile.css
+  cascade.css                  entry point #1 → htdocs/luci-static/shadcnui/cascade.css
+  mobile.css                   entry point #2 → htdocs/luci-static/shadcnui/mobile.css
   theme-map.css                tokens shadcn lacks: success/warning/fonts
   compat/bootstrap-vars.css    bootstrap variables → shadcn tokens (PERMANENT, see below)
   base/*.css                   reset, scaffolding, typography
   components/*.css             groups of @apply rules (19 files)
   mobile/screens.css           responsive rules ≤854/600/375px
-luci-theme-shadcn/             the package itself (htdocs, ucode, root, Makefile)
+luci-theme-shadcnui/             the package itself (htdocs, ucode, root, Makefile)
 ```
 
 Important: a `src/` directory **inside** the package directory is reserved by `luci.mk`
@@ -250,7 +250,7 @@ the "aggregate" focus and `.btn` rules had to stay exactly where they were).
 ## Verification
 
 - `npm run build`, then `docker compose up -d --wait`; the theme is chosen with
-  `LUCI_THEME` (`shadcn`, `shadcn-light`, `shadcn-dark`).
+  `LUCI_THEME` (`shadcn`, `shadcnui-light`, `shadcnui-dark`).
 - Smoke test with curl: log in with `-d 'luci_username=root&luci_password=openwrt'`, then
   walk `admin/{dashboard,status/overview,network/network,network/firewall,system/system}`.
   Note: curl only sees the shell, the views render on the client.
@@ -280,8 +280,8 @@ the "aggregate" focus and `.btn` rules had to stay exactly where they were).
   `?v=$(PKG_VERSION)` to `{{ media }}/*.css|js` itself while building the package. On the
   bench there is no version, so review CSS changes with the cache disabled or a hard
   reload.
-- **uci option names cannot contain a hyphen** — hence `luci.themes.ShadcnDark`, not
-  `shadcn-dark`. `uci set` with a hyphen fails silently.
+- **uci option names cannot contain a hyphen** — hence `luci.themes.ShadcnUiDark`, not
+  `shadcnui-dark`. `uci set` with a hyphen fails silently.
 - **`--zone-color-rgb` arrives as an inline `style`** from `resources/firewall.js` and
   beats any class of ours. The background of `.zonebadge[style]`/`.ifacebox-head[style]` is
   not painted at all.

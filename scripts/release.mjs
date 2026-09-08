@@ -9,7 +9,7 @@
  *   node scripts/release.mjs 1.0.2 --no-package   # skip the SDK build
  *
  * What it touches:
- *   luci-theme-shadcn/Makefile   PKG_VERSION
+ *   luci-theme-shadcnui/Makefile   PKG_VERSION
  *   package.json                 version   (package.sh refuses to build if the
  *                                           two disagree)
  *   RELEASE_NOTES.md             every reference to the old version, the
@@ -26,7 +26,7 @@ import { resolve, join } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
 const NOTES = join(root, 'RELEASE_NOTES.md');
-const MAKEFILE = join(root, 'luci-theme-shadcn/Makefile');
+const MAKEFILE = join(root, 'luci-theme-shadcnui/Makefile');
 const PKG_JSON = join(root, 'package.json');
 const OUT = join(root, '.sdk-out');
 
@@ -79,7 +79,7 @@ if (!notes.includes(oldVersion) && !notes.includes('__SHA256__'))
 const dirty = git('status', '--porcelain');
 if (dirty) console.warn('\nnote: the working tree is dirty; releasing it as is');
 
-console.log(`\nluci-theme-shadcn ${oldVersion} -> ${version} (r${pkgRelease})`);
+console.log(`\nluci-theme-shadcnui ${oldVersion} -> ${version} (r${pkgRelease})`);
 
 /* --- version bump -------------------------------------------------------- */
 
@@ -127,7 +127,7 @@ if (!flags.has('--no-package')) {
 	if (!found.length) die(`the SDK produced no .apk in ${OUT}`);
 	if (found.length > 1) die(`several .apk in ${OUT}: ${found.join(', ')}`);
 	apk = join(OUT, found[0]);
-	const expected = `luci-theme-shadcn-${version}-r${pkgRelease}.apk`;
+	const expected = `luci-theme-shadcnui-${version}-r${pkgRelease}.apk`;
 	if (found[0] !== expected)
 		die(`built ${found[0]}, expected ${expected} — the version bump did not reach the SDK`);
 }
@@ -141,8 +141,8 @@ step('release notes');
    ("OpenWrt 25.12", "Chrome 111+") are left alone. */
 const before = notes;
 notes = notes
-	.replaceAll(`luci-theme-shadcn-${oldVersion}-r${pkgRelease}.apk`,
-	            `luci-theme-shadcn-${version}-r${pkgRelease}.apk`)
+	.replaceAll(`luci-theme-shadcnui-${oldVersion}-r${pkgRelease}.apk`,
+	            `luci-theme-shadcnui-${version}-r${pkgRelease}.apk`)
 	.replaceAll(`/v${oldVersion}/`, `/v${version}/`)
 	/* "drops on top of <predecessor>" — that is the version we just bumped
 	   away from, not the new one */

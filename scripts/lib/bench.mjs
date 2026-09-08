@@ -76,7 +76,7 @@ export async function open({ light = false, width = 1440, height = 1000, scale =
 	return { browser, ctx, page: await ctx.newPage() };
 }
 
-/** Log in. The form is a modal raised by view/shadcn/sysauth.js. */
+/** Log in. The form is a modal raised by view/shadcnui/sysauth.js. */
 export async function login(page, { before } = {}) {
 	await page.goto(`${BASE}/cgi-bin/luci/`, { waitUntil: 'domcontentloaded' });
 	await page.waitForSelector('input[name="luci_username"]', { timeout: 15000 });

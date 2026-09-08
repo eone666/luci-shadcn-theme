@@ -34,7 +34,7 @@
 }
 
 /*
- * The scroll box menu-shadcn.js wraps every table in (see wrapTables there for
+ * The scroll box menu-shadcnui.js wraps every table in (see wrapTables there for
  * why it cannot be done from the template or from CSS alone).
  *
  * The frame moves here so it stays put while the content slides under it,
@@ -95,7 +95,7 @@
    nowrap because a column title is a label, not prose: "Intra zone forward"
    broke onto three lines and "IPv4 Masquerading" onto two, which made the
    header taller than the rows and hid where one column ended. The table is
-   free to be wider than the screen now — the scroll box in menu-shadcn.js
+   free to be wider than the screen now — the scroll box in menu-shadcnui.js
    handles that — so the titles no longer have to fit. */
 .table .tr:first-child .th {
 	@apply h-10 whitespace-nowrap font-medium text-foreground;

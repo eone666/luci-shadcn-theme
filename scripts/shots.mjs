@@ -39,7 +39,7 @@ const out = resolve(root, dir);
 const list = want.length ? want : Object.keys(PAGES);
 
 mkdirSync(out, { recursive: true });
-switchTheme(light ? 'shadcn-light' : 'shadcn-dark');
+switchTheme(light ? 'shadcnui-light' : 'shadcnui-dark');
 
 const { browser, page } = await open({ light, width, height });
 
