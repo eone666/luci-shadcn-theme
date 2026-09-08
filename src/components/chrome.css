@@ -13,13 +13,17 @@
 
 header {
 	/* The header is not separated from the body — as on the shadcn site: no
-	   border, no fill of its own. The translucent blurred background exists
-	   only to keep content from showing through while scrolling (the header is
-	   sticky). items-stretch + min-h: menu items span the full height, which
-	   gives them a large hover area and lets submenus stick to the bottom edge
-	   (see top:100% below) — otherwise the cursor loses hover in the gap. */
+	   border, no fill of its own beyond the page's own colour. It is opaque
+	   rather than translucent-and-blurred: the point is only to keep content
+	   from showing through while scrolling (the header is sticky), which a
+	   solid ground does better, and backdrop-filter came with a trap — it makes
+	   an element the containing block for fixed-position descendants, and the
+	   mobile menu sheet is one of this header's children.
+	   items-stretch + min-h: menu items span the full height, which gives them
+	   a large hover area and lets submenus stick to the bottom edge (see
+	   top:100% below) — otherwise the cursor loses hover in the gap. */
 	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
-	       bg-background/80 text-foreground backdrop-blur-md;
+	       bg-background text-foreground;
 	margin: calc(-1 * var(--page-gutter)) calc(-1 * var(--page-gutter)) 15px;
 	/* The gutter term is the body padding the negative margin above cancels: the
 	   header box starts one gutter left of the body content box, and 100%
@@ -54,9 +58,57 @@ header ul .active > a {
    fixed above left it 11px right of every heading below it. Nothing needs the
    padding any more — the hover plate that used to fill it is gone. */
 header .brand {
-	@apply flex items-center pr-4 text-lg font-semibold text-foreground;
+	@apply flex items-center gap-2 pr-4 text-lg font-semibold text-foreground;
 	float: none;
 	line-height: 1.2;
+}
+
+/*
+ * The OpenWrt mark, ahead of the device name. It is a mask painted with
+ * currentColor rather than an <img>, so it comes out monochrome in whichever
+ * palette is loaded and needs no second file — the plate-and-mark logo.svg
+ * stays what it is, the favicon.
+ *
+ * The viewBox is the mark's own measured box on that plate (20 14 60 72,
+ * getBBox through the group's transform), which is what keeps it optically
+ * centred: the full 100x100 plate has 14px of padding above the arcs and 33
+ * below, and cropping to the plate would hang the icon high.
+ *
+ * Sized in em so it tracks the brand's font-size — 18px on desktop, larger on
+ * a phone where the name is dropped and the mark stands alone.
+ */
+header .brand::before {
+	--openwrt-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='20 14 60 72'><g fill='%23000' transform='translate(20 14) scale(.739)'><path d='m40.5 50.8a6.6 6.6 0 1 0 0 13.2 6.6 6.6 0 0 0 0-13.2m-40.5-33.9 7 6.8a47.5 47.5 0 0 1 67.2 0l7-6.8a57.2 57.2 0 0 0-81.2 0'/><path d='m12.5 29.2 6.8 7a30 30 0 0 1 42.6 0l6.8-7a39.7 39.7 0 0 0-56.3 0'/><path d='m24.8 41.6 6.8 6.9a12.6 12.6 0 0 1 18 0l6.8-6.9a22.3 22.3 0 0 0-31.6 0'/><path d='m64.9 39.7a30.2 30.2 0 1 1-48.7 0l-6.9-7a39.9 39.9 0 1 0 62.5 0z'/></g></svg>");
+
+	@apply flex-none;
+	content: "";
+	width: 1.05em;
+	height: 1.25em;
+	background: currentColor;
+	-webkit-mask: var(--openwrt-mark) center/contain no-repeat;
+	mask: var(--openwrt-mark) center/contain no-repeat;
+}
+
+/* --- mobile menu trigger --------------------------------------------------
+ * The checkbox in header.ut is the state. It is moved out of sight rather than
+ * display:none'd, so it stays keyboard-reachable and its focus ring can be
+ * drawn on the label; the label is the visible control.
+ */
+/* `header input.menu-toggle` rather than `.menu-toggle`: checkbox-radio.css
+   styles `input[type=checkbox]` into a real 16px box, which outranks a single
+   class — the toggle stayed in the flow and pushed the trigger 24px off the
+   content column before this was specific enough to win. */
+header input.menu-toggle {
+	@apply pointer-events-none absolute size-px opacity-0;
+	appearance: none;
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+/* On a wide window the strip of pills *is* the menu, so the trigger is gone. */
+.menu-trigger {
+	@apply hidden;
 }
 
 header .pull-right {
@@ -247,27 +299,147 @@ footer ul.breadcrumb {
  * thing, so there is no conflict.
  */
 @media (max-width: 860px) {
+	/* One row — trigger, mark, indicators — instead of the three centred rows
+	   this used to wrap into. The horizontal padding is left to the base rule,
+	   which resolves to --page-gutter once the centring term clamps to zero, so
+	   the row stays on the content column. */
 	header {
-		@apply min-h-0 flex-wrap items-center justify-center gap-x-1 px-1 py-1;
+		@apply min-h-12 flex-nowrap items-center justify-start gap-2 py-1;
 	}
 
+	/* text-base, not the desktop's text-lg: the row carries the trigger, the
+	   mark, the device name and the indicators, and the mark is sized in em off
+	   this. */
 	header .brand {
-		@apply w-full justify-center whitespace-nowrap px-2 py-1 text-base;
-		flex: 1 1 100%;
-	}
-
-	.nav {
-		@apply m-0 w-full flex-wrap justify-center;
-		flex: 1 1 100%;
-	}
-
-	.nav a {
-		@apply my-0.5 whitespace-nowrap px-2.5 py-1.5 text-sm;
+		@apply flex-none px-0 text-base;
 	}
 
 	header .pull-right {
-		@apply mx-auto flex flex-row items-center justify-center gap-1 p-0;
+		@apply ml-auto flex flex-row items-center justify-end gap-1 p-0;
 		flex: 0 0 auto;
+	}
+
+	.menu-trigger {
+		--menu-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'><path d='M4 6h16M4 12h16M4 18h16'/></svg>");
+		--menu-icon-open: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg>");
+
+		@apply -ml-2 inline-flex shrink-0 cursor-pointer select-none items-center gap-2
+		       rounded-lg px-2 py-1.5 text-base font-medium text-foreground;
+	}
+
+	/* No visible word beside the icon — the burger is the whole control. The
+	   text stays in the DOM for a screen reader, which is also what names the
+	   checkbox if the aria-label is ever dropped. */
+	.menu-trigger-label {
+		@apply sr-only;
+	}
+
+	.menu-trigger::before {
+		@apply size-5 flex-none;
+		content: "";
+		background: currentColor;
+		-webkit-mask: var(--menu-icon) center/contain no-repeat;
+		mask: var(--menu-icon) center/contain no-repeat;
+	}
+
+	/* the same control closes it, so the glyph flips to a cross */
+	.menu-toggle:checked ~ .menu-trigger::before {
+		-webkit-mask-image: var(--menu-icon-open);
+		mask-image: var(--menu-icon-open);
+	}
+
+	.menu-toggle:focus-visible ~ .menu-trigger {
+		@apply ring-[3px] ring-ring/50;
+	}
+
+	/* --- the panel -------------------------------------------------------
+	 * Closed by default; open it is a sheet over the page. Every rule below
+	 * goes through #topmenu on purpose: mobile.css is a separate <link> that
+	 * loads after this file and restyles `header .nav`, and an id outranks it
+	 * whichever order the two end up in.
+	 */
+	#topmenu {
+		@apply hidden;
+	}
+
+	.menu-toggle:checked ~ #topmenu {
+		@apply fixed inset-0 z-[790] m-0 block w-auto overflow-y-auto bg-background;
+		/* the top strip is left clear for the header's own contents, which are
+		   lifted above the sheet by the rule below */
+		padding: 3.5rem var(--page-gutter) 2rem;
+	}
+
+	/*
+	 * The sheet is a *child* of <header>, since #topmenu is where the core
+	 * renders the menu — so its z-index is compared with its own siblings, not
+	 * with the header's 800, and it covered the trigger: the menu opened and
+	 * could not be closed again. The bar's contents are therefore raised above
+	 * it explicitly.
+	 */
+	/*
+	 * An opaque strip behind the bar for as long as the sheet is open. Without
+	 * it the items scrolled straight through the cross and the mark: the sheet
+	 * is a *child* of the header, so it paints over the header's own
+	 * background, and only the header's contents were lifted clear of it. A
+	 * pseudo-element with its own z-index puts solid ground back between the
+	 * two, and the list goes under the bar the way it should.
+	 */
+	body:has(.menu-toggle:checked) header::before {
+		@apply absolute inset-0 z-[791] block;
+		content: "";
+		background: var(--background);
+	}
+
+	.menu-trigger,
+	header .brand,
+	header .pull-right {
+		@apply relative z-[792];
+	}
+
+	/* The page underneath does not scroll; the sheet does (overflow-y above). */
+	body:has(.menu-toggle:checked) {
+		@apply overflow-hidden;
+	}
+
+	.menu-toggle:checked ~ #topmenu > li {
+		@apply block w-auto;
+	}
+
+	/* A parent entry becomes the group's label. It is not a destination in the
+	   panel — its own page is the submenu — so it stops taking the tap. */
+	.menu-toggle:checked ~ #topmenu > li > a.menu {
+		@apply pointer-events-none block px-0 pb-1 pt-6 text-xs font-medium uppercase
+		       tracking-wider text-muted-foreground no-underline;
+	}
+
+	/* The caret says "this opens on hover", which is not what a group label in
+	   the sheet does — the children are already listed under it. */
+	.menu-toggle:checked ~ #topmenu > li > a.menu::after {
+		@apply hidden;
+	}
+
+	/* A childless top-level entry (Dashboard, Log out) is a destination. */
+	.menu-toggle:checked ~ #topmenu > li > a:not(.menu),
+	.menu-toggle:checked ~ #topmenu .dropdown-menu li a {
+		@apply block rounded-lg px-0 py-2.5 text-lg font-medium leading-snug
+		       text-foreground/80 no-underline;
+	}
+
+	/* The submenus lie flat and stay open. An accordion would need a state per
+	   group, and there is no markup to hang another checkbox on — the core
+	   builds this list at runtime. */
+	.menu-toggle:checked ~ #topmenu .dropdown-menu {
+		@apply static m-0 block w-auto border-0 bg-transparent p-0 shadow-none;
+		top: auto;
+	}
+
+	.menu-toggle:checked ~ #topmenu .dropdown-menu li {
+		@apply block border-0;
+	}
+
+	.menu-toggle:checked ~ #topmenu .active > a,
+	.menu-toggle:checked ~ #topmenu .dropdown-menu .active a {
+		@apply bg-transparent font-semibold text-foreground;
 	}
 
 	/* the submenu is anchored to its item, not to a fixed header height */

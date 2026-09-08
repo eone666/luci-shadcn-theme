@@ -57,6 +57,57 @@ header [data-indicator][data-clickable][data-style="active"] {
 	@apply hover:bg-primary/90;
 }
 
+/* --- the poll indicator, as an icon button --------------------------------
+ *
+ * "Refreshing"/"Paused" is the one indicator that is a control rather than a
+ * status: clicking it stops and restarts the page's polling. Spelled out as a
+ * word it was the widest thing in the bar, which is the scarcest space on a
+ * phone — so it becomes a square icon button: lucide's refresh arrows while
+ * polling, a pause bar when stopped. It reads the same on desktop.
+ *
+ * The label is not removed, only pushed out of the box: it is the control's
+ * only accessible name, and the core writes it as a bare text node with
+ * nothing to hang a class on. The ::before is positioned absolutely so the
+ * text-indent that hides the word does not carry the icon off with it.
+ *
+ * [data-clickable] is in the selector to reach past the generic
+ * [data-indicator][data-style="active"] rule above, which is more specific
+ * than a lone attribute and would otherwise keep painting this as a filled
+ * pill.
+ */
+header [data-indicator="poll-status"][data-clickable] {
+	--poll-refresh: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg>");
+	--poll-pause: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'><rect x='6' y='4' width='4' height='16' rx='1'/><rect x='14' y='4' width='4' height='16' rx='1'/></svg>");
+
+	@apply relative inline-flex h-8 w-auto shrink-0 items-center gap-1.5 rounded-lg
+	       border border-input bg-transparent px-2.5 text-xs font-medium text-foreground
+	       shadow-xs hover:bg-accent hover:text-accent-foreground
+	       dark:bg-input/30 dark:hover:bg-input/50;
+	margin: 0;
+}
+
+
+/* polling is the resting state, so it gets no fill of its own either */
+header [data-indicator="poll-status"][data-clickable][data-style="active"] {
+	@apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground
+	       dark:bg-input/30 dark:hover:bg-input/50;
+}
+
+header [data-indicator="poll-status"]::before {
+	@apply pointer-events-none size-4 flex-none;
+	content: "";
+	background: currentColor;
+	-webkit-mask: var(--poll-pause) center/contain no-repeat;
+	mask: var(--poll-pause) center/contain no-repeat;
+}
+
+/* Static: the two glyphs already say which state this is in, and a permanently
+   turning icon in the corner of every page reads as "busy" rather than "live". */
+header [data-indicator="poll-status"][data-style="active"]::before {
+	-webkit-mask-image: var(--poll-refresh);
+	mask-image: var(--poll-refresh);
+}
+
 /* --- progress bar: the Progress recipe ----------------------------------- */
 
 /* No overflow-hidden on the track, unlike shadcn's Progress: the percentage
@@ -96,7 +147,11 @@ header [data-indicator][data-clickable][data-style="active"] {
 }
 
 .spinning::before {
-	--spinner-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' stroke='%23000' stroke-width='3' fill='none'><circle cx='10' cy='10' r='8' stroke-opacity='.5'/><path d='M10 2c4 0 8 4 8 8'><animateTransform attributeName='transform' type='rotate' dur='1s' from='0 10 10' to='360 10 10' repeatCount='indefinite'/></path></svg>");
+	/* lucide's LoaderCircle — the same arc the rest of the icon set is drawn
+	   from, instead of the circle-plus-quarter this used to hand-draw. The
+	   SMIL animateTransform is kept rather than a CSS animation: the glyph is a
+	   mask, and a mask image cannot be animated from CSS. */
+	--spinner-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'><path d='M21 12a9 9 0 1 1-6.219-8.56'><animateTransform attributeName='transform' type='rotate' dur='.9s' from='0 12 12' to='360 12 12' repeatCount='indefinite'/></path></svg>");
 
 	@apply absolute size-5;
 	top: calc(50% - 10px);

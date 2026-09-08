@@ -58,7 +58,12 @@
 	<body class="lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
 		{% if (!blank_page): %}
 		<header>
-			<a class="brand" href="/">{{ striptags(boardinfo.hostname ?? '?') }}</a>
+			{#- The checkbox is the mobile menu's open/closed state. It sits in front
+			    of #topmenu so CSS can reach the list the core fills from its :checked
+			    state, which is what keeps the theme free of a script of its own. -#}
+			<input class="menu-toggle" type="checkbox" id="menu-toggle" aria-label="{{ _('Menu') }}">
+			<label class="menu-trigger" for="menu-toggle"><span class="menu-trigger-label">{{ _('Menu') }}</span></label>
+			<a class="brand" href="/"><span class="brand-name">{{ striptags(boardinfo.hostname ?? '?') }}</span></a>
 			<ul class="nav" id="topmenu" style="display:none"></ul>
 			<div id="indicators" class="pull-right"></div>
 		</header>

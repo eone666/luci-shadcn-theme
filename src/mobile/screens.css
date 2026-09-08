@@ -10,17 +10,24 @@
  * dropped from the tab strip, which became a segmented control on desktop.
  */
 
-/* Upstream hid the device name on phones to save space. We keep it: it takes
-   the first line, centred above the menu. The !important is there because the
-   rule overrides inherited behaviour rather than our own. */
+/* Upstream hid the device name on phones to save space; we keep it, now on the
+   one header row beside the burger and the OpenWrt mark rather than on a line
+   of its own (see the 860px band in chrome.css, which defines that layout for
+   resized desktop windows too).
+
+   These two selectors have to stay and have to agree with that band: this file
+   is a separate <link> loaded after cascade.css, so whatever it says about the
+   header wins on a real phone. The !important is inherited from when the rule
+   fought the core's own display value. */
 header h3 a, header .brand {
 	display: flex !important;
-	width: 100%;
-	flex: 1 1 100%;
-	justify-content: center;
-	padding: 2px 8px 0;
+	width: auto;
+	flex: 0 1 auto;
+	justify-content: flex-start;
+	min-width: 0;
+	padding: 0;
 	font-size: 1rem;
-	line-height: 1.4;
+	line-height: 1.2;
 }
 
 /* On a narrow screen the tab strip wraps onto several lines and the pill shape
@@ -357,14 +364,12 @@ header h3 a, header .brand {
 		flex-direction: row;
 	}
 
-	/* Header on a phone: three centred rows -- the device name (rule at the top
-	   of this file), the menu, and the indicators. Everything is centred, and
-	   wrapped items stay centred as well; pushing the indicators to the right
-	   instead would eat into the width and break the centring. Upstream laid
-	   them out as a column 20% wide, which left a large empty area below the
-	   menu. */
+	/* Header on a phone: one row — the trigger, the mark, and the indicators
+	   pushed right. This restates the 860px band in chrome.css because that
+	   band cannot reach here: this file loads after it and a bare `header`
+	   selector in it would otherwise win with the old three-row layout. */
 	header {
-		@apply min-h-0 flex-wrap items-center justify-center gap-x-1 px-1 py-1;
+		@apply min-h-12 flex-nowrap items-center justify-start gap-2 py-1;
 	}
 
 	header .nav {
@@ -378,8 +383,27 @@ header h3 a, header .brand {
 	}
 
 	header .pull-right {
-		@apply mx-auto flex flex-row items-center justify-center gap-1 p-0;
+		@apply ml-auto flex flex-row items-center justify-end gap-1 p-0;
 		flex: 0 0 auto;
+	}
+
+	/* The poll button loses its word here: the row has to fit the burger, the
+	   mark, the device name and this, and the two glyphs already say which
+	   state it is in. font-size:0 rather than the usual overflow:hidden +
+	   text-indent pair — it keeps the label in the DOM, which is this control's
+	   only accessible name, and the glyph sizes itself in rem so it does not
+	   shrink with it. */
+	header [data-indicator="poll-status"][data-clickable] {
+		width: 2rem;
+		padding: 0;
+		font-size: 0;
+	}
+
+	header [data-indicator="poll-status"]::before {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 
 	.menu-dropdown, .dropdown-menu {
