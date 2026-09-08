@@ -42,7 +42,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="darkreader-lock">
 		<link rel="stylesheet" href="{{ media }}/cascade.css">
-		<link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="{{ media }}/mobile.css" />
+		{#- max-width, not max-device-width: the latter is the physical screen, so a
+		    desktop window resized to phone width never loaded this file and kept the
+		    wide table layout, overflowing by up to 441px (measured on Software at
+		    603px). It is also long deprecated. -#}
+		<link rel="stylesheet" media="only screen and (max-width: 854px)" href="{{ media }}/mobile.css" />
 		<link rel="icon" href="{{ media }}/logo_48.png" sizes="48x48">
 		<link rel="icon" href="{{ media }}/logo.svg" sizes="any">
 		{% if (node?.css): %}

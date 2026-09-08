@@ -292,13 +292,15 @@ footer ul.breadcrumb {
 }
 
 /* --- narrow window ---------------------------------------------------------
- * The template links mobile.css with `max-device-width`, so it reacts to the
- * device's physical screen rather than the window size: resizing a desktop
- * window never triggers it. The header layout for narrow windows is therefore
- * defined here, by viewport width. On a phone both media queries mean the same
- * thing, so there is no conflict.
+ * The header layout for narrow viewports. mobile.css restates it, because that
+ * file is a separate <link> loaded after this one and a bare `header` selector
+ * in it would otherwise win with whatever it said instead.
+ *
+ * 854px, the same number header.ut gives that <link>: the two have to switch
+ * together, or there is a band a few pixels wide where the header is laid out
+ * for a phone and the tables still for a desktop.
  */
-@media (max-width: 860px) {
+@media (max-width: 854px) {
 	/* One row — trigger, mark, indicators — instead of the three centred rows
 	   this used to wrap into. The horizontal padding is left to the base rule,
 	   which resolves to --page-gutter once the centring term clamps to zero, so

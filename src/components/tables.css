@@ -32,7 +32,6 @@
 	border-collapse: separate;
 	border-spacing: 0;
 }
-
 .table .th, .table .td {
 	@apply px-2 py-2 text-left align-middle transition-colors;
 	display: table-cell;

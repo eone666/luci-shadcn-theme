@@ -1,7 +1,13 @@
 /*
  * Responsive rules. header.ut links this file through a separate <link> with
- * media="only screen and (max-device-width: 854px)", so it holds nothing but
- * overrides for narrow screens — the top level of the file is the ≤854px band.
+ * media="only screen and (max-width: 854px)", so it holds nothing but overrides
+ * for narrow screens — the top level of the file is the ≤854px band.
+ *
+ * That query is on the viewport, not the device: with max-device-width, which
+ * is what upstream used and what this carried until it was measured, a desktop
+ * window narrowed to phone width never loaded the file at all and kept the wide
+ * table layout — Software overflowed by 441px at 603px. The nested bands below
+ * are on the viewport for the same reason.
  *
  * The layout is carried over from luci-theme-bootstrap (Apache-2.0, commit
  * e9ebca7) as is: the card mode for tables via .td[data-title]::before and the
@@ -47,7 +53,7 @@ header h3 a, header .brand {
 	@apply rounded-lg;
 }
 
-@media screen and (max-device-width: 600px) {
+@media screen and (max-width: 600px) {
 	.modal {
 		margin: 1.5em auto;
 	}
@@ -524,7 +530,7 @@ header h3 a, header .brand {
 	}
 }
 
-@media screen and (max-device-width: 375px) {
+@media screen and (max-width: 375px) {
 	.cbi-page-actions {
 		display: flex;
 		justify-content: space-between;

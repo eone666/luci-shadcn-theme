@@ -124,8 +124,8 @@
    The radii here now restate the defaults — the strip stopped being a pill
    once the tab radius was synced with the buttons — and are kept only so the
    selectors stay in place for scripts/audit-selectors.mjs.
-   The media query is on viewport width rather than max-device-width: the
-   latter does not react to window resizing (see the note in chrome.css). */
+   The media query is on viewport width, as every one in this theme now is —
+   max-device-width, which upstream used, does not react to window resizing. */
 @media (max-width: 720px) {
 	.tabs, .cbi-tabmenu {
 		@apply w-full rounded-xl p-1.5;
