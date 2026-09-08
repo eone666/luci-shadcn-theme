@@ -421,10 +421,25 @@ footer ul.breadcrumb {
 	}
 
 	/* A childless top-level entry (Dashboard, Log out) is a destination. */
+	/*
+	 * -mx-2 against px-2: the text stays on the content column, where every
+	 * heading below it also starts, while the hover plate it inherits from
+	 * `.nav a:hover` extends 8px past the text on each side. With px-0 the
+	 * plate was flush with the first letter and the row read as a band with the
+	 * word jammed against its edge.
+	 */
 	.menu-toggle:checked ~ #topmenu > li > a:not(.menu),
 	.menu-toggle:checked ~ #topmenu .dropdown-menu li a {
-		@apply block rounded-lg px-0 py-2.5 text-lg font-medium leading-snug
+		@apply -mx-2 block rounded-lg px-2 py-2.5 text-lg font-medium leading-snug
 		       text-foreground/80 no-underline;
+	}
+
+	/* The plate is the only thing marking the row under the pointer, so it
+	   keeps the muted fill rather than the header strip's accent, and the text
+	   comes up to full contrast inside it. */
+	.menu-toggle:checked ~ #topmenu > li > a:not(.menu):hover,
+	.menu-toggle:checked ~ #topmenu .dropdown-menu li a:hover {
+		@apply bg-accent text-foreground no-underline;
 	}
 
 	/* The submenus lie flat and stay open. An accordion would need a state per
