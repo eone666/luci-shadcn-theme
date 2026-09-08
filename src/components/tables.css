@@ -60,14 +60,19 @@
 	 * top of its shade and hides it; scroll, and the cover slides away and the
 	 * shade appears — and if the content fits, neither ever moves, so nothing
 	 * shows. Earlier layers paint over later ones, hence covers first.
+	 *
+	 * The covers are flat fills, not gradients, and exactly as wide as the
+	 * shades. A fading cover only attenuates what is under it — about a third
+	 * of the shade still came through eight pixels in, which is why the mark
+	 * showed on tables that had nowhere to scroll at all.
 	 */
 	background-image:
-		linear-gradient(to right, var(--table-cover), transparent),
-		linear-gradient(to left, var(--table-cover), transparent),
+		linear-gradient(var(--table-cover), var(--table-cover)),
+		linear-gradient(var(--table-cover), var(--table-cover)),
 		linear-gradient(to right, color-mix(in oklab, var(--foreground) 16%, transparent), transparent),
 		linear-gradient(to left, color-mix(in oklab, var(--foreground) 16%, transparent), transparent);
 	background-position: left center, right center, left center, right center;
-	background-size: 26px 100%, 26px 100%, 16px 100%, 16px 100%;
+	background-size: 18px 100%, 18px 100%, 18px 100%, 18px 100%;
 	background-repeat: no-repeat;
 	background-attachment: local, local, scroll, scroll;
 

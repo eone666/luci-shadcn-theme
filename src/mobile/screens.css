@@ -268,6 +268,28 @@ header h3 a, header .brand {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: pre-line;
+		/* The control sat straight under its own label — measured a 0px gap.
+		   8px is what the rest of the theme puts between a label and the thing
+		   it labels (shadcn's FormItem is a grid gap-2). */
+		margin-bottom: 0.5rem;
+	}
+
+	/*
+	 * A boolean is not a full-width field, so its label belongs beside the box
+	 * rather than stacked above it: "IPv4 Masquerading" on Zones had its 16px
+	 * checkbox sitting alone on the next line, reading as an empty row.
+	 */
+	.td[data-title]:has(.cbi-checkbox),
+	.td[data-title]:has(input[type="checkbox"]) {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.td[data-title]:has(.cbi-checkbox)::before,
+	.td[data-title]:has(input[type="checkbox"])::before {
+		margin-bottom: 0;
 	}
 
 	.td[data-description]::after {
@@ -349,7 +371,20 @@ header h3 a, header .brand {
 
 	.cbi-value label.cbi-value-title {
 		font-weight: bold;
+		display: block;
+		/* text-left because the desktop rule aligns the label right, to sit
+		   against the control in the two-column layout (forms.css). Stacked
+		   above its field, a right-aligned label drifts away from everything
+		   else on the row. */
+		text-align: left;
+		/* The desktop rule also pads the label down to centre its first line on
+		   a 36px control. Stacked, that is just dead air above it. */
+		padding-top: 0;
+		/* And the field sat straight under the label — the same 8px the rest of
+		   the theme puts between a label and what it labels. */
+		margin-bottom: 0.5rem;
 	}
+
 
 	.cbi-value-field, .cbi-select, .cbi-dynlist, .cbi-dropdown:not(.btn):not(.cbi-button) {
 		width: 100%;
