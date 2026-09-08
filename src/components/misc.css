@@ -143,6 +143,107 @@ div.cbi-value var.cbi-tooltip-container,
 	@apply w-full;
 }
 
+/* --- Dashboard -----------------------------------------------------------
+ *
+ * luci-mod-dashboard ships its own custom.css, and most of what follows is
+ * undoing decisions in it: a 466px min-height on every panel, a 97px title
+ * block, centred headings, 64px picture icons and a right-aligned label column
+ * at 35%. Those are the numbers the stock theme drew this page around; none of
+ * them belong on a shadcn card. The panels came out taller than their content
+ * by a wide margin — measured 466px and 563px against the few rows in them.
+ */
+
+/*
+ * Flat panels on the page's own colour with a hairline around them, rather
+ * than the lighter fill custom.css asks for. That is the dark shadcn card —
+ * and it is darker, since --card sits above --background in a dark palette
+ * (0.205 against 0.145 in the shipped one).
+ *
+ * Keyed on .box-s1, not .dashboard-bg: the devices table's thead and tfoot
+ * carry that class too, and they are not panels.
+ */
+.Dashboard .dashboard-bg.box-s1 {
+	@apply rounded-xl border border-border bg-background;
+	min-height: 0;
+}
+
+.Dashboard .thead.dashboard-bg,
+.Dashboard .tfoot.dashboard-bg {
+	@apply rounded-none bg-transparent;
+}
+
+/*
+ * The card header: icon and title on one row, left and small, in place of a
+ * 97px block with the picture centred above the words.
+ *
+ * The Internet panel needs its own selector, and a longer one. custom.css pins
+ * that title at 97px through four classes, and it is linked by the view *after*
+ * cascade.css — so matching its specificity is not enough to win, and the
+ * heading sat centred in a box two thirds of it empty. .dashboard-bg is folded
+ * in to outweigh it; the element carries it already.
+ */
+.Dashboard .title,
+.Dashboard .internet-status-self.dashboard-bg .internet-status-info .title {
+	@apply flex items-center gap-2.5;
+	height: auto;
+	text-align: left;
+}
+
+/* Panels side by side come out the same height. custom.css leaves them at
+   flex-start, so the shorter one stopped wherever its content did — and the
+   .Dashboard/.cbi-section-0 pair is on one element, which is what makes this
+   outrank it. */
+.Dashboard.cbi-section-0 .section-content {
+	align-items: stretch;
+}
+
+.Dashboard .title h3 {
+	@apply m-0 text-sm font-medium leading-none text-foreground;
+}
+
+/*
+ * The stock icons are <img> files from the dashboard's own icons/ directory,
+ * sized 55-64px and carrying their own colours — the Internet one is bright
+ * green whatever the palette says. They are replaced by the lucide glyphs the
+ * rest of the theme is drawn from, as masks in currentColor, so they follow the
+ * palette like every other icon here.
+ */
+.Dashboard .title img {
+	@apply hidden;
+}
+
+.Dashboard .title::before {
+	@apply size-5 flex-none text-muted-foreground;
+	content: "";
+	background: currentColor;
+	-webkit-mask: var(--dash-icon) center/contain no-repeat;
+	mask: var(--dash-icon) center/contain no-repeat;
+}
+
+.Dashboard .internet-status-self {
+	--dash-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20'/><path d='M2 12h20'/></svg>");
+}
+
+.Dashboard .router-status-self {
+	--dash-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='20' height='8' x='2' y='14' rx='2'/><path d='M6.01 18H6'/><path d='M10.01 18H10'/><path d='M15 10v4'/><path d='M17.84 7.17a4 4 0 0 0-5.66 0'/><path d='M20.66 4.34a8 8 0 0 0-11.31 0'/></svg>");
+}
+
+.Dashboard .router-status-lan {
+	--dash-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='16' y='16' width='6' height='6' rx='1'/><rect x='2' y='16' width='6' height='6' rx='1'/><rect x='9' y='2' width='6' height='6' rx='1'/><path d='M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3'/><path d='M12 12V8'/></svg>");
+}
+
+.Dashboard .router-status-wifi {
+	--dash-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20h.01'/><path d='M2 8.82a15 15 0 0 1 20 0'/><path d='M5 12.859a10 10 0 0 1 14 0'/><path d='M8.5 16.429a5 5 0 0 1 7 0'/></svg>");
+}
+
+/* The label column: muted and left-aligned. custom.css puts it at 12px, right
+   aligned, which reads as a form rather than as the data it is. The 35% width
+   it also sets is kept — that is what lines the values up. */
+.Dashboard .settings-info p span:first-child {
+	@apply text-xs text-muted-foreground;
+	text-align: left;
+}
+
 /* --- .controls: the package manager's filter/action strip ----------------- */
 
 /*
