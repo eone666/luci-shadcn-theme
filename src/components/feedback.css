@@ -59,8 +59,14 @@ header [data-indicator][data-clickable][data-style="active"] {
 
 /* --- progress bar: the Progress recipe ----------------------------------- */
 
+/* No overflow-hidden on the track, unlike shadcn's Progress: the percentage
+   label is a ::before sitting a line above the bar (top:-1.4em, the 1.4em the
+   margin reserves), so clipping the track to its own 8px box painted it out of
+   existence — the "7.38 GiB / 7.82 GiB (94%)" that bootstrap showed over its
+   20px-tall bar disappeared entirely. The fill keeps its own rounded-pill, so
+   it stays a pill without the track clipping it. */
 .cbi-progressbar {
-	@apply relative h-2 min-w-[170px] overflow-hidden rounded-pill border-0 bg-primary/20;
+	@apply relative h-2 min-w-[170px] rounded-pill border-0 bg-primary/20;
 	margin: 1.4em 0 4px 0;
 }
 

@@ -44,8 +44,13 @@
 	@apply block font-mono not-italic text-foreground no-underline;
 }
 
+/* ui.js emits a bare inline <strong>Legend:</strong> straight in front of this
+   row, so nothing separated the label from its swatches. mt-1.5 rather than
+   mt-2 because .uci-change-legend-label below adds its own 2px on top — the
+   pair ends up at the 8px the rest of the theme puts between a label and what
+   it labels. */
 .uci-change-legend {
-	@apply flex flex-wrap;
+	@apply mt-1.5 flex flex-wrap;
 }
 
 .uci-change-legend-label {
@@ -53,10 +58,18 @@
 	flex-basis: 150px;
 }
 
+/* The mb-0! undoes the mb-0.5 the diff-line rule above hands every ins/del/var
+   in the dialog (the modal carries .uci-dialog, so it reaches these too): here
+   the swatch is a flex item centred against its label, and items-center centres
+   the *margin* box, so those 2px of bottom margin lifted the 16px swatch 1px
+   above the text's centre.
+   The ! is what it takes: `.uci-dialog div > ins` is a class plus two type
+   selectors and outranks this one class plus one, and the selector here has to
+   stay as it is for scripts/audit-selectors.mjs to keep matching upstream. */
 .uci-change-legend-label > ins,
 .uci-change-legend-label > del,
 .uci-change-legend-label > var {
-	@apply mr-1 flex size-4 rounded-sm;
+	@apply mb-0! mr-1 flex size-4 rounded-sm;
 }
 
 .uci-change-legend-label > * > * {

@@ -21,9 +21,13 @@ header {
 	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
 	       bg-background/80 text-foreground backdrop-blur-md;
 	margin: -5px -5px 15px -5px;
-	/* the redundant properties below work around a csstidy bug */
-	padding-left: calc((100% - 1180px) / 2);
-	padding-right: calc((100% - 1180px) / 2);
+	/* The 5px term is the body padding the negative margin above cancels: the
+	   header box starts 5px left of the body content box, and 100% resolves
+	   against that content box — so without it the whole header column lands
+	   5px left of the page content instead of on it.
+	   The redundant properties below work around a csstidy bug. */
+	padding-left: calc(5px + (100% - 1180px) / 2);
+	padding-right: calc(5px + (100% - 1180px) / 2);
 }
 
 header a {
@@ -41,8 +45,13 @@ header ul .active > a {
 	@apply bg-accent text-accent-foreground no-underline;
 }
 
+/* No left padding: the brand is the leftmost text in the header, so it defines
+   the content column and has to start exactly where the page content does. Its
+   own px-4 pushed it 16px past that edge, which together with the header offset
+   fixed above left it 11px right of every heading below it. Nothing needs the
+   padding any more — the hover plate that used to fill it is gone. */
 header .brand {
-	@apply flex items-center px-4 text-lg font-semibold text-foreground;
+	@apply flex items-center pr-4 text-lg font-semibold text-foreground;
 	float: none;
 	line-height: 1.2;
 }
