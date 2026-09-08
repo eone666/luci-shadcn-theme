@@ -24,7 +24,10 @@ header {
 	   top:100% below) — otherwise the cursor loses hover in the gap. */
 	@apply sticky top-0 z-[800] flex min-h-12 items-stretch overflow-visible
 	       bg-background text-foreground;
-	margin: calc(-1 * var(--page-gutter)) calc(-1 * var(--page-gutter)) 15px;
+	/* 1rem, not the 15px this carried: everything else in the theme steps in
+	   fours, and a lone odd number here put the first card half a pixel off
+	   the rhythm of every gap below it. */
+	margin: calc(-1 * var(--page-gutter)) calc(-1 * var(--page-gutter)) 1rem;
 	/* The gutter term is the body padding the negative margin above cancels: the
 	   header box starts one gutter left of the body content box, and 100%
 	   resolves against that content box — so without it the whole header column
@@ -111,8 +114,11 @@ header input.menu-toggle {
 	@apply hidden;
 }
 
+/* No right margin: this cluster is the last thing on the row, so it has to end
+   exactly where the content column does — the same reason the brand carries no
+   left padding. mr-2 left it 8px short of every heading's right edge. */
 header .pull-right {
-	@apply ml-auto mr-2 flex items-center gap-1;
+	@apply ml-auto flex items-center gap-1;
 }
 
 header p {
