@@ -538,6 +538,38 @@ header h3 a, header .brand {
 		mask: var(--uci-changes-icon) center/contain no-repeat;
 	}
 
+	/*
+	 * The count comes back as a badge on the icon's corner.
+	 * menu-shadcnui.js publishes it as data-count, since `content` cannot read
+	 * a text node and the core writes the label as one.
+	 *
+	 * Painted in the page's own colours, not the accent: the button underneath
+	 * is the filled variant, so a badge in --primary would vanish into it. The
+	 * ring keeps the two apart on any palette where those tones come close.
+	 *
+	 * font-size is absolute because the button itself is font-size:0 — that is
+	 * how the label is hidden — and 0 would otherwise be inherited here.
+	 */
+	header [data-indicator="uci-changes"][data-count]:not([data-count="0"])::after {
+		content: attr(data-count);
+		position: absolute;
+		top: -0.25rem;
+		right: -0.25rem;
+		min-width: 1rem;
+		height: 1rem;
+		padding: 0 0.1875rem;
+		box-sizing: border-box;
+		border-radius: 999px;
+		background: var(--background);
+		box-shadow: 0 0 0 1px var(--border);
+		color: var(--foreground);
+		font-size: 10px;
+		font-weight: 600;
+		line-height: 1rem;
+		text-align: center;
+		font-variant-numeric: tabular-nums;
+	}
+
 	.menu-dropdown, .dropdown-menu {
 		top: 23px;
 	}

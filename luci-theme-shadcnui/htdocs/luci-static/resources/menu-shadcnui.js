@@ -5,7 +5,7 @@
 return baseclass.extend({
 	__init__() {
 		ui.menu.load().then((tree) => this.render(tree));
-		this.watchTables();
+		this.watch();
 	},
 
 	/*
@@ -62,15 +62,58 @@ return baseclass.extend({
 		});
 	},
 
-	watchTables() {
-		this.wrapTables();
+	/*
+	 * The change indicator collapses to an icon on a narrow screen (see
+	 * mobile/screens.css), where "Unsaved Changes: 3" does not fit. The count is
+	 * the half of that worth keeping, so it is copied onto the element for CSS to
+	 * draw as a badge: `content` cannot read a text node, and the core writes the
+	 * whole label as one.
+	 *
+	 * The number comes from ui.changes rather than from parsing that label. It is
+	 * where the label's own number comes from, so the two cannot disagree, and it
+	 * does not care how a translation orders the words around it.
+	 */
+	syncChangeCount() {
+		const el = document.querySelector('#indicators [data-indicator="uci-changes"]');
 
+		if (!el)
+			return;
+
+		const changes = ui.changes?.changes ?? {};
+		let n = 0;
+
+		for (const config in changes)
+			if (changes.hasOwnProperty(config))
+				n += changes[config].length;
+
+		/* If a future core renders the indicator from somewhere else, the trailing
+		   number in the label is still better than no badge at all. */
+		if (!n) {
+			const m = (el.textContent || '').match(/(\d+)\D*$/);
+			n = m ? Number(m[1]) : 0;
+		}
+
+		/* three digits would be wider than the button */
+		const shown = n > 99 ? '99+' : String(n);
+
+		if (el.getAttribute('data-count') !== shown)
+			el.setAttribute('data-count', shown);
+	},
+
+	watch() {
+		this.wrapTables();
+		this.syncChangeCount();
+
+		/*
+		 * Two observers, each as narrow as its job.
+		 *
+		 * Views are re-rendered on the client — navigating, and paging through the
+		 * package list — so tables have to be re-wrapped each time. Wrapping one is
+		 * itself a mutation, so the work is queued once per frame rather than run
+		 * per event.
+		 */
 		let queued = false;
 
-		/* Views are re-rendered on the client — navigating, and paging through
-		   the package list — so this has to run again each time. Wrapping a
-		   table is itself a mutation, so the work is queued once per frame
-		   rather than run per event. */
 		new MutationObserver(() => {
 			if (queued)
 				return;
@@ -81,6 +124,20 @@ return baseclass.extend({
 				this.wrapTables();
 			});
 		}).observe(document.body, { childList: true, subtree: true });
+
+		/*
+		 * The change count needs characterData as well: when it moves, the core
+		 * rewrites the indicator's text in place rather than replacing the node, so
+		 * a childList-only observer never hears about it — the badge stayed on
+		 * whatever number it was first given. That is also why this one is scoped
+		 * to #indicators instead of the body: with characterData over the whole
+		 * document every ticking uptime on a status page would wake it.
+		 */
+		const indicators = document.querySelector('#indicators');
+
+		if (indicators)
+			new MutationObserver(() => this.syncChangeCount())
+				.observe(indicators, { childList: true, subtree: true, characterData: true });
 	},
 
 	render(tree) {
