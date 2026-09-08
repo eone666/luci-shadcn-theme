@@ -69,8 +69,12 @@ div.cbi-value var.cbi-tooltip-container,
    custom.css sets `.Dashboard .table { width: auto }`. The DataTable outline
    would therefore draw a second box inside the panel, sized to the data rather
    than to the panel — which is what made the DHCP Devices list look cropped.
-   These tables keep the row dividers and drop the frame. */
-.Dashboard .table {
+   These tables keep the row dividers and drop the frame — the scroll box too,
+   since tables.css moves the frame onto it: the small key/value lists in the
+   Internet and System panels are 101 and 159 pixels wide, and a rounded
+   outline around each of those reads as a stray button. */
+.Dashboard .table,
+.Dashboard .table-scroller {
 	@apply rounded-none border-0;
 }
 

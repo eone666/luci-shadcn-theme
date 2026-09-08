@@ -73,6 +73,12 @@
    to reserve on its own. */
 select.cbi-input-select:not([multiple]) {
 	@apply cursor-pointer appearance-none pr-9;
+	/* The chevron alone takes 36px of that padding, so in a narrow table cell —
+	   the Input/Output/Forward columns on Firewall > Zones — a w-full select
+	   collapsed to the arrow with none of the value left showing. It keeps a
+	   floor now and the table scrolls instead, which is what the scroll box in
+	   tables.css is for. */
+	min-width: 7.5rem;
 }
 
 select.cbi-input-select option {

@@ -23,6 +23,11 @@
 .cbi-dropdown:not(.btn):not(.cbi-button) {
 	@apply rounded-lg border border-input bg-transparent text-foreground dark:bg-input/30;
 	background-image: none;
+	/* A floor, for the same reason the native select has one
+	   (select-native.css): in the narrow Input/Output/Forward columns on
+	   Firewall > Zones this collapsed to its caret with none of the value
+	   showing. The table scrolls rather than squeezing it now. */
+	min-width: 7.5rem;
 }
 
 .cbi-dropdown img {

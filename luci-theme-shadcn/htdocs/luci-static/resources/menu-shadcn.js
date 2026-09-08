@@ -5,6 +5,82 @@
 return baseclass.extend({
 	__init__() {
 		ui.menu.load().then((tree) => this.render(tree));
+		this.watchTables();
+	},
+
+	/*
+	 * A table too wide for the screen scrolls itself, instead of pushing the
+	 * whole page sideways — measured before this, Software overflowed the
+	 * document by 441px at a 603px viewport, and Zones, Overview, Startup and
+	 * Interfaces all did the same by less.
+	 *
+	 * It needs a wrapper, and the wrapper cannot come from anywhere else:
+	 *
+	 *   - not from the template, because the core renders views into #view long
+	 *     after header.ut has run;
+	 *   - not from an existing element, because no table has one to itself —
+	 *     every parent also holds the section heading, the description or the
+	 *     "Add" button, and Routes puts six tables in one;
+	 *   - not from CSS, because overflow-x is ignored on a display:table box,
+	 *     and making the table a block puts an anonymous table box inside it
+	 *     that no selector can reach or stretch to the frame.
+	 *
+	 * Leaving the table itself display:table is what keeps it filling the width
+	 * whenever it does fit.
+	 */
+	SCROLLER: 'table-scroller',
+
+	wrapTables() {
+		document.querySelectorAll('.table').forEach((table) => {
+			const parent = table.parentNode;
+
+			if (!parent || parent.classList?.contains(this.SCROLLER))
+				return;
+
+			const box = E('div', { 'class': this.SCROLLER });
+
+			parent.insertBefore(box, table);
+			box.appendChild(table);
+
+			/*
+			 * The shade marking a scrollable edge is hidden, at the ends, by a
+			 * cover pinned to the content — so the cover has to be the colour
+			 * actually behind the table. That is the page in one place and a card
+			 * in another, and in the dark palette the two differ (--card is 0.205
+			 * against --background's 0.145), which showed as a dark band over the
+			 * Dashboard's panels. CSS cannot read what is behind an element; this
+			 * can.
+			 */
+			for (let n = box.parentElement; n; n = n.parentElement) {
+				const bg = getComputedStyle(n).backgroundColor;
+
+				if (bg && bg != 'transparent' && bg != 'rgba(0, 0, 0, 0)') {
+					box.style.setProperty('--table-cover', bg);
+					break;
+				}
+			}
+		});
+	},
+
+	watchTables() {
+		this.wrapTables();
+
+		let queued = false;
+
+		/* Views are re-rendered on the client — navigating, and paging through
+		   the package list — so this has to run again each time. Wrapping a
+		   table is itself a mutation, so the work is queued once per frame
+		   rather than run per event. */
+		new MutationObserver(() => {
+			if (queued)
+				return;
+
+			queued = true;
+			requestAnimationFrame(() => {
+				queued = false;
+				this.wrapTables();
+			});
+		}).observe(document.body, { childList: true, subtree: true });
 	},
 
 	render(tree) {
