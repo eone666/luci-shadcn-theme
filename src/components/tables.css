@@ -92,17 +92,17 @@
 
 /* --- cbi sections rendered as tables -------------------------------------- */
 
-/* TableRow's hover:bg-muted/50. The first two selectors widen it from the cbi
-   section tables to every table: with the zebra striping gone, hover is the
-   only thing marking a row on the status tables too. The fill goes on the
-   cells rather than the row because the named sections draw a leading ::before
-   that has to pick it up as well. */
+/* No hover fill. The zebra below marks the rows instead: a stripe is there
+   before the pointer is, which is what makes a long row scannable, and a tint
+   riding on top of a permanent stripe only muddled both. Setting the cells
+   transparent rather than dropping the rules keeps the row's own stripe
+   showing through, and keeps the selectors for scripts/audit-selectors.mjs. */
 .table .tr:hover .td,
 .table .tr:hover .th,
 .cbi-section-table .tr:hover .td,
 .cbi-section-table .tr:hover .th,
 .cbi-section-table .tr:hover::before {
-	@apply bg-muted/50;
+	@apply bg-transparent;
 }
 
 .cbi-section-table .tr.cbi-section-table-descr .th {
@@ -166,11 +166,51 @@
 	@apply align-middle;
 }
 
-/* Upstream fills the header row and stripes every second row. The DataTable
-   does neither — it separates rows with dividers and marks the pointer with a
-   hover fill, which is what the rules above now do — so both fills are dropped.
-   The selectors stay so scripts/audit-selectors.mjs keeps matching upstream. */
+/*
+ * Zebra, back — but quiet, and now the only thing marking a row.
+ *
+ * The veil is --foreground at 4%, not --muted at some opacity, because --muted
+ * is not equidistant from the canvas in the two modes: in the light palette it
+ * sits 0.03 of oklch lightness from --background and in the dark one 0.124, so
+ * any single alpha over it lands four times stronger in dark than in light —
+ * measured, and visibly blank in light. --foreground is 0.855 away in light and
+ * 0.840 in dark, near enough that one number gives the same step in both, and
+ * it keeps that property for whatever palette is dropped into
+ * theme/globals.css: a readable foreground is far from its background by
+ * definition.
+ *
+ * 4% of it works out to about 0.034 of lightness either way — a change of shade
+ * rather than a band. Deliberately below the muted/50 the hover fill used: a
+ * stripe is painted permanently across half the table, so it has to sit well
+ * under what a tint appearing only beneath the pointer can afford.
+ *
+ * LuCI tags alternating rows .cbi-rowstyle-2 itself, but only on Startup and
+ * Routes — the key/value lists on Overview and the Dashboard panels never get
+ * the class. The nth-child pair carries the stripes there too, which is what
+ * "instead of hover" needs: those tables are not clickable, so losing the tint
+ * costs nothing, while striping keeps a long value tied to its label.
+ *
+ * The :not(:has()) is what keeps the two halves from cancelling out. Where LuCI
+ * does tag the rows, .cbi-rowstyle-2 lands on the *odd* ones, so an unguarded
+ * nth-child(even) filled in exactly the gaps and striped the whole table solid.
+ * So position is used only in tables that carry no .cbi-rowstyle-2 at all, and
+ * the class keeps its own tables — where it also puts the stripes exactly where
+ * bootstrap had them.
+ *
+ * Two positional selectors because LuCI emits rows both ways: wrapped in a
+ * tbody (the cbi section tables) and as direct children of the table (the
+ * status tables). The placeholder row ("no entries") is excluded — a single
+ * empty row reads as a band, not as a stripe.
+ */
 .cbi-rowstyle-2,
+.table:not(:has(.cbi-rowstyle-2)) > .tr:nth-child(even):not(.placeholder),
+.table:not(:has(.cbi-rowstyle-2)) > .tbody > .tr:nth-child(even):not(.placeholder) {
+	@apply bg-foreground/4;
+}
+
+/* The header rows keep no fill: upstream painted them the same colour as the
+   stripes, but the divider under the header already sets it apart and shadcn's
+   TableHead has none. The selectors stay for the audit. */
 .tr.table-titles,
 .tr.cbi-section-table-titles {
 	@apply bg-transparent;
