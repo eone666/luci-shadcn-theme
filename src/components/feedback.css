@@ -9,8 +9,8 @@
  * nothing, and the .flash/.fade-in/.fade-out classes are set by ui.js.
  */
 
-.label,
-header [data-indicator] {
+/* A badge in the page content: a pill, and not a control. */
+.label {
 	@apply inline-flex w-fit shrink-0 items-center justify-center gap-1 whitespace-nowrap
 	       rounded-pill border border-transparent bg-secondary px-2 py-0.5 text-xs
 	       font-medium text-secondary-foreground;
@@ -18,8 +18,24 @@ header [data-indicator] {
 	text-shadow: none;
 }
 
+/*
+ * The header indicators are the same shape as each other and as the buttons
+ * elsewhere — every one of them is a control, not a badge: uci-changes opens
+ * the changes dialog, poll-status stops and restarts polling. They used to
+ * inherit the badge pill above, which left "Unsaved Changes" a 22px pill beside
+ * the 32px poll button.
+ */
+header [data-indicator] {
+	@apply inline-flex h-8 w-fit shrink-0 items-center justify-center gap-1.5
+	       whitespace-nowrap rounded-lg border border-input bg-transparent px-2.5
+	       text-xs font-medium text-foreground shadow-xs dark:bg-input/30;
+	margin: 0;
+	text-shadow: none;
+}
+
 header [data-indicator][data-clickable] {
-	@apply cursor-pointer hover:bg-secondary/80;
+	@apply cursor-pointer hover:bg-accent hover:text-accent-foreground
+	       dark:hover:bg-input/50;
 }
 
 a.label:link,
@@ -43,9 +59,12 @@ a.label:hover {
 	@apply bg-success text-success-foreground;
 }
 
+/* data-style="active" is the indicator that wants pressing — uci-changes when
+   there are changes to save. It takes the Button recipe's filled default,
+   against the outline the others keep. */
 .label.notice,
 header [data-indicator][data-style="active"] {
-	@apply bg-primary text-primary-foreground;
+	@apply border-transparent bg-primary text-primary-foreground dark:bg-primary;
 }
 
 /* An active indicator is filled with --primary and keeps its text on
@@ -54,7 +73,7 @@ header [data-indicator][data-style="active"] {
    over from the fill turned unreadable on a dark palette the moment the
    pointer touched it. */
 header [data-indicator][data-clickable][data-style="active"] {
-	@apply hover:bg-primary/90;
+	@apply hover:bg-primary/90 hover:text-primary-foreground dark:hover:bg-primary/90;
 }
 
 /* --- the poll indicator, as an icon button --------------------------------
@@ -87,10 +106,12 @@ header [data-indicator="poll-status"][data-clickable] {
 }
 
 
-/* polling is the resting state, so it gets no fill of its own either */
+/* Polling is the resting state, not a call to action, so this one stays an
+   outline button even while active — including the border the filled variant
+   above turns transparent. */
 header [data-indicator="poll-status"][data-clickable][data-style="active"] {
-	@apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground
-	       dark:bg-input/30 dark:hover:bg-input/50;
+	@apply border-input bg-transparent text-foreground hover:bg-accent
+	       hover:text-accent-foreground dark:bg-input/30 dark:hover:bg-input/50;
 }
 
 header [data-indicator="poll-status"]::before {
