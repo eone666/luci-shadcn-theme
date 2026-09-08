@@ -1,92 +1,94 @@
-A visual release: the markup, the workflow and the uci contract are untouched, so
-it drops straight on top of 1.0.0. Every page keeps working — only the look moves
-closer to shadcn/ui.
+The first release of **luci-theme-shadcnui** — a theme for LuCI, the OpenWrt web
+interface, in the style of [shadcn/ui](https://ui.shadcn.com). Nothing about the
+markup or the workflow changes, only how it looks: every LuCI page keeps working,
+because the theme does not own the markup — LuCI core generates the classes, and
+the build refuses to ship if a single upstream selector went missing.
 
-One correction rather than a change: the Firefox floor below is 121, not the 113
-the 1.0.0 notes quoted. `:has()` was already in the stylesheet then and that
-number was simply wrong; more of the layout leans on it now.
+> **Not a shadcn/ui project.** Officially unaffiliated with shadcn/ui and not
+> endorsed by it; it ships none of its code. It is inspired by it — the styles
+> were written after the publicly documented component recipes — and it is
+> compatible with shadcn/ui themes, which is the one real point of contact.
 
-## What's new
+## What's in it
 
-### Selects finally look like the recipe
+### The look
 
-The theme styled a wrapper class that LuCI 25.12 never emits, so every plain
-`<select>` on the firewall, system and zone pages kept the browser's own arrow —
-full-contrast, glued to the edge, and different on every platform. Selects now
-carry the shadcn chevron: 16px, muted, 12px in from the edge, and it follows
-whatever palette sits in `theme/globals.css`. LuCI's own dropdown widget uses the
-same chevron, so the two read alike.
+Cards, a segmented tab strip, bordered data tables, buttons and inputs on one
+radius, and native selects carrying the shadcn chevron rather than the browser's
+own arrow. The palette is `oklch()` and the translucent surfaces are
+`color-mix()`.
 
-The open list is offset 4px from its trigger, and the current value is marked
-with a check on the right instead of a background tint one shade away from the
-hover colour — previously the selected row and the row under the cursor were hard
-to tell apart.
+Three variants are registered, exactly like the stock bootstrap theme: one that
+follows the browser's light/dark preference, and one for each mode pinned.
 
-### Buttons, tabs and tables
+### Your own colours
 
-- Buttons take the same radius as the input fields instead of being pills, and
-  tabs follow the buttons, with the strip around them one step up the scale.
-- An input with a button butted against it is a proper button group: one shared
-  edge, matching heights, and a single divider between two buttons. Before, the
-  button overlapped the input by ~3px, over the input's own rounded corner, at a
-  different height.
-- Tables follow shadcn's data table — an outlined, rounded block with a divider
-  under every row. The old header fill and zebra striping are gone; a hover tint
-  marks the row under the pointer, on every table rather than just the editable
-  ones. Dashboard panels are already framed, so tables there keep the dividers
-  without a second outline.
+The entire palette is one file, and **any official shadcn theme drops into it
+unchanged** — the `globals.css` written by `shadcn init`, one of the base colours,
+or a theme built at [ui.shadcn.com/create](https://ui.shadcn.com/create).
+`--radius` is genuinely in charge: a palette that sets it to `0` comes out square
+everywhere, pills included.
 
-### Spacing and alignment
+### On a phone
 
-Several places where things sat flush against each other:
+The header is one row — a burger, the OpenWrt mark, the device name, and the poll
+and unsaved-changes controls as icon buttons, the second with the change count on
+its corner. The menu opens as a full-screen sheet: group labels in small caps,
+rows big enough for a thumb, the page behind it locked and the sheet scrolling on
+its own.
 
-- The page heading had no margin at all, so its description touched it and the
-  whole block sat 8px from the first card.
-- Status-page headings (with their Hide toggle) sat directly on their table.
-- Field hints sat 4px under their field, and the `?` icon was slightly high.
-- In the package manager the gap between control groups was 7px and the labels
-  had none at all.
-- A field holding two controls — Local Time and its Sync buttons — had them
-  touching.
-- Notifications, the firmware-upgrade notice among them, were 8px from the
-  content below.
+Tables stack into cards, each cell labelled by its own column heading, so a
+five-column list like the package manager stays readable at 390px instead of
+squeezing "Size (.apk)" into 71 pixels.
 
-Form labels also line up with their controls now. Checkbox rows sat 2.5px low
-because of how a flex box reports its baseline; checkbox, radio, text input,
-select and the dropdown widget are now within a quarter-pixel of each other.
+### Wide tables scroll themselves
 
-### Other
+A table too wide for the screen scrolls inside its own box rather than dragging
+the whole page sideways, and shades the edge it can still be pulled from — a mark
+that appears only when there is somewhere to go, and never when the table fits.
+Checked across nine pages at three widths: the document never scrolls
+horizontally.
 
-- The favicon is redrawn monochrome — white marks on a near-black rounded plate,
-  in the theme's own tones, inset so nothing touches the edge.
-- `npm run dev` actually watches again. Tailwind was started in a mode that quits
-  as soon as stdin is not a terminal, so under `nohup`, an IDE run configuration
-  or CI the watcher exited on startup and nothing rebuilt, silently. It also
-  crashed on a clean tree. Only affects development, not the shipped theme.
+### The dashboard
+
+Flat cards on the page's own colour with a hairline around them, sized to their
+content instead of a fixed 466px, with the icons redrawn from the same lucide set
+as the rest of the theme so they follow the palette instead of carrying their own
+colours.
+
+## Upgrading from luci-theme-shadcn
+
+The package was called `luci-theme-shadcn` while it was finding its shape, and
+served `/luci-static/shadcn`. If you have that installed, `apk` will not see this
+as an upgrade — the package name is different — so remove the old one:
+
+```sh
+apk del luci-theme-shadcn
+```
+
+Your Design selection survives: installing this package rewrites
+`luci.main.mediaurlbase` if it points at one of the old paths, and clears the
+stale entries out of the Design list once the old files are gone. That is the one
+uci value the install otherwise leaves alone.
 
 <!-- changelog:start -->
-<details>
-<summary>All commits since v1.0.0</summary>
-
-- Move selects, buttons, tabs and tables onto the shadcn recipe (258bb5f)
-
-</details>
+_First release — the whole history is in the repository._
 <!-- changelog:end -->
 
 ## Installation
 
 Requires **OpenWrt 25.12** (the `apk` era) with LuCI. The package is `noarch` — the
-same file fits every target, x86_64 or aarch64 or mipsel alike. It weighs 21 KB.
+same file fits every target, x86_64 or aarch64 or mipsel alike. It weighs 26 KB.
 
 ### From the router's shell
 
 ```sh
 cd /tmp
-wget https://github.com/eone666/luci-theme-shadcnui/releases/download/v1.0.1/luci-theme-shadcnui-1.0.1-r1.apk
-sha256sum luci-theme-shadcnui-1.0.1-r1.apk
-# 06a6567a3b46b8b7a7d676560f8d93921ac95c51f7818dad2f67464dfb17c799
+wget https://github.com/eone666/luci-theme-shadcnui/releases/download/v1.0.0/luci-theme-shadcnui-1.0.0-r1.apk
+sha256sum luci-theme-shadcnui-1.0.0-r1.apk
+# 64309fd70afc9a4bbf33b68b3bddc6e14edd3270f59751dd04f8036b12296a36
 
-apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.1-r1.apk
+apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.0-r1.apk
 ```
 
 `--allow-untrusted` is needed because the file is not signed with an OpenWrt
@@ -95,8 +97,8 @@ repository key.
 ### Or copy it from your machine
 
 ```sh
-scp luci-theme-shadcnui-1.0.1-r1.apk root@192.168.1.1:/tmp/
-ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.1-r1.apk'
+scp luci-theme-shadcnui-1.0.0-r1.apk root@192.168.1.1:/tmp/
+ssh root@192.168.1.1 'apk add --allow-untrusted /tmp/luci-theme-shadcnui-1.0.0-r1.apk'
 ```
 
 ### Or without a shell at all
@@ -117,7 +119,7 @@ Installing only registers the theme; it does not change how LuCI looks. Go to
 …then **Save & Apply**. From the shell instead:
 
 ```sh
-uci set luci.main.mediaurlbase=/luci-static/shadcnui-dark   # or shadcn / shadcnui-light
+uci set luci.main.mediaurlbase=/luci-static/shadcnui-dark   # or shadcnui / shadcnui-light
 uci commit luci
 ```
 

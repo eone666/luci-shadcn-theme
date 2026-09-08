@@ -1,6 +1,6 @@
 {
   "name": "luci-theme-shadcnui",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "A shadcn/ui-styled theme for LuCI, the OpenWrt web interface",
   "license": "Apache-2.0",
