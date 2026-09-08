@@ -167,6 +167,22 @@ header [data-indicator="poll-status"][data-style="active"]::before {
 	padding-left: 32px !important;
 }
 
+/*
+ * Except on the Save & Apply ComboButton. LuCI marks it .spinning while it
+ * applies *and* raises its own "Applying changes" modal, which carries a
+ * spinner — so there were two for one action, and this one had nowhere to sit:
+ * .spinning reserves 32px for the glyph, but .cbi-dropdown carries
+ * `padding: 0 !important` (dropdown-widget.css) and wins, so the mark landed
+ * straight on top of the label. The modal is the better place for it.
+ *
+ * Scoped to the widget that has that padding conflict. A plain .btn marked
+ * .spinning does get the 32px, so its glyph sits beside the label as intended
+ * — and on the buttons that raise no modal it is the only feedback there is.
+ */
+.cbi-dropdown.spinning::before {
+	@apply hidden;
+}
+
 .spinning::before {
 	/* lucide's LoaderCircle — the same arc the rest of the icon set is drawn
 	   from, instead of the circle-plus-quarter this used to hand-draw. The
